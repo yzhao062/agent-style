@@ -2,7 +2,7 @@
 
 # ProseLint rule map
 
-Mapping between the 12 rules in `RULES.md` and the corresponding check IDs in [ProseLint](https://github.com/amperser/proselint). Use ProseLint as a Tier-2 post-hoc linter in CI to catch what the generation-time ruleset missed.
+Mapping between the 12 canonical rules in `RULES.md` (RULE-01 through RULE-12) and the corresponding check IDs in [ProseLint](https://github.com/amperser/proselint). Use ProseLint as a Tier-2 post-hoc linter in CI to catch what the generation-time ruleset missed. Field-observed rules (RULE-A through RULE-I) are not mapped here; extending the mapping to cover them is a Phase 2b follow-up.
 
 🚧 Phase 2b placeholder — draft table below; verify each ProseLint ID during Phase 2b by running `proselint --list-checks` or inspecting the ProseLint source.
 
@@ -32,7 +32,7 @@ pip install proselint
 Run on staged prose files:
 
 ```bash
-proselint RULES.md examples/*.md
+proselint RULES.md
 ```
 
 Configure via `.proselintrc.json` to enable the checks from this map and suppress the rest.

@@ -20,6 +20,12 @@ Informs the *format and phrasing* of rules for AI-agent consumption at generatio
 5. **Zhang, X., Wang, G., Cui, Y., Qiu, W., Li, Z., Zhu, B., & He, P. (2026).** "Do Agent Rules Shape or Distort? Guardrails Beat Guidance in Coding Agents." arXiv:2604.11088. 679 instruction files (CLAUDE.md, .cursorrules, etc.), 25,532 rules, 5,000+ SWE-bench Verified evaluations. Key finding: negative constraints are the only individually beneficial rule type in coding-agent settings; broad positive directives hurt when given without examples.
 6. **Bohr, J. (2025).** "Show and Tell: Prompt Strategies for Style Control in Multi-Turn LLM Code Generation." arXiv:2511.13972. Compares instruction-only, example-only, and combined prompts (N=160 paired programs). Key finding: combined prompts (directive + examples) give the best initial compression plus the strongest expansion discipline in subsequent turns.
 
+## Bucket C — Maintainer field observation
+
+Informs the 9 field-observed rules (RULE-A through RULE-I) in `RULES.md`. Not a cited writing authority. Patterns were logged across the maintainer's research papers, grant proposals, technical documentation, and agent-configuration work from 2022 to 2026; each named rule required the pattern to appear across distinct projects at a frequency high enough to warrant a rule rather than a one-off edit.
+
+Field-observed rules are labeled transparently in `RULES.md` (`source: Maintainer observation ...`) and do not carry the citation weight of the 12 canonical rules. They sit alongside the canonical rules as peer input to the agent because the maintainer's own editing experience has real signal, even though the evidentiary standard differs. The README states this explicitly.
+
 ## Design implications drawn from Bucket B
 
 - **Mixed phrasing**: negative for anti-pattern rules and broad prohibitions; positive for constructive placement, structure, or rhythm rules.

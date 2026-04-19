@@ -8,7 +8,7 @@ This repository hosts *The Elements of Agent Style* — a writing ruleset for AI
 
 ## License split
 
-- **`RULES.md`, `SOURCES.md`, `examples/`, `agents/`, `adapter-matrix.md`**: Creative Commons Attribution 4.0 International (`LICENSES/CC-BY-4.0.txt`). Attribution required on redistribution and derivative works.
+- **`RULES.md`, `SOURCES.md`, `agents/`, `adapter-matrix.md`**: Creative Commons Attribution 4.0 International (`LICENSES/CC-BY-4.0.txt`). Attribution required on redistribution and derivative works.
 - **`enforcement/`, `.github/workflows/`, generator scripts**: MIT (`LICENSES/MIT.txt`). Permissive; simple copyright notice suffices.
 
 SPDX license identifier is at the top of each source file.
