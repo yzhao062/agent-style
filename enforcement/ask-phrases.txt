@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: MIT
+#
+# enforcement/ask-phrases.txt — Tier-1 ask list.
+#
+# Heuristic matches where the hook pauses for user confirmation rather than
+# deny outright. Includes suggested replacement in the prompt. Covers:
+#
+#   - RULE-06 fake-jargon substitutions ("leverage" → "use", "utilize" → "use",
+#     "methodology" → "method", "functionality" → "feature", "facilitate" → "help")
+#   - RULE-12 long-sentence warnings (count-based, not phrase-based)
+#
+# Format: one rule per line as `PHRASE ||| SUGGESTION` (triple pipe separator).
+# Comments start with #. Blank lines ignored.
+#
+# Populated in Phase 2b.

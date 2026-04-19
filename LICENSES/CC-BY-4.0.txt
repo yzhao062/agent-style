@@ -1,0 +1,34 @@
+Attribution 4.0 International (CC BY 4.0)
+
+Copyright (c) 2026 Yue Zhao
+
+This work is licensed under the Creative Commons Attribution 4.0 International
+License. To view a copy of this license, visit:
+
+    https://creativecommons.org/licenses/by/4.0/legalcode
+
+Summary (not a substitute for the full license text):
+
+You are free to:
+- Share — copy and redistribute the material in any medium or format
+- Adapt — remix, transform, and build upon the material for any purpose, even
+  commercially
+
+Under the following terms:
+- Attribution — You must give appropriate credit, provide a link to the
+  license, and indicate if changes were made. You may do so in any reasonable
+  manner, but not in any way that suggests the licensor endorses you or your
+  use.
+- No additional restrictions — You may not apply legal terms or technological
+  measures that legally restrict others from doing anything the license
+  permits.
+
+For the full legal text, see:
+
+    https://creativecommons.org/licenses/by/4.0/legalcode
+
+Before the first public release (v0.1.0), fetch the full legal text and replace
+this file:
+
+    curl -sLO https://creativecommons.org/licenses/by/4.0/legalcode.txt
+    mv legalcode.txt LICENSES/CC-BY-4.0.txt

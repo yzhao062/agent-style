@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: MIT
+#
+# enforcement/warn-patterns.txt — Tier-1 warn list.
+#
+# Low-precision regex patterns that surface warnings without interrupting.
+# Covers:
+#
+#   - RULE-02 passive voice detection (high-recall regex: `\b(was|were|is|are|been|being)\s+\w+ed\b`)
+#
+# Format: one regex per line. Comments start with #. Blank lines ignored.
+# Every warn pattern must pass the false-positive-fixtures directory without
+# false-flagging.
+#
+# Populated in Phase 2b.

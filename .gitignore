@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: MIT
+
+.DS_Store
+*~
+*.swp
+.idea/
+.vscode/
+__pycache__/
+*.pyc
+.pytest_cache/
+site/
+_build/
+CodexReview.md
+PLAN-*.md

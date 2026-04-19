@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: MIT
+#
+# enforcement/deny-phrases.txt — Tier-1 deny list.
+#
+# Exact-phrase matches that the hook blocks outright (zero false positives
+# expected, validated by enforcement/false-positive-fixtures/). Covers:
+#
+#   - RULE-04 filler phrases (needless words): "it is important to note",
+#     "in order to", "due to the fact that", "may potentially",
+#     "could possibly", etc.
+#   - RULE-05 dying metaphors / prefabricated phrases: "push the boundaries",
+#     "paving the way", "industry-leading", etc.
+#
+# Format: one phrase per line, case-insensitive match, leading/trailing
+# whitespace ignored. Comments start with #. Blank lines ignored.
+#
+# Populated in Phase 2b. Current baseline is in agent-config/AGENTS.md
+# Writing Defaults (45 banned words); extract + expand during Phase 2b.
