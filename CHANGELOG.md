@@ -8,7 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 ## [Unreleased]
 
-_Phase 1a skeleton only. Content in Phase 1b (rule bodies, adapters, enforcement payloads)._
+*Phase 1a skeleton only. Content in Phase 1b (rule bodies, adapters, enforcement payloads).*
 
 ---
 

@@ -6,6 +6,8 @@
 applyTo: "**/*.md,**/*.tex,**/*.rst,**/*.txt"
 ---
 
+<!-- blank line above protects lint rules that require a blank line after frontmatter -->
+
 # GitHub Copilot — Writing Style Rules (path-scoped)
 
 🚧 Phase 1a placeholder. Full adapter content added in Phase 2a.

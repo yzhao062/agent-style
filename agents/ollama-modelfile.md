@@ -8,7 +8,7 @@
 
 Ollama models load a `SYSTEM` section from the Modelfile. Create a model that embeds these rules:
 
-```
+```text
 FROM llama3.2
 SYSTEM """
 <paste the content of RULES.md here, or a compact subset>

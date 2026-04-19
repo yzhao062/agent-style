@@ -5,6 +5,7 @@
 🚧 **Phase 1a skeleton — rule bodies land in Phase 1b.**
 
 For each rule, the Phase 1b draft provides:
+
 - metadata (source citation, severity, scope, enforcement tier)
 - directive (imperative sentence, negative for anti-patterns, positive for constructive placement)
 - BAD → GOOD examples (3-5 per rule)

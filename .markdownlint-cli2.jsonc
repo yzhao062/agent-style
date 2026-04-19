@@ -6,13 +6,17 @@
 //   MD041 first-line-h1   — SPDX comment comes before the H1 on purpose
 //   MD024 duplicate-headings — subheading reuse is fine in structured rule docs
 //   MD034 no-bare-urls    — tolerable in source citations and link lists
+//   MD026 no-trailing-punctuation — frontmatter `description:` fields legitimately end with a period
+//   MD029 ol-prefix       — SOURCES.md numbers 5-6 continue semantically from 1-4 across buckets
 {
   "config": {
     "MD013": false,
     "MD033": false,
     "MD041": false,
     "MD024": false,
-    "MD034": false
+    "MD034": false,
+    "MD026": false,
+    "MD029": false
   },
   "ignores": [
     "LICENSES/**",
