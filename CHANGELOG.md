@@ -8,6 +8,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 ## [Unreleased]
 
+*No unreleased changes queued.*
+
+## [0.1.0] — 2026-04-19
+
 ### Added
 
 - Phase 1b full draft: bodies for all 12 canonical rules (RULE-01 through RULE-12) plus 9 field-observed rules (RULE-A through RULE-I) in `RULES.md`. Canonical rules are distilled from Strunk & White, Orwell, Pinker, and Gopen & Swan, with citations verified by the maintainer against chapter, section, or essay-rule references. Field-observed rules come from the maintainer's observation of LLM output across research papers, grant proposals, technical documentation, and agent-configuration work 2022 to 2026, covering bullet-point overuse (A), em/en-dash overuse (B), consecutive same-starts (C), transition-word overuse (D), paragraph-closing summaries (E), term consistency (F), title case for headings (G), citation discipline including anti-hallucination (H, critical), and contraction register (I). Each rule block includes metadata (source, agent-instruction evidence citing Zhang et al. 2026 and Bohr 2025 with narrowed claims, severity per the four-level rubric, scope, enforcement tier), directive (negative for anti-pattern rules; positive for constructive-placement rules), 5 or more BAD/GOOD example pairs with at least one non-paper context, and rationale-for-AI-agent framing the LLM-specific failure mode.
@@ -27,4 +31,5 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 ---
 
-[Unreleased]: https://github.com/yzhao062/agent-style/compare/main...HEAD
+[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/yzhao062/agent-style/releases/tag/v0.1.0

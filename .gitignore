@@ -12,3 +12,11 @@ site/
 _build/
 CodexReview.md
 PLAN-*.md
+
+# Build artifacts + scratch
+packages/pypi/dist/
+packages/pypi/build/
+*.egg-info/
+packages/npm/node_modules/
+.agent-style/
+v*-release-notes.md
