@@ -9,7 +9,7 @@ Every shipped adapter file in `agents/`, with its target path, auto-load behavio
 ## Adapter files this repo ships
 
 | Surface | Shipped file | Target path | Scope | Auto-loaded? | Token risk |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | AGENTS.md standard | `agents/AGENTS.md` | `<repo>/AGENTS.md` | repo | ✓ by AGENTS.md-compliant tools (see list below) | medium |
 | Claude Code | `agents/claude-code.md` | `<repo>/CLAUDE.md` | repo | ✓ | medium |
 | Anthropic Skills | `agents/anthropic-skill/SKILL.md` | `.claude/skills/elements-of-agent-style/SKILL.md` | per-skill | on invocation (progressive disclosure) | low |
@@ -34,7 +34,7 @@ Every shipped adapter file in `agents/`, with its target path, auto-load behavio
 
 These tools read the repo's root `AGENTS.md` (the same file `agents/AGENTS.md` ships) and do not require a separate adapter. List verified against `agents.md/` at plan Revision 4:
 
-- **AGENTS.md-only consumers** (the root file is the only adapter needed): Codex, Jules, goose, opencode, Zed, Warp, VS Code, Devin, UiPath, Junie, Amp, RooCode, Gemini CLI, Kilo Code, Phoenix, Semgrep, Ona, Augment Code, OpenAI Agents SDK runtime.
+- **AGENTS.md-only consumers** (the root file is the only adapter needed): Codex, Jules, goose, Zed, Warp, VS Code, Devin, UiPath, Junie, Amp, RooCode, Gemini CLI, Kilo Code, Phoenix, Semgrep, Ona, Augment Code, OpenAI Agents SDK runtime.
 - **Dual-path consumers** (read AGENTS.md AND have a first-class adapter file above): Aider, Cursor, GitHub Copilot, opencode, Windsurf. Use whichever path the user prefers.
 
 When a new tool announces AGENTS.md support, it is covered automatically.

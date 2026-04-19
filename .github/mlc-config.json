@@ -3,6 +3,12 @@
   "ignorePatterns": [
     {
       "pattern": "^https://github.com/yzhao062/elements-of-agent-style"
+    },
+    {
+      "pattern": "^https://www\\.npmjs\\.com/"
+    },
+    {
+      "pattern": "^https://tessl\\.io/"
     }
   ],
   "timeout": "20s",

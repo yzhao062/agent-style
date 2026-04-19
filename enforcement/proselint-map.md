@@ -7,7 +7,7 @@ Mapping between the 12 rules in `RULES.md` and the corresponding check IDs in [P
 🚧 Phase 2b placeholder — draft table below; verify each ProseLint ID during Phase 2b by running `proselint --list-checks` or inspecting the ProseLint source.
 
 | RULE | Recommended ProseLint checks |
-|---|---|
+| --- | --- |
 | 01 curse of knowledge | (no direct ProseLint equivalent; Tier-4 Codex review) |
 | 02 active voice | `leonard.exclamation.30ppm` (proxy), `misc.passive_voice` (if available) |
 | 03 concrete/specific | (no direct equivalent; partial: `misc.waxed` for hollow phrases) |

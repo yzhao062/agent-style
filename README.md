@@ -99,27 +99,27 @@ See [`RULES.md`](RULES.md) for the canonical full version with BAD/GOOD examples
 
 ## Canonical sources
 
-Rules distilled from four writing authorities; rule format and phrasing informed by two recent empirical papers on agent-instruction design.
+Four writing authorities for prose content, plus two recent empirical papers for rule format and phrasing. Every one of the 12 rules cites its source explicitly; **each citation is verified page-by-page by the maintainer against the original work, not scraped or summarized from search results.** When the final text disagrees with an authority, the disagreement is stated in the rule's rationale.
 
-<details>
-<summary><b>Bucket A — Writing authorities (prose content)</b></summary>
+### Writing authorities (prose content)
 
 1. **Strunk, W., Jr., & White, E. B. (1959).** *The Elements of Style* (revised from Strunk 1918). The Macmillan Company. Especially Part II, "Elementary Principles of Composition" (§§12-22).
 2. **Orwell, G. (1946).** "Politics and the English Language." *Horizon*, April 1946. Public domain; freely available online.
-3. **Pinker, S. (2014).** *The Sense of Style: The Thinking Person's Guide to Writing in the 21st Century*. Viking.
+3. **Pinker, S. (2014).** *The Sense of Style: The Thinking Person's Guide to Writing in the 21st Century*. Viking. Especially Ch. 2 (classic style), Ch. 3 (curse of knowledge), Ch. 6 (calibrated claims).
 4. **Gopen, G. D., & Swan, J. A. (1990).** "The Science of Scientific Writing." *American Scientist*, 78(6), pp. 550-558.
 
-</details>
-
-<details>
-<summary><b>Bucket B — Agent-instruction evidence (rule format and phrasing)</b></summary>
+### Agent-instruction evidence (rule format and phrasing)
 
 5. **Zhang, X. et al. (2026).** "Do Agent Rules Shape or Distort? Guardrails Beat Guidance in Coding Agents." arXiv:2604.11088. 25,532 rules across 679 instruction files; motivates negative-constraint phrasing for anti-pattern rules.
 6. **Bohr, J. (2025).** "Show and Tell: Prompt Strategies for Style Control in Multi-Turn LLM Code Generation." arXiv:2511.13972. Motivates the directive + BAD/GOOD example format used throughout `RULES.md`.
 
-</details>
+See [`SOURCES.md`](SOURCES.md) for the full bibliography and recommended reading ranges per source.
 
-See [`SOURCES.md`](SOURCES.md) for full bibliography and recommended reading ranges.
+## Curation and method
+
+The 12 rules are not a generated digest of the four source works. The maintainer read each source, extracted the rules most applicable to English technical prose, filtered for AI-agent failure modes observed in practice, and phrased each rule using the negative-versus-positive split that Zhang et al. 2026 found empirically effective for coding-agent instructions. Rules that could be supported only by Bucket A but not mapped to a concrete AI-R&D failure mode are excluded. Rules that felt necessary from practice but had no Bucket A source are excluded. The intersection is what this repo ships.
+
+New contributions are welcome on the same standard: a rule must cite a source from Bucket A or B, include BAD/GOOD examples drawn from real technical-prose output, and include a rationale for why the rule matters specifically for AI-agent-generated prose.
 
 ## Related
 
@@ -135,14 +135,14 @@ Dual license with file-level SPDX boundaries:
 
 | Content | License |
 |---|---|
-| `RULES.md`, `SOURCES.md`, `examples/`, `agents/`, `adapter-matrix.md` | [CC BY 4.0](LICENSES/CC-BY-4.0.txt) |
+| `RULES.md`, `SOURCES.md`, `NOTICE.md`, `examples/`, `agents/`, `adapter-matrix.md` | [CC BY 4.0](LICENSES/CC-BY-4.0.txt) |
 | `enforcement/`, `.github/workflows/`, generator scripts | [MIT](LICENSES/MIT.txt) |
 
 Every source file carries an SPDX-License-Identifier header. See [`NOTICE.md`](NOTICE.md) for the attribution snippet consumers should retain on reuse.
 
 ## Maintenance
 
-Maintained by [Yue Zhao](https://yzhao062.github.io), USC CS faculty and author of [PyOD](https://github.com/yzhao062/pyod). Issues and pull requests welcome; contributions that add a new rule must cite a source from Bucket A or B.
+Maintained by [Yue Zhao](https://yzhao062.github.io), USC CS faculty and author of [PyOD](https://github.com/yzhao062/pyod). Issues and pull requests welcome; contributions that add a new rule must cite a source from Bucket A or B. See [`CHANGELOG.md`](CHANGELOG.md) for release history and upcoming work.
 
 <div align="center">
 
