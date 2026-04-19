@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-"""End-to-end fresh-install verification of agent-style v0.1.0 from real PyPI + npm.
+"""End-to-end fresh-install verification of agent-style v0.1.1 from real PyPI + npm.
 
 Creates a scratch directory, makes fresh venv / npm install, exercises the
 CLI surface (`--version`, `list-tools`, `rules`, `enable --dry-run --json`,
@@ -14,7 +14,7 @@ import subprocess
 import sys
 import tempfile
 
-EXPECTED_VERSION = "0.1.0"
+EXPECTED_VERSION = "0.1.1"
 EXPECTED_TOOL_COUNT = 8
 
 SCRATCH = tempfile.mkdtemp(prefix="as-final-")
@@ -89,7 +89,7 @@ def exercise(label, cli_path):
 
 
 # --- Python CLI via real PyPI ---
-section("Python CLI via real PyPI (pip install agent-style==0.1.0)")
+section(f"Python CLI via real PyPI (pip install agent-style=={EXPECTED_VERSION})")
 py_venv = os.path.join(SCRATCH, "py-venv")
 subprocess.run([sys.executable, "-m", "venv", py_venv], check=True)
 
@@ -106,7 +106,7 @@ exercise("Python", py_as)
 
 
 # --- Node CLI via real npm ---
-section("Node CLI via real npm (npm install agent-style@0.1.0)")
+section(f"Node CLI via real npm (npm install agent-style@{EXPECTED_VERSION})")
 npm_dir = os.path.join(SCRATCH, "npm-install")
 os.makedirs(npm_dir)
 NPM_BIN = shutil.which("npm") or ("npm.cmd" if sys.platform == "win32" else "npm")

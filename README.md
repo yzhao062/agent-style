@@ -104,7 +104,7 @@ Two install paths: a CLI (recommended) or a manual `curl` recipe for users who p
 ```bash
 pip install agent-style                              # Python users
 # or: npm install -g agent-style                     # Node users
-# or: npx --yes agent-style@0.1.0 <subcommand>       # no install needed
+# or: npx --yes agent-style@0.1.1 <subcommand>       # no install needed
 
 agent-style list-tools                               # show supported tools
 agent-style enable claude-code                       # wire up Claude Code
@@ -134,7 +134,7 @@ For `print-only` and `multi-file-required`, the JSON output carries `manual_step
 For users who prefer not to install a package. Pins to a specific release so adapters and `RULES.md` stay consistent:
 
 ```bash
-AGENT_STYLE_REF=v0.1.0
+AGENT_STYLE_REF=v0.1.1
 mkdir -p .agent-style
 curl -fsSLo .agent-style/RULES.md       "https://raw.githubusercontent.com/yzhao062/agent-style/${AGENT_STYLE_REF}/RULES.md"
 curl -fsSLo .agent-style/claude-code.md "https://raw.githubusercontent.com/yzhao062/agent-style/${AGENT_STYLE_REF}/agents/claude-code.md"
@@ -148,7 +148,7 @@ Then add ONE line to your `CLAUDE.md` (create the file only if absent; never ove
 
 For other surfaces, substitute the adapter filename and follow the per-surface table below. The `curl` commands only write under `.agent-style/`; the one-line import into your instruction file is the only edit you make to files you own.
 
-### Per-Surface Paths (v0.1.0 primary set)
+### Per-Surface Paths (v0.1.1 primary set)
 
 <details>
 <summary><b>Eight primary adapters (full matrix in <code>adapter-matrix.md</code>)</b></summary>
@@ -176,7 +176,7 @@ After running `agent-style enable <tool>` (or completing the manual setup), ask 
 
 Expected reply:
 
-> agent-style v0.1.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.
+> agent-style v0.1.1 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.
 
 If the version string or rule count is missing, the file is on disk but not in your agent's active context. Check that your tool's instruction-file reload behavior picked up the new content (some tools require a session restart).
 

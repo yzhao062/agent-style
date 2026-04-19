@@ -10,6 +10,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 *No unreleased changes queued.*
 
+## [0.1.1] — 2026-04-19
+
+### Fixed
+
+- **npm CLI**: `agent-style rules` on Linux and macOS truncated piped output at the 64 KiB kernel pipe-buffer boundary. Root cause: `process.stdout.write()` returned `false` when the buffer filled and `process.exit()` ran before the queued bytes drained, so `agent-style rules | less` or `agent-style rules | wc -c` lost the last ~25 KiB of `RULES.md`. Fix lives in `packages/npm/bin/agent-style.js`: wait for `stdout` and `stderr` to drain via zero-byte writes with drain callbacks before calling `process.exit`, and swallow `EPIPE` from consumers that close the pipe early (for example `agent-style rules | head -3`). Windows (non-POSIX pipe semantics) and the Python CLI are unaffected by the original bug. Regression covered by `scripts/verify-fresh-install.py` on Linux aarch64.
+
+### Changed
+
+- Bundled `RULES.md` content refresh (no structural change; all 21 rule bodies still line up with the published rule IDs):
+  - Stale "Phase 1b draft" banner at the top of the canonical rule file removed.
+  - Author voice normalized from "the maintainer" to "I / my / me" across field-observed source metadata and the descriptive intro, so the ruleset reads as a personal project. Field-observed source lines now say "My observation of LLM output across dozens of writing projects and code releases, 2022 – 2026" in place of the prior category enumeration.
+- README post-release polish (not a packaged artifact but cited here for completeness): `docs/hero.png` hero figure, `docs/sources.png` canonical-sources collage, "What It Is" rewrite into a Scope table plus Two Rule Groups sub-sections, badge row trimmed, two dense sections moved into collapsible `<details>`.
+
 ## [0.1.0] — 2026-04-19
 
 ### Added
@@ -31,5 +44,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 ---
 
-[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/yzhao062/agent-style/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/yzhao062/agent-style/releases/tag/v0.1.0

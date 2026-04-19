@@ -4,7 +4,7 @@ at the last line so enable/disable can detect tampering.
 
 Signature line format:
 
-    <!-- owned-by: agent-style; version: v0.1.0; sha256: <64-hex-chars> -->
+    <!-- owned-by: agent-style; version: v0.1.1; sha256: <64-hex-chars> -->
 
 Hash is sha256 over a canonical byte stream (Python and Node compute the same bytes):
 

@@ -4,7 +4,7 @@
  * Marker-block parsing and manipulation. Mirrors agent_style.markers in Python.
  *
  * Format:
- *   <!-- BEGIN agent-style v0.1.0 -->
+ *   <!-- BEGIN agent-style v0.1.1 -->
  *   ...content...
  *   <!-- END agent-style -->
  *
