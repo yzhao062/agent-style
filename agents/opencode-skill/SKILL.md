@@ -1,10 +1,10 @@
 ---
-name: elements-of-agent-style
+name: agent-style
 description: Literature-backed English technical-prose writing rules for OpenCode.
 ---
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 <!-- Adapter: OpenCode skills -->
-<!-- Target paths: .opencode/skills/elements-of-agent-style/SKILL.md, also compatible with .claude/skills and .agents/skills -->
+<!-- Target paths: .opencode/skills/agent-style/SKILL.md, also compatible with .claude/skills and .agents/skills -->
 
 # The Elements of Agent Style (OpenCode Skill)
 

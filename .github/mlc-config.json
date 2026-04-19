@@ -2,7 +2,7 @@
   "_license": "SPDX-License-Identifier: MIT",
   "ignorePatterns": [
     {
-      "pattern": "^https://github.com/yzhao062/elements-of-agent-style"
+      "pattern": "^https://github.com/yzhao062/agent-style"
     },
     {
       "pattern": "^https://www\\.npmjs\\.com/"

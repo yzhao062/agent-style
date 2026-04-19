@@ -14,4 +14,4 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 ---
 
-[Unreleased]: https://github.com/yzhao062/elements-of-agent-style/compare/main...HEAD
+[Unreleased]: https://github.com/yzhao062/agent-style/compare/main...HEAD

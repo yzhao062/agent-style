@@ -4,7 +4,7 @@
 
 This repository hosts *The Elements of Agent Style* — a writing ruleset for AI agents, curated from publicly available writing authorities. Consumers reusing the ruleset should retain the following attribution snippet somewhere visible (README, system prompt metadata, or equivalent):
 
-> Based on *The Elements of Agent Style* (https://github.com/yzhao062/elements-of-agent-style), CC BY 4.0.
+> Based on *The Elements of Agent Style* (https://github.com/yzhao062/agent-style), CC BY 4.0.
 
 ## License split
 

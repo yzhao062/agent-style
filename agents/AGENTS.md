@@ -13,7 +13,7 @@ This file is the cross-agent root instruction file. Tools that implement the AGE
 Copy to your repository root:
 
 ```bash
-curl -sLO https://raw.githubusercontent.com/yzhao062/elements-of-agent-style/main/agents/AGENTS.md
+curl -sLO https://raw.githubusercontent.com/yzhao062/agent-style/main/agents/AGENTS.md
 ```
 
 Or reference via submodule / include from your own AGENTS.md.

@@ -1,5 +1,5 @@
 ---
-name: elements-of-agent-style
+name: agent-style
 description: Literature-backed English technical-prose writing rules for OpenAI Agents SDK. Use when generating prose in research papers, docs, proposals, or release notes.
 ---
 

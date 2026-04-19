@@ -1,10 +1,10 @@
 ---
-name: elements-of-agent-style
+name: agent-style
 description: Literature-backed English technical-prose writing rules for Replit Agent.
 ---
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
 <!-- Adapter: Replit Skills -->
-<!-- Target path: .agents/skills/elements-of-agent-style/SKILL.md -->
+<!-- Target path: .agents/skills/agent-style/SKILL.md -->
 
 # The Elements of Agent Style (Replit Skill)
 

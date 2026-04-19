@@ -12,21 +12,21 @@ Every shipped adapter file in `agents/`, with its target path, auto-load behavio
 | --- | --- | --- | --- | --- | --- |
 | AGENTS.md standard | `agents/AGENTS.md` | `<repo>/AGENTS.md` | repo | ✓ by AGENTS.md-compliant tools (see list below) | medium |
 | Claude Code | `agents/claude-code.md` | `<repo>/CLAUDE.md` | repo | ✓ | medium |
-| Anthropic Skills | `agents/anthropic-skill/SKILL.md` | `.claude/skills/elements-of-agent-style/SKILL.md` | per-skill | on invocation (progressive disclosure) | low |
+| Anthropic Skills | `agents/anthropic-skill/SKILL.md` | `.claude/skills/agent-style/SKILL.md` | per-skill | on invocation (progressive disclosure) | low |
 | OpenAI Codex (API) | `agents/codex.md` | developer-supplied system prompt | session | manual | low-medium |
 | OpenAI Agents SDK skill | `agents/openai-agents-sdk-skill.md` | skill directory within SDK | per-skill | on invocation | low |
 | GitHub Copilot (repo-level) | `agents/copilot-instructions.md` | `.github/copilot-instructions.md` | repo | ✓ | low |
 | GitHub Copilot (path-scoped) | `agents/copilot-path-instructions.md` | `.github/instructions/writing.instructions.md` | path | ✓ | low |
 | Cursor | `agents/cursor-rule.mdc` | `.cursor/rules/writing.mdc` | repo | ✓ | low |
 | Aider | `agents/aider-conventions.md` | `<repo>/CONVENTIONS.md` + `aider --read` or `.aider.conf.yml` | session | manual | low |
-| Replit Skills | `agents/replit-skill/SKILL.md` | `.agents/skills/elements-of-agent-style/SKILL.md` | per-skill | on invocation | low |
+| Replit Skills | `agents/replit-skill/SKILL.md` | `.agents/skills/agent-style/SKILL.md` | per-skill | on invocation | low |
 | Replit | `agents/replit-md.md` | `<repo>/replit.md` | project | ✓ | medium |
 | Windsurf (repo) | `agents/windsurf-rule.md` | `.windsurf/rules/writing.md` | repo | ✓ | low |
 | Windsurf (global) | `agents/windsurf-rule.md` (same file) | `~/.codeium/windsurf/memories/global_rules.md` | global | ✓ | medium |
 | Ollama | `agents/ollama-modelfile.md` | `Modelfile` `SYSTEM` section | per-model | ✓ on model load | medium-high |
 | Amazon Q Developer | `agents/amazon-q-rule.md` | `.amazonq/rules/writing.rule.md` | repo | ✓ | low |
 | JetBrains AI Assistant | `agents/jetbrains-ai-rule.md` | `.aiassistant/rules/writing.md` | repo | ✓ | low |
-| OpenCode | `agents/opencode-skill/SKILL.md` | `.opencode/skills/elements-of-agent-style/SKILL.md` (also `.claude/skills`, `.agents/skills`) | per-skill | on invocation | low |
+| OpenCode | `agents/opencode-skill/SKILL.md` | `.opencode/skills/agent-style/SKILL.md` (also `.claude/skills`, `.agents/skills`) | per-skill | on invocation | low |
 | Continue.dev | `agents/continue-rule.md` | `.continue/rules/writing.md` | repo | ✓ | low |
 | Tabnine | `agents/tabnine-guideline.md` | `.tabnine/guidelines/writing.md` | repo | ✓ | low |
 

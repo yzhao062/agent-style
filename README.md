@@ -9,8 +9,8 @@
 **A literature-backed English writing ruleset formatted for AI agents to follow at generation time. Scoped to technical prose.**
 
 [![License](https://img.shields.io/badge/license-CC%20BY%204.0%20%2B%20MIT-blue.svg)](NOTICE.md)
-[![CI](https://github.com/yzhao062/elements-of-agent-style/actions/workflows/validate.yml/badge.svg)](https://github.com/yzhao062/elements-of-agent-style/actions/workflows/validate.yml)
-[![GitHub stars](https://img.shields.io/github/stars/yzhao062/elements-of-agent-style?style=social&cacheSeconds=300)](https://github.com/yzhao062/elements-of-agent-style)
+[![CI](https://github.com/yzhao062/agent-style/actions/workflows/validate.yml/badge.svg)](https://github.com/yzhao062/agent-style/actions/workflows/validate.yml)
+[![GitHub stars](https://img.shields.io/github/stars/yzhao062/agent-style?style=social&cacheSeconds=300)](https://github.com/yzhao062/agent-style)
 
 [Use](#use) &nbsp;·&nbsp;
 [Rules](#the-12-rules) &nbsp;·&nbsp;
@@ -40,7 +40,7 @@ Named in homage to Strunk & White's *The Elements of Style* (1918/1959), one of 
 ### Single-file pull
 
 ```bash
-curl -sLO https://raw.githubusercontent.com/yzhao062/elements-of-agent-style/main/RULES.md
+curl -sLO https://raw.githubusercontent.com/yzhao062/agent-style/main/RULES.md
 ```
 
 Paste into the instruction file your agent loads.
@@ -55,7 +55,7 @@ Drop the adapter file for your tool into the expected path. The adapters are thi
 | Surface | Target path | Auto-loaded |
 | --- | --- | --- |
 | Claude Code | `CLAUDE.md` at repo root | yes |
-| Anthropic Skills | `.claude/skills/elements-of-agent-style/SKILL.md` | on invocation |
+| Anthropic Skills | `.claude/skills/agent-style/SKILL.md` | on invocation |
 | GitHub Copilot (repo) | `.github/copilot-instructions.md` | yes |
 | GitHub Copilot (path) | `.github/instructions/writing.instructions.md` | yes, path-scoped |
 | Cursor | `.cursor/rules/writing.mdc` | yes |
