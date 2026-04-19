@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "agent_style_version": "0.1.0",
+  "tools": {
+    "claude-code": {
+      "install_mode": "import-marker",
+      "target_path": "CLAUDE.md",
+      "adapter_source": "agents/claude-code.md",
+      "load_class": "import-capable",
+      "import_line": "@.agent-style/claude-code.md"
+    },
+    "agents-md": {
+      "install_mode": "append-block",
+      "target_path": "AGENTS.md",
+      "adapter_source": "agents/AGENTS.md",
+      "load_class": "single-file"
+    },
+    "copilot": {
+      "install_mode": "append-block",
+      "target_path": ".github/copilot-instructions.md",
+      "adapter_source": "agents/copilot-instructions.md",
+      "load_class": "single-file"
+    },
+    "copilot-path": {
+      "install_mode": "owned-file",
+      "target_path": ".github/instructions/agent-style.instructions.md",
+      "adapter_source": "agents/copilot-path-instructions.md",
+      "load_class": "single-file"
+    },
+    "cursor": {
+      "install_mode": "owned-file",
+      "target_path": ".cursor/rules/agent-style.mdc",
+      "adapter_source": "agents/cursor-rule.mdc",
+      "load_class": "single-file"
+    },
+    "anthropic-skill": {
+      "install_mode": "owned-file",
+      "target_path": ".claude/skills/agent-style/SKILL.md",
+      "adapter_source": "agents/anthropic-skill/SKILL.md",
+      "load_class": "single-file"
+    },
+    "codex": {
+      "install_mode": "print-only",
+      "target_path": ".agent-style/codex-system-prompt.md",
+      "adapter_source": "agents/codex.md",
+      "load_class": "single-file"
+    },
+    "aider": {
+      "install_mode": "multi-file-required",
+      "target_path": ".agent-style/aider-conventions.md",
+      "adapter_source": "agents/aider-conventions.md",
+      "load_class": "multi-file-required",
+      "second_file_snippet": "read:\n  - .agent-style/aider-conventions.md\n  - .agent-style/RULES.md\n"
+    }
+  }
+}

@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-style"
+version = "0.1.0"
+description = "The Elements of Agent Style: a literature-backed English technical-prose writing ruleset for AI agents, with CLI install/enable/disable for 8 primary agent surfaces."
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    { name = "Yue Zhao", email = "fortis@usc.edu" },
+]
+license = { text = "MIT AND CC-BY-4.0" }
+keywords = ["writing", "style", "agent", "llm", "ai", "instructions", "prompt"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Documentation",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Text Processing :: Markup",
+]
+
+[project.urls]
+Homepage = "https://github.com/yzhao062/agent-style"
+Repository = "https://github.com/yzhao062/agent-style"
+Issues = "https://github.com/yzhao062/agent-style/issues"
+Changelog = "https://github.com/yzhao062/agent-style/blob/main/CHANGELOG.md"
+
+[project.scripts]
+agent-style = "agent_style.cli:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agent_style*"]
+
+[tool.setuptools.package-data]
+agent_style = [
+    "data/RULES.md",
+    "data/NOTICE.md",
+    "data/tools.json",
+    "data/agents/*.md",
+    "data/agents/*.mdc",
+    "data/agents/*/*.md",
+    "data/LICENSES/*.txt",
+]
