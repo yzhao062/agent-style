@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: MIT
+// Markdown lint config for The Elements of Agent Style.
+// Rules disabled because this project legitimately produces the flagged shape:
+//   MD013 line-length     — many tables exceed 80 chars (adapter matrix, enforcement map)
+//   MD033 no-inline-html  — SPDX-License-Identifier comments at the top of every file
+//   MD041 first-line-h1   — SPDX comment comes before the H1 on purpose
+//   MD024 duplicate-headings — subheading reuse is fine in structured rule docs
+//   MD034 no-bare-urls    — tolerable in source citations and link lists
+{
+  "config": {
+    "MD013": false,
+    "MD033": false,
+    "MD041": false,
+    "MD024": false,
+    "MD034": false
+  },
+  "ignores": [
+    "LICENSES/**",
+    "node_modules/**"
+  ]
+}

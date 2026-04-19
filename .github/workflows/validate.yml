@@ -33,3 +33,4 @@ jobs:
         with:
           use-quiet-mode: "yes"
           use-verbose-mode: "no"
+          config-file: .github/mlc-config.json
