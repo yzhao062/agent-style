@@ -2,14 +2,23 @@
 
 # The Elements of Agent Style — Rules
 
-🚧 **Phase 1a skeleton — rule bodies land in Phase 1b.**
+🚧 **Phase 1b validator draft — RULE-01 and RULE-05 are complete; remaining rule bodies land after this template review.**
 
 For each rule, the Phase 1b draft provides:
 
-- metadata (source citation, severity, scope, enforcement tier)
+- metadata (source citation, agent-instruction evidence, severity, scope, enforcement tier)
 - directive (imperative sentence, negative for anti-patterns, positive for constructive placement)
-- BAD → GOOD examples (3-5 per rule)
+- BAD → GOOD examples (3-5 per rule, across paper / API / runbook / proposal / release-note contexts)
 - rationale for AI agent (why the rule matters for LLM output specifically)
+
+## Severity rubric
+
+Each rule has a severity from this four-level scale:
+
+- **critical** — reader cannot understand or trust the prose if the rule is violated.
+- **high** — externally visible AI-tell, or a recurring clarity failure that breaks skim-reading.
+- **medium** — local readability cost, felt by the reader but not a trust issue.
+- **low** — polish or preference; flagged for consistency rather than comprehension.
 
 ## Escape hatch (meta-principle)
 
@@ -25,14 +34,14 @@ Rules are guides to clarity, not ends in themselves. When a rule fights the sent
 #### RULE-01: Do not assume the reader shares your tacit knowledge (resist the curse of knowledge)
 
 - **source**: Pinker 2014, Ch. 3 "The Curse of Knowledge" (the entire chapter is devoted to this failure mode).
-- **agent-instruction evidence**: Zhang et al. 2026 (negative-constraint phrasing fits anti-pattern rules); Bohr 2025 (directive pairs with examples for durable compliance).
+- **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: critical. Most common reviewer complaint on AI-generated technical prose is "reads like you forgot the reader doesn't know X yet."
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
 - **enforcement**: Tier-3 agent self-check (judgment rule; not mechanical); Tier-4 Codex review as primary gate.
 
 ##### directive
 
-Do not use technical terms or acronyms that have not been established for the reader's background level. Do not launch into mechanics before naming the purpose. Do not write a multi-paragraph argument without a one-sentence map first. If a reader at the level of a first-year graduate student in the adjacent sub-field would pause to infer what a term means, define it or rewrite around it.
+Do not use technical terms or acronyms that have not been established for the reader's background level. Do not launch into mechanics before naming the purpose. Do not write a multi-paragraph argument without a one-sentence map first. Before writing, name the intended reader for this artifact: adjacent-field graduate student for research papers, junior engineer for API docs, on-call engineer for runbooks, cross-panel reviewer for proposals, release reader for changelogs, or another concrete reader. If that reader would pause to infer what a term means, define it or rewrite around it.
 
 ##### BAD → GOOD
 
@@ -50,6 +59,9 @@ Do not use technical terms or acronyms that have not been established for the re
 
 - BAD: `SGD converges faster here because of the Hessian conditioning.`
 - GOOD: `SGD converges faster than Adam on this task because the loss surface is well-conditioned — the eigenvalues of the second-derivative matrix (Hessian) do not span many orders of magnitude, so a single learning rate suits all directions.`
+
+- BAD (runbook): `If the queue is backed up, bounce the workers and clear the dead-letter.`
+- GOOD (runbook): `If RabbitMQ queue depth exceeds 10k messages for more than 5 minutes, (1) drain and restart the Celery worker pool (bounce the workers) so new brokers pick up the rebalanced connections, then (2) drain the dead-letter queue so failed messages do not replay against the now-fresh workers.`
 
 ##### rationale for AI agent
 
@@ -77,7 +89,7 @@ LLMs absorb their training corpus at a near-expert register and reproduce that r
 #### RULE-05: Do not use dying metaphors or prefabricated phrases
 
 - **source**: Orwell 1946, "Politics and the English Language," Rule 1: *"Never use a metaphor, simile, or other figure of speech which you are used to seeing in print."*
-- **agent-instruction evidence**: Zhang et al. 2026 (negative-constraint phrasing is individually beneficial for anti-pattern rules); Bohr 2025 (directive + examples format sustains compliance across multi-turn generation).
+- **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; the exact-phrase deny list is our separate mechanical enforcement choice because these phrases are directly detectable. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow.
 - **severity**: high. The most externally visible AI-tell signal in generated prose.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
 - **enforcement**: Tier-1 `deny` (exact-phrase list in `enforcement/deny-phrases.txt`) + Tier-2 ProseLint (`misc.phrasal_adjectives`, `airlinese.misc`, `cliches.misc`) + Tier-4 Codex review for anything the phrase list misses.
@@ -103,9 +115,12 @@ Do not use metaphors, similes, or phrases you have seen often in print. When a p
 - BAD: `Our groundbreaking approach to interpretability represents a paradigm shift in the field.`
 - GOOD: `Our attention-probing method identifies which transformer layer each factual-recall head first activates. We validate this on 12 known facts from Meng et al. 2022 and observe consistent attribution for 10 of them.`
 
+- BAD (release note): `This release delivers significant improvements to user experience and performance.`
+- GOOD (release note): `Reduce p99 dashboard load latency from 820ms to 240ms. Fix a crash in CSV export when a cell contains an embedded newline. Add keyboard shortcut (Shift+E) for the filter-reset action requested in #1847.`
+
 ##### rationale for AI agent
 
-LLMs trained on web text — press releases, blog posts, grant introductions, paper abstracts, corporate marketing — disproportionately reproduce clichéd phrases from that corpus. Readers who have processed many such sources recognize "pushes the boundaries" and "paradigm shift" as filler and skip the sentence; the distinctiveness of AI-written prose suffers in direct proportion. Orwell 1946 Rule 1 names the failure mode directly, predating LLMs by eighty years. Zhang et al. 2026 show that negative constraints (rules phrased as "do not use X") are the individually beneficial rule type for coding agents, so a phrase-list deny is a direct fit for this rule. The LLM-specific corollary — which the five BAD/GOOD examples above illustrate — is that if you cannot quote a specific number, comparison, or mechanism in place of the cliché, the cliché was hiding the absence of substance. Deleting the cliché and finding you cannot replace it with specifics is itself useful information.
+LLMs trained on web text — press releases, blog posts, grant introductions, paper abstracts, corporate marketing — disproportionately reproduce clichéd phrases from that corpus. Readers who have processed many such sources recognize "pushes the boundaries" and "paradigm shift" as filler and skip the sentence; the distinctiveness of AI-written prose suffers in direct proportion. Orwell 1946 Rule 1 names the failure mode directly, predating LLMs by eighty years. Zhang et al. 2026 give empirical support for phrasing this class of rule as a negative directive in coding-agent instruction files; the phrase-list deny is our separate mechanical enforcement choice, independent of the Zhang paper, motivated by the observation that these specific phrases are directly detectable without a parse. The LLM-specific corollary — which the six BAD/GOOD examples above illustrate — is that if you cannot quote a specific number, comparison, or mechanism in place of the cliché, the cliché was hiding the absence of substance. Deleting the cliché and finding you cannot replace it with specifics is itself useful information.
 
 #### RULE-06: Do not use avoidable jargon where an everyday English word exists
 

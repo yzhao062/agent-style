@@ -53,7 +53,7 @@ Drop the adapter file for your tool into the expected path. The adapters are thi
 <summary><b>Common surfaces (full list in <code>adapter-matrix.md</code>)</b></summary>
 
 | Surface | Target path | Auto-loaded |
-|---|---|---|
+| --- | --- | --- |
 | Claude Code | `CLAUDE.md` at repo root | yes |
 | Anthropic Skills | `.claude/skills/elements-of-agent-style/SKILL.md` | on invocation |
 | GitHub Copilot (repo) | `.github/copilot-instructions.md` | yes |
@@ -134,7 +134,7 @@ New contributions are welcome on the same standard: a rule must cite a source fr
 Dual license with file-level SPDX boundaries:
 
 | Content | License |
-|---|---|
+| --- | --- |
 | `RULES.md`, `SOURCES.md`, `NOTICE.md`, `examples/`, `agents/`, `adapter-matrix.md` | [CC BY 4.0](LICENSES/CC-BY-4.0.txt) |
 | `enforcement/`, `.github/workflows/`, generator scripts | [MIT](LICENSES/MIT.txt) |
 
