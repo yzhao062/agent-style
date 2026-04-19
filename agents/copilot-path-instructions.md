@@ -1,12 +1,10 @@
-<!-- SPDX-License-Identifier: CC-BY-4.0 -->
-<!-- Adapter: GitHub Copilot (path-scoped instructions) -->
-<!-- Target path: <repo root>/.github/instructions/writing.instructions.md -->
-
 ---
 applyTo: "**/*.md,**/*.tex,**/*.rst,**/*.txt"
 ---
 
-<!-- blank line above protects lint rules that require a blank line after frontmatter -->
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+<!-- Adapter: GitHub Copilot (path-scoped instructions) -->
+<!-- Target path: <repo root>/.github/instructions/writing.instructions.md -->
 
 # GitHub Copilot — Writing Style Rules (path-scoped)
 
