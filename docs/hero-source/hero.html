@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: MIT -->
+<!--
+  agent-style hero figure source.
+  Render: open in Chrome / Edge and save as PNG at 1280 × 720, OR run:
+    "C:/Program Files/Google/Chrome/Application/chrome.exe" \
+      --headless --disable-gpu --hide-scrollbars \
+      --window-size=1280,720 \
+      --screenshot="C:/Users/yuezh/PycharmProjects/agent-style/docs/hero.png" \
+      "file:///C:/Users/yuezh/PycharmProjects/agent-style/docs/hero-source/hero.html"
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>agent-style hero</title>
+<style>
+  :root {
+    --paper: #f7f3ea;
+    --paper-deep: #ebe5d4;
+    --ink: #1a1815;
+    --ink-mid: #4a463e;
+    --rule: #8a8370;
+    --draft-bg: #f3f1ec;
+    --draft-border: #c8c0a8;
+    --fire-bg: #fff6d6;
+    --fire-border: #d6b650;
+    --crit-bg: #fbe7e2;
+    --crit-border: #c54b30;
+    --revised-bg: #eaf2e4;
+    --revised-border: #7fa268;
+    --accent: #3d5e2a;
+    --chip-bg: #fffdf7;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .hero {
+    width: 1200px;
+    padding: 36px 44px 40px 44px;
+    box-sizing: border-box;
+    background: var(--paper);
+    position: relative;
+    border: 2px solid var(--ink);
+    /* subtle double-rule frame like a title page */
+    box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px var(--ink-mid);
+  }
+  .booktop { text-align: center; }
+  .mini-cap {
+    font-family: "Segoe UI", "SF Pro Text", system-ui, sans-serif;
+    letter-spacing: 0.25em;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    margin-bottom: 10px;
+  }
+  .title {
+    font-size: 52px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    margin: 0 0 10px 0;
+    font-family: "Playfair Display", Georgia, serif;
+  }
+  .tagline {
+    font-size: 18px;
+    font-style: italic;
+    color: var(--ink-mid);
+    margin: 0 0 6px 0;
+  }
+  .attribution {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 12px;
+    color: var(--rule);
+    margin-top: 4px;
+  }
+  .rule-grid {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 6px;
+    margin: 22px auto 4px auto;
+    max-width: 1000px;
+  }
+  .rule-chip {
+    font-family: "SF Mono", Consolas, "Roboto Mono", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    padding: 6px 0;
+    background: var(--chip-bg);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+  }
+  .rule-chip.crit {
+    background: var(--crit-bg);
+    border-color: var(--crit-border);
+    color: #7a2614;
+  }
+  .rule-legend {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 11px;
+    color: var(--ink-mid);
+    text-align: center;
+    margin-top: 10px;
+    letter-spacing: 0.02em;
+  }
+  .rule-legend .sep { color: var(--rule); margin: 0 10px; }
+  .rule-legend .crit-mark { color: #7a2614; font-weight: 600; }
+
+  /* mechanism section */
+  .mechanism {
+    display: grid;
+    grid-template-columns: 1fr 170px 1fr;
+    gap: 18px;
+    margin: 28px 0 0 0;
+    align-items: stretch;
+  }
+  .panel {
+    background: white;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 16px 18px 18px 18px;
+    font-family: "Segoe UI", "SF Pro Text", system-ui, sans-serif;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink);
+    position: relative;
+  }
+  .panel.draft { background: var(--draft-bg); border-color: var(--draft-border); }
+  .panel.revised { background: var(--revised-bg); border-color: var(--revised-border); }
+  .panel-label {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-mid);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .panel.revised .panel-label { color: var(--accent); }
+  .panel.draft .panel-label { color: var(--ink-mid); }
+  .panel p {
+    margin: 0;
+  }
+  .tell { background: rgba(214, 182, 80, 0.35); padding: 1px 3px; border-radius: 2px; }
+  .concrete { background: rgba(127, 162, 104, 0.28); padding: 1px 3px; border-radius: 2px; }
+  .fire-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+    padding: 4px 0;
+  }
+  .fire-col .arrow {
+    font-family: "SF Pro Text", system-ui, sans-serif;
+    font-size: 10px;
+    color: var(--rule);
+    text-align: center;
+    letter-spacing: 0.15em;
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+  .fire-chip {
+    background: var(--fire-bg);
+    border: 1px solid var(--fire-border);
+    padding: 5px 9px;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 11px;
+    border-radius: 3px;
+    color: #5a4100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+  }
+  .fire-chip.crit {
+    background: var(--crit-bg);
+    border-color: var(--crit-border);
+    color: #7a2614;
+  }
+  .fire-chip .id { font-weight: 700; letter-spacing: 0.02em; }
+  .fire-chip .label {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 10.5px;
+    font-weight: 400;
+  }
+
+  .footer {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-mid);
+    text-align: center;
+    margin-top: 22px;
+    letter-spacing: 0.02em;
+  }
+  .footer code {
+    font-family: "SF Mono", Consolas, monospace;
+    background: white;
+    padding: 1px 5px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+<div class="hero">
+
+  <div class="booktop">
+    <div class="mini-cap">a literature-backed writing ruleset for ai agents</div>
+    <h1 class="title">The Elements of Agent Style</h1>
+    <div class="tagline">Make your AI agent write like a tech pro.</div>
+    <div class="attribution">21 rules · 12 from Strunk &amp; White, Orwell, Pinker, Gopen &amp; Swan · 9 from field observation, 2022–2026</div>
+  </div>
+
+  <div class="rule-grid">
+    <div class="rule-chip crit">RULE-01</div>
+    <div class="rule-chip">RULE-02</div>
+    <div class="rule-chip">RULE-03</div>
+    <div class="rule-chip">RULE-04</div>
+    <div class="rule-chip">RULE-05</div>
+    <div class="rule-chip">RULE-06</div>
+    <div class="rule-chip">RULE-07</div>
+    <div class="rule-chip">RULE-08</div>
+    <div class="rule-chip">RULE-09</div>
+    <div class="rule-chip">RULE-10</div>
+    <div class="rule-chip">RULE-11</div>
+    <div class="rule-chip">RULE-12</div>
+    <div class="rule-chip">RULE-A</div>
+    <div class="rule-chip">RULE-B</div>
+    <div class="rule-chip">RULE-C</div>
+    <div class="rule-chip">RULE-D</div>
+    <div class="rule-chip">RULE-E</div>
+    <div class="rule-chip">RULE-F</div>
+    <div class="rule-chip">RULE-G</div>
+    <div class="rule-chip crit">RULE-H</div>
+    <div class="rule-chip">RULE-I</div>
+  </div>
+  <div class="rule-legend">
+    <span>RULE-01..12 canonical</span>
+    <span class="sep">·</span>
+    <span>RULE-A..I field-observed</span>
+    <span class="sep">·</span>
+    <span class="crit-mark">bordered red = critical</span>
+  </div>
+
+  <div class="mechanism">
+    <div class="panel draft">
+      <div class="panel-label">AI draft: PR description</div>
+      <p>This PR introduces a <span class="tell">novel caching optimization</span> that <span class="tell">leverages</span> <span class="tell">cutting-edge</span> infrastructure to improve <span class="tell">overall system performance</span>. <span class="tell">Additionally</span>, it enhances session <span class="tell">robustness</span> and <span class="tell">paves the way</span> for future scalability. <span class="tell">Overall, these changes represent a significant step forward in our session management capabilities.</span></p>
+    </div>
+    <div class="fire-col">
+      <div class="arrow">↦ RULES FIRE</div>
+      <div class="fire-chip"><span class="id">RULE-05</span><span class="label">cliché</span></div>
+      <div class="fire-chip"><span class="id">RULE-06</span><span class="label">jargon</span></div>
+      <div class="fire-chip crit"><span class="id">RULE-H</span><span class="label">unsupported</span></div>
+      <div class="fire-chip"><span class="id">RULE-03</span><span class="label">vague</span></div>
+      <div class="fire-chip"><span class="id">RULE-D</span><span class="label">transition</span></div>
+      <div class="fire-chip"><span class="id">RULE-E</span><span class="label">closer</span></div>
+    </div>
+    <div class="panel revised">
+      <div class="panel-label">revised: same budget, same register</div>
+      <p>Switch session caching from in-memory LRU to Redis with a <span class="concrete">5-minute TTL</span>. Sessions now survive pod restarts; per-pod memory drops from <span class="concrete">1.2 GB to 280 MB</span>. Trade-off: a Redis outage logs all users out, but session lookup already fails closed, so the user impact is a <span class="concrete">401, not a 500</span>.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    installed in seconds: <code>pip install agent-style &amp;&amp; agent-style enable claude-code</code>
+    <span class="sep">·</span>
+    <code>npm install -g agent-style</code>
+  </div>
+
+</div>
+</body>
+</html>

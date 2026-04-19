@@ -2,9 +2,7 @@
 
 # The Elements of Agent Style — Rules
 
-🚧 **Phase 1b draft — 12 canonical rule bodies (RULE-01 through RULE-12) and 9 field-observed rule bodies (RULE-A through RULE-I) drafted. Codex validator review complete across four rounds; first tagged release follows.**
-
-For each rule, the Phase 1b draft provides:
+For each rule, this document provides:
 
 - metadata (source citation, agent-instruction evidence, severity, scope, enforcement tier)
 - directive (command-form sentence, negative for anti-patterns, positive for constructive placement)
@@ -455,13 +453,13 @@ LLM decoding rewards well-formed completions; the next-token objective encourage
 
 ## The 9 Field-Observed Rules
 
-The following nine rules (RULE-A through RULE-I) come from the maintainer's observation of LLM output across research papers, grant proposals, technical documentation, and agent-configuration work between 2022 and 2026. They are not drawn from cited writing authorities; each rule names a recurring pattern observed frequently enough across distinct projects to warrant a named rule. They are treated as peer input to the 12 canonical rules in all adapter files; when an agent consumes the ruleset, both groups are binding.
+The following nine rules (RULE-A through RULE-I) come from my observation of LLM output across dozens of writing projects and code releases, 2022 to 2026. They are not drawn from cited writing authorities; each rule names a recurring pattern I saw frequently enough across distinct projects to warrant a named rule. They are treated as peer input to the 12 canonical rules in all adapter files; when an agent consumes the ruleset, both groups are binding.
 
 ### Observed LLM Patterns
 
 #### RULE-A: Do Not Convert Prose into Bullet Points Unless the Content Is a Genuine List
 
-- **source**: Maintainer observation of LLM output across research, proposal, documentation, and agent-configuration projects, 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Do not convert paragraphs into bullet points unless the user asks for that format."
+- **source**: My observation of LLM output across dozens of writing projects and code releases, 2022–2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Do not convert paragraphs into bullet points unless the user asks for that format."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: medium. Recurring structural AI-tell; bullet-ification fragments reasoning and signals "AI summary" register in proposals, design docs, and research-paper introductions.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
@@ -537,7 +535,7 @@ LLMs default to bullets whenever they present multiple ideas because bullets rea
 
 #### RULE-B: Do Not Use Em or En Dashes as Casual Sentence Punctuation
 
-- **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Avoid heavy dash use. Do not use em dashes or en dashes as casual sentence punctuation. Prefer commas, semicolons, colons, or parentheses instead."
+- **source**: My observation of LLM output across dozens of writing projects and code releases, 2022–2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Avoid heavy dash use. Do not use em dashes or en dashes as casual sentence punctuation. Prefer commas, semicolons, colons, or parentheses instead."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; the dash-as-punctuation regex flag is our separate mechanical enforcement choice (Zhang does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: medium. Recurring and externally visible AI-tell; LLMs produce em dashes at substantially higher rates than skilled human technical writers, producing a cadence that human readers recognize as AI-paced.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
@@ -570,7 +568,7 @@ LLMs absorb the em dash as a favored connector from long-form journalism and ess
 
 #### RULE-C: Do Not Start Consecutive Sentences with the Same Word or Phrase
 
-- **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Prefer not to start several consecutive sentences with the same word or phrase."
+- **source**: My observation of LLM output across dozens of writing projects and code releases, 2022–2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Prefer not to start several consecutive sentences with the same word or phrase."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: medium. Local rhythm issue; paragraphs read as monotone and template-filled when same-starts accumulate.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
@@ -603,7 +601,7 @@ LLMs producing text token-by-token often lock into a successful opener and repea
 
 #### RULE-D: Do Not Overuse Transition Words ("Additionally", "Furthermore", "Moreover")
 
-- **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Avoid overusing transition words like 'Additionally' or 'Furthermore.'"
+- **source**: My observation of LLM output across dozens of writing projects and code releases, 2022–2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Avoid overusing transition words like 'Additionally' or 'Furthermore.'"
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: medium. Recurring externally visible AI-tell; opening two or three consecutive sentences with "Additionally" / "Furthermore" / "Moreover" is one of the most distinctive cadences AI-generated text is recognized by.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
@@ -636,7 +634,7 @@ LLM training on formal essay corpora (academic prose, Wikipedia, editorial writi
 
 #### RULE-E: Do Not Close Every Paragraph with a Summary Sentence
 
-- **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Not every paragraph needs a tidy summary sentence at the end."
+- **source**: My observation of LLM output across dozens of writing projects and code releases, 2022–2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Not every paragraph needs a tidy summary sentence at the end."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: medium. Structural throat-clearing; adds length without adding information. Pattern is externally visible because well-read technical readers skim past it, marking the prose as machine-generated or unedited.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
@@ -669,7 +667,7 @@ LLMs often add paragraph-closing summaries because academic and expository corpo
 
 #### RULE-F: Use Consistent Terms; Do Not Redefine Abbreviations Mid-Document
 
-- **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Writing Defaults: "Use consistent terms. If an abbreviation is defined once, do not define it again later."
+- **source**: My observation of LLM output across dozens of writing projects and code releases, 2022–2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Writing Defaults: "Use consistent terms. If an abbreviation is defined once, do not define it again later."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: medium. Recurring clarity failure in long documents; varied terms force the reader to check whether each new term refers to the same concept or a new one.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
@@ -702,7 +700,7 @@ LLMs often vary terminology within a document because variety is mildly rewarded
 
 #### RULE-G: Use Title Case for Section and Subsection Headings
 
-- **source**: Maintainer observation of LLM output 2022 to 2026. LLMs default to sentence case for Markdown and LaTeX headings; in academic and engineering contexts that call for title case, the sentence-case drift is a visible AI-tell.
+- **source**: My observation of LLM output across dozens of writing projects and code releases, 2022–2026. LLMs default to sentence case for Markdown and LaTeX headings; in academic and engineering contexts that call for title case, the sentence-case drift is a visible AI-tell.
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; RULE-G uses a positive directive because applying title case is a constructive placement rather than an anti-pattern to flag. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: low. Polish rather than comprehension; readers recover meaning from either case. Pattern is high-visibility however because headings are the first thing a skimmer sees.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and similar structural heading surfaces.
@@ -735,7 +733,7 @@ LLMs default to sentence case for Markdown and LaTeX headings because their trai
 
 #### RULE-H: Support Factual Claims with Citation or Concrete Evidence; Do Not Be Handwavy
 
-- **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Writing Defaults: "If citing papers, verify that they exist." This rule is the flagship of the three-rule cluster against handwavy prose (RULE-03 on vague nouns, RULE-08 on uncalibrated verbs, RULE-H on unsupported claims).
+- **source**: My observation of LLM output across dozens of writing projects and code releases, 2022–2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Writing Defaults: "If citing papers, verify that they exist." This rule is the flagship of the three-rule cluster against handwavy prose (RULE-03 on vague nouns, RULE-08 on uncalibrated verbs, RULE-H on unsupported claims).
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: critical. Uncited claims are a trust failure; fabricated citations are worse (permanent damage to reader trust once the fabrication is discovered). LLMs both default to citation-free hedges ("prior work shows", "recent studies suggest") and actively hallucinate plausible-looking citations that do not exist (Ji et al. 2023 survey of hallucination in NLG; Agrawal et al. 2024 empirical measurement).
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
@@ -771,7 +769,7 @@ LLMs produce handwavy, citation-free claims as a default register absorbed from 
 
 #### RULE-I: Prefer Full Forms over Contractions in Technical Prose
 
-- **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Prefer full forms such as 'it is' and 'he would' rather than contractions."
+- **source**: My observation of LLM output across dozens of writing projects and code releases, 2022–2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Prefer full forms such as 'it is' and 'he would' rather than contractions."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; RULE-I uses a positive directive because preferring full forms is a constructive placement rather than an anti-pattern to flag. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: low. Register rather than comprehension; readers parse contractions correctly. Flagged for consistency because register drift (a contraction in otherwise formal prose) reads as careless.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.

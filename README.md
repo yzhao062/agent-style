@@ -10,6 +10,8 @@
 
 *21 rules: 12 from classic writing guides, 9 from field observation of LLM output, 2022-2026.*
 
+[![PyPI](https://img.shields.io/pypi/v/agent-style.svg?color=blue&cacheSeconds=300)](https://pypi.org/project/agent-style/)
+[![npm](https://img.shields.io/npm/v/agent-style.svg?color=blue&cacheSeconds=300)](https://www.npmjs.com/package/agent-style)
 [![License](https://img.shields.io/badge/license-CC%20BY%204.0%20%2B%20MIT-blue.svg)](NOTICE.md)
 [![CI](https://github.com/yzhao062/agent-style/actions/workflows/validate.yml/badge.svg)](https://github.com/yzhao062/agent-style/actions/workflows/validate.yml)
 [![GitHub stars](https://img.shields.io/github/stars/yzhao062/agent-style?style=social&cacheSeconds=300)](https://github.com/yzhao062/agent-style)
@@ -20,39 +22,36 @@
 
 </div>
 
-> [!NOTE]
-> **Phase 1b draft.** 12 canonical rules and 9 field-observed rules are drafted in `RULES.md`. Codex validator review complete across four rounds; the first tagged release follows.
-
 ## Before and After
 
-The same paper introduction, drafted by an AI coding or writing agent without and with these rules. Highlighted phrases in the first version are specific rule violations; the second version replaces them with concrete content at the same information budget.
+![agent-style hero: 21 rules, then a PR-description drafted by an AI agent (with rule violations highlighted) alongside the revised version at the same budget](docs/hero.png)
 
-**Without (typical AI output):**
-
-> This paper presents a <mark>novel framework</mark> for retrieval-augmented generation (RAG) that <mark>leverages</mark> dense embeddings to improve information access. Our approach combines <mark>recent advances</mark> in contrastive learning with efficient indexing to <mark>achieve significant performance gains</mark> across <mark>standard benchmarks</mark>. <mark>Additionally</mark>, the method demonstrates <mark>robust behavior</mark> in <mark>various deployment scenarios</mark>. <mark>Overall, these contributions advance the state of the art</mark> in retrievable knowledge systems.
-
-Violations in order: `novel framework` plus `advance the state of the art` are clichés (RULE-05); `leverages` is jargon where `uses` fits (RULE-06); `recent advances` is an uncited claim (RULE-H); `significant performance gains`, `robust behavior`, and `various deployment scenarios` are vague adjectives without numbers (RULE-03 and RULE-08); `standard benchmarks` names no benchmarks (RULE-H); `Additionally` is transition-word overuse (RULE-D); the closing sentence restates the paragraph's claim (RULE-E).
-
-**With (rules applied):**
-
-> This paper presents a retrieval-augmented generation (RAG) system for medical question answering. We fine-tune `text-embedding-3-large` on 50k query-passage pairs from PubMed abstracts using InfoNCE loss. On our held-out set of 5k queries, recall@10 rises from 0.67 (baseline: `text-embedding-3-large` without fine-tuning) to 0.79; MRR@10 moves from 0.42 to 0.51. Latency at batch size 1 rises from 42 ms to 58 ms. On out-of-distribution queries (5k from Wikipedia biology articles), the gain narrows to 2 points, which we attribute to domain shift.
-
-Same paragraph budget; named method, named dataset, named baseline, named metrics, and an honest out-of-distribution result in place of `robust behavior`.
+The top row is the identity: 21 rules, 12 canonical plus 9 field-observed; bordered red marks the two critical rules (RULE-01 curse-of-knowledge and RULE-H citation discipline). The bottom row is the mechanism: a typical AI-drafted PR description on the left (highlighted phrases are rule violations), the specific rules that fire in the middle, and the revised version on the right, with the same budget, same register, still a PR description rather than a technical report.
 
 ## What It Is
 
-A curated set of English writing rules formatted for AI coding and writing agents to follow **at generation time**, not as a post-hoc linter. Scoped to technical prose: API documentation, engineering design docs, research papers, grant proposals, READMEs, runbooks, commit messages, error messages, technical blog posts.
+A curated set of English writing rules formatted for AI coding and writing agents to follow **at generation time**, not as a post-hoc linter.
 
-Two rule groups, both peer inputs for the agent:
+### Scope
 
-- **12 canonical rules (`RULE-01` through `RULE-12`):** distilled from Strunk & White, Orwell, Pinker, and Gopen & Swan. Each rule cites its source by chapter, section, or essay rule, verified by the maintainer against the original works.
-- **9 field-observed rules (`RULE-A` through `RULE-I`):** structural patterns logged from LLM output across research papers, grant proposals, technical documentation, and agent configurations, 2022 to 2026. Covers bullet-point overuse, em-dash overuse, consecutive same-starts, overused transitions, paragraph-closing summaries, term consistency, sentence-case heading bias, citation discipline (RULE-H, critical — LLMs both default to handwavy claims and fabricate plausible-looking citations), and contraction register.
+| In scope | Out of scope |
+| --- | --- |
+| API docs, design docs, research papers, grant proposals | Fiction, poetry, marketing copy |
+| READMEs, runbooks, commit messages, error messages | Long-form narrative non-fiction |
+| Technical blog posts, postmortems, issue reports | Non-English prose; any context where rhythm or affect matter more than precision |
 
-Out of scope: fiction, poetry, marketing copy, design writing, long-form narrative nonfiction, non-English prose, any context where rhythm or affect matter more than precision.
+### Two Rule Groups, Peer Inputs
+
+The 21 rules split by origin. The agent reads both as equal peers; no group is annotated as higher-priority than the other.
+
+- **`RULE-01..12` (canonical).** Distilled from Strunk & White, Orwell, Pinker, and Gopen & Swan. Each rule cites its source by chapter, section, or essay rule; I verified every citation against the original works. Full names in the table below.
+- **`RULE-A..I` (field-observed).** Patterns I logged from AI output across dozens of writing projects (papers, grant proposals, technical documentation, agent configs) and code releases, 2022 to 2026. Transparent attribution: these are not literature-backed but capture LLM-specific failure modes that the canonical set alone misses (RULE-H citation discipline is the critical one). Full names in the table below.
 
 Named in homage to Strunk & White's *The Elements of Style* (1918/1959), one of the four canonical sources.
 
 ### Canonical Rules (RULE-01 through RULE-12)
+
+![Four writing authorities cited by RULE-01..12: Strunk & White (Elements of Style, 1959), Orwell (Politics and the English Language, 1946), Pinker (Sense of Style, 2014), Gopen & Swan (Science of Scientific Writing, 1990), with the rule IDs distilled from each](docs/sources.png)
 
 Sourced from writing authorities; each rule cites its source by chapter, section, or essay rule.
 
@@ -116,7 +115,9 @@ agent-style disable claude-code                      # reverse enable
 agent-style rules                                    # print bundled RULES.md to stdout
 ```
 
-What `enable` does per tool (all safe, all idempotent):
+<details>
+<summary><b>What <code>enable</code> Does per Tool (All Safe, All Idempotent)</b></summary>
+<br>
 
 - **Claude Code (`import-marker`)**: writes `.agent-style/RULES.md` and `.agent-style/claude-code.md`; safe-appends `@.agent-style/claude-code.md` in a marker block to your existing `CLAUDE.md`. Creates `CLAUDE.md` only if absent.
 - **AGENTS.md, Copilot repo-wide (`append-block`)**: safe-appends a marker-wrapped compact adapter block to your existing instruction file. Content above and below the marker is preserved.
@@ -125,6 +126,8 @@ What `enable` does per tool (all safe, all idempotent):
 - **Aider (`multi-file-required`)**: writes `.agent-style/aider-conventions.md`; prints a `.aider.conf.yml` snippet to stderr. You paste both files into the config.
 
 For `print-only` and `multi-file-required`, the JSON output carries `manual_step_required: true` and `enabled: false`; exit code stays 0 (the CLI did everything it can do) and the first line of human output is exactly `manual step required:` followed by the specific action.
+
+</details>
 
 ### Install via Manual `curl`
 
@@ -194,9 +197,13 @@ Remove-Item -Recurse -Force .agent-style          # PowerShell
 
 Skipping step 1 leaves orphan marker blocks in your instruction files; skipping step 2 leaves shared rule data on disk.
 
-### Complementary Post-Hoc Linting
+<details>
+<summary><b>Complementary Post-Hoc Linting</b></summary>
+<br>
 
 This repo is read at generation time. For a linter that runs over committed prose in CI, see [ProseLint](https://github.com/amperser/proselint); per-rule check-ID mappings are in [`enforcement/proselint-map.md`](enforcement/proselint-map.md). Vale users can plug ProseLint via its existing style-pack ecosystem.
+
+</details>
 
 ### v0.2.0 Roadmap
 
@@ -206,11 +213,11 @@ Planned CLI additions: `agent-style update` (refresh installed adapters to lates
 <summary><b>Curation and method</b></summary>
 <br>
 
-The 12 canonical rules are not a generated digest of the four source works. The maintainer read each source, extracted the rules most applicable to English technical prose, filtered for AI-agent failure modes observed in practice, and phrased each rule using the negative-versus-positive split that Zhang et al. 2026 found empirically effective for coding-agent instructions. Rules that are supported by a source but that do not map to a concrete AI-R&D failure mode are excluded. The intersection is what this repo ships as the canonical set.
+The 12 canonical rules are not a generated digest of the four source works. I read each source, extracted the rules most applicable to English technical prose, filtered for AI-agent failure modes I had seen in practice, and phrased each rule using the negative-versus-positive split that Zhang et al. 2026 found empirically effective for coding-agent instructions. Rules that are supported by a source but that do not map to a concrete AI-R&D failure mode are excluded. The intersection is what this repo ships as the canonical set.
 
-The 9 field-observed rules (`RULE-A` through `RULE-I`) come from the maintainer's own observation of LLM output across research, proposal, documentation, and agent-configuration work from 2022 to 2026. Each pattern appeared often enough across distinct projects to warrant a named rule. These rules are labeled transparently as field observations in `RULES.md` and sit next to the canonical rules in all adapter files.
+The 9 field-observed rules (`RULE-A` through `RULE-I`) come from my own observation of AI output across dozens of writing projects and code releases, 2022 to 2026. Each pattern appeared often enough across distinct projects to warrant a named rule. These rules are labeled transparently as field observations in `RULES.md` and sit next to the canonical rules in all adapter files.
 
-New contributions are welcome. A canonical-track rule must cite a source from the writing-authority bucket or the agent-instruction-evidence bucket below, include BAD/GOOD examples drawn from real technical-prose output, and include a rationale for why the rule matters specifically for AI-agent-generated prose. Field-observed rule additions are curated by the maintainer to keep the list tight.
+New contributions are welcome. A canonical-track rule must cite a source from the writing-authority bucket or the agent-instruction-evidence bucket below, include BAD/GOOD examples drawn from real technical-prose output, and include a rationale for why the rule matters specifically for AI-agent-generated prose. I curate field-observed rule additions to keep the list tight.
 
 </details>
 
@@ -218,7 +225,7 @@ New contributions are welcome. A canonical-track rule must cite a source from th
 <summary><b>Canonical sources</b></summary>
 <br>
 
-Four writing authorities for prose content, plus two recent empirical papers for rule format and phrasing. Every one of the 12 canonical rules cites its source explicitly; **each citation is verified by the maintainer against the original work, not scraped or summarized from search results.** When the final text disagrees with an authority, the disagreement is stated in the rule's rationale.
+Four writing authorities for prose content, plus two recent empirical papers for rule format and phrasing. Every one of the 12 canonical rules cites its source explicitly; **I verified every citation against the original work, not scraped or summarized from search results.** When the final text disagrees with an authority, the disagreement is stated in the rule's rationale.
 
 #### Writing Authorities (Prose Content)
 

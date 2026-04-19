@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: MIT -->
+<!--
+  agent-style canonical-sources collage.
+  Stylized tribute tiles for the four writing authorities cited by RULE-01..12.
+  Render at 2x DPI:
+    "C:/Program Files/Google/Chrome/Application/chrome.exe" \
+      --headless --disable-gpu --hide-scrollbars \
+      --force-device-scale-factor=2 --window-size=1280,440 \
+      --screenshot="C:/.../docs/sources.png" \
+      "file:///C:/.../docs/hero-source/sources.html"
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>agent-style — canonical sources</title>
+<style>
+  :root {
+    --paper: #f7f3ea;
+    --ink: #1a1815;
+    --ink-mid: #4a463e;
+    --rule: #8a8370;
+    --tile-bg: #fffdf7;
+    --c1: #2d5f3f; /* Strunk & White · forest green */
+    --c2: #8a2d2d; /* Orwell · dusty red */
+    --c3: #c49932; /* Pinker · mustard */
+    --c4: #3d5a7a; /* Gopen & Swan · steel blue */
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .sources {
+    width: 1200px;
+    padding: 26px 34px 28px 34px;
+    box-sizing: border-box;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px var(--ink-mid);
+  }
+  .top-label {
+    font-family: "Segoe UI", "SF Pro Text", system-ui, sans-serif;
+    letter-spacing: 0.22em;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  .tile {
+    background: var(--tile-bg);
+    border: 1px solid var(--rule);
+    border-top-width: 6px;
+    border-radius: 2px;
+    padding: 16px 18px 14px 18px;
+    min-height: 252px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .tile.s1 { border-top-color: var(--c1); }
+  .tile.s2 { border-top-color: var(--c2); }
+  .tile.s3 { border-top-color: var(--c3); }
+  .tile.s4 { border-top-color: var(--c4); }
+  .author {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    margin-bottom: 2px;
+  }
+  .year {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 11.5px;
+    color: var(--ink-mid);
+    margin-bottom: 12px;
+  }
+  .title {
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .venue {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-mid);
+    margin-bottom: 4px;
+  }
+  .ref {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 11px;
+    color: var(--ink-mid);
+    margin-bottom: auto;
+    padding-bottom: 12px;
+    line-height: 1.45;
+  }
+  .divider {
+    border-top: 1px solid var(--rule);
+    opacity: 0.4;
+    margin: 0 0 8px 0;
+  }
+  .distilled {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 10.5px;
+    color: var(--ink-mid);
+    letter-spacing: 0.03em;
+  }
+  .distilled .count {
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .distilled .rules {
+    font-family: "SF Mono", Consolas, monospace;
+    color: var(--ink-mid);
+    display: block;
+    margin-top: 4px;
+    font-size: 10.5px;
+  }
+  .footer {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 11.5px;
+    color: var(--ink-mid);
+    text-align: center;
+    margin-top: 18px;
+    letter-spacing: 0.02em;
+  }
+  .footer code {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 10.5px;
+    background: white;
+    padding: 1px 5px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="sources">
+
+  <div class="top-label">four writing authorities · cited rule by rule</div>
+
+  <div class="tiles">
+
+    <div class="tile s1">
+      <div class="author">Strunk &amp; White</div>
+      <div class="year">1959</div>
+      <div class="title">The Elements of Style</div>
+      <div class="venue">Macmillan</div>
+      <div class="ref">Part II, §§12–22<br>"Elementary Principles of Composition"</div>
+      <div class="divider"></div>
+      <div class="distilled">
+        <span class="count">7 rules distilled</span>
+        <span class="rules">RULE-02 · 03 · 04 · 07 · 09 · 10 · 12</span>
+      </div>
+    </div>
+
+    <div class="tile s2">
+      <div class="author">George Orwell</div>
+      <div class="year">1946</div>
+      <div class="title">Politics and the English Language</div>
+      <div class="venue">Horizon</div>
+      <div class="ref">Rules 1–6 (essay)</div>
+      <div class="divider"></div>
+      <div class="distilled">
+        <span class="count">4 rules distilled</span>
+        <span class="rules">RULE-02 · 04 · 05 · 06</span>
+      </div>
+    </div>
+
+    <div class="tile s3">
+      <div class="author">Steven Pinker</div>
+      <div class="year">2014</div>
+      <div class="title">The Sense of Style</div>
+      <div class="venue">Viking</div>
+      <div class="ref">Ch. 2, 3, 4, 6</div>
+      <div class="divider"></div>
+      <div class="distilled">
+        <span class="count">5 rules distilled</span>
+        <span class="rules">RULE-01 · 03 · 06 · 08 · 12</span>
+      </div>
+    </div>
+
+    <div class="tile s4">
+      <div class="author">Gopen &amp; Swan</div>
+      <div class="year">1990</div>
+      <div class="title">The Science of Scientific Writing</div>
+      <div class="venue">American Scientist</div>
+      <div class="ref">Vol. 78(6), pp. 550–558</div>
+      <div class="divider"></div>
+      <div class="distilled">
+        <span class="count">3 rules distilled</span>
+        <span class="rules">RULE-08 · 10 · 11</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    Each citation verified against the original work. Per-rule page references live in <code>RULES.md</code>.
+  </div>
+
+</div>
+</body>
+</html>
