@@ -45,7 +45,7 @@ A curated set of English writing rules formatted for AI coding and writing agent
 
 Two rule groups, both peer inputs for the agent:
 
-- **12 canonical rules (`RULE-01` through `RULE-12`):** distilled from Strunk & White, Orwell, Pinker, and Gopen & Swan. Each rule cites its source page-by-page, verified by the maintainer against the original works.
+- **12 canonical rules (`RULE-01` through `RULE-12`):** distilled from Strunk & White, Orwell, Pinker, and Gopen & Swan. Each rule cites its source by chapter, section, or essay rule, verified by the maintainer against the original works.
 - **9 field-observed rules (`RULE-A` through `RULE-I`):** structural patterns logged from LLM output across research papers, grant proposals, technical documentation, and agent configurations, 2022 to 2026. Covers bullet-point overuse, em-dash overuse, consecutive same-starts, overused transitions, paragraph-closing summaries, term consistency, sentence-case heading bias, citation discipline (RULE-H, critical — LLMs both default to handwavy claims and fabricate plausible-looking citations), and contraction register.
 
 Out of scope: fiction, poetry, marketing copy, design writing, long-form narrative nonfiction, non-English prose, any context where rhythm or affect matter more than precision.
@@ -54,7 +54,7 @@ Named in homage to Strunk & White's *The Elements of Style* (1918/1959), one of 
 
 ### Canonical Rules (RULE-01 through RULE-12)
 
-Sourced from writing authorities; each rule cites its source page-by-page.
+Sourced from writing authorities; each rule cites its source by chapter, section, or essay rule.
 
 | # | Rule | Primary source |
 | --- | --- | --- |
@@ -218,7 +218,7 @@ New contributions are welcome. A canonical-track rule must cite a source from th
 <summary><b>Canonical sources</b></summary>
 <br>
 
-Four writing authorities for prose content, plus two recent empirical papers for rule format and phrasing. Every one of the 12 canonical rules cites its source explicitly; **each citation is verified page-by-page by the maintainer against the original work, not scraped or summarized from search results.** When the final text disagrees with an authority, the disagreement is stated in the rule's rationale.
+Four writing authorities for prose content, plus two recent empirical papers for rule format and phrasing. Every one of the 12 canonical rules cites its source explicitly; **each citation is verified by the maintainer against the original work, not scraped or summarized from search results.** When the final text disagrees with an authority, the disagreement is stated in the rule's rationale.
 
 #### Writing Authorities (Prose Content)
 

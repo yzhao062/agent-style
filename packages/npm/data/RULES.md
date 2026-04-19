@@ -7,8 +7,8 @@
 For each rule, the Phase 1b draft provides:
 
 - metadata (source citation, agent-instruction evidence, severity, scope, enforcement tier)
-- directive (imperative sentence, negative for anti-patterns, positive for constructive placement)
-- BAD → GOOD examples (3-5 per rule, across paper / API / runbook / proposal / release-note contexts)
+- directive (command-form sentence, negative for anti-patterns, positive for constructive placement)
+- BAD → GOOD examples (5 or more per rule, with at least one non-paper context such as API docs, runbooks, proposals, release notes, postmortems, changelogs, or issue reports)
 - rationale for AI agent (why the rule matters for LLM output specifically)
 
 ## Severity Rubric
@@ -31,7 +31,7 @@ Rules are guides to clarity, not ends in themselves. When a rule fights the sent
 
 ### Audience and Reader State
 
-#### RULE-01: Do not assume the reader shares your tacit knowledge (resist the curse of knowledge)
+#### RULE-01: Do Not Assume the Reader Shares Your Tacit Knowledge (Resist the Curse of Knowledge)
 
 - **source**: Pinker 2014, Ch. 3 "The Curse of Knowledge" (the entire chapter is devoted to this failure mode).
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -69,7 +69,7 @@ LLMs absorb their training corpus at a near-expert register and reproduce that r
 
 ### Voice and Directness
 
-#### RULE-02: Do not use passive voice when the agent matters
+#### RULE-02: Do Not Use Passive Voice When the Agent Matters
 
 - **source**: Orwell 1946, "Politics and the English Language," Rule 3: *"Never use the passive where you can use the active."* Strunk & White §II.14 "Use the active voice."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -104,7 +104,7 @@ LLMs trained on formal technical prose (abstracts, RFCs, corporate documentation
 
 ### Word Choice
 
-#### RULE-03: Do not use abstract or general language when a concrete, specific term exists
+#### RULE-03: Do Not Use Abstract or General Language When a Concrete, Specific Term Exists
 
 - **source**: Strunk & White §II.16: *"Use definite, specific, concrete language."* Pinker 2014 Ch. 3 frames abstraction as a primary vector of the curse of knowledge (writer has the specifics; reader does not, and cannot resolve abstract pointers like "factors" or "aspects").
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -137,7 +137,7 @@ Do not use abstract nouns when concrete ones exist. "The system has performance 
 
 LLMs absorb abstract prose from grant abstracts, executive summaries, and position-paper genres where specifics are hidden for competitive or rhetorical reasons. The default output carries that register: "improvements across metrics", "multiple factors", "various considerations". A careful reader processes these phrases, notices nothing has been said, and discounts the rest of the document. The operational test before any factual-claim sentence: can I point at the exact number, file, commit, user action, or mechanism behind each phrase in this sentence? If not, the phrase is filler, and the LLM has hidden the absence of substance behind pleasant-sounding abstraction. Strunk & White §II.16 gives the rule; Pinker 2014 Ch. 3 identifies abstraction as one primary vector of the curse of knowledge (the writer knows the specifics, so "factors" reads as a pointer to them, but the reader has no pointer and cannot resolve it).
 
-#### RULE-04: Do not include needless words
+#### RULE-04: Do Not Include Needless Words
 
 - **source**: Strunk & White §II.17: *"Omit needless words. Vigorous writing is concise."* Orwell 1946 Rule 3: *"If it is possible to cut a word out, always cut it out."*
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; the filler-phrase deny list is our separate mechanical enforcement choice because these specific phrases are directly detectable without a parse. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -173,7 +173,7 @@ Do not stretch phrases. "In order to" is "to"; "due to the fact that" is "becaus
 
 LLM training rewards formal-sounding, hedge-laden completions because they sit closer to the modal output of the training corpus (press releases, whitepapers, academic abstracts, corporate documentation) than terse technical writing does. The specific filler phrases ("in order to", "due to the fact that", "it is important to note", "may potentially", "could possibly") are consensus cliché of that register. They lengthen sentences without carrying information. Human readers skim past them and infer the writer had little to say; downstream consumers (search indices, RAG pipelines, summarization chains) also suffer from the diluted signal-per-token ratio. The exact-phrase deny list is mechanically enforceable (Tier-1) because these phrases have no legitimate technical function: "in order to" is always replaceable by "to" with no loss of meaning, so denying the phrase outright has near-zero false-positive risk. Strunk & White §II.17 gives the principle; Orwell 1946 Rule 3 gives the cut-if-possible operational test.
 
-#### RULE-05: Do not use dying metaphors or prefabricated phrases
+#### RULE-05: Do Not Use Dying Metaphors or Prefabricated Phrases
 
 - **source**: Orwell 1946, "Politics and the English Language," Rule 1: *"Never use a metaphor, simile, or other figure of speech which you are used to seeing in print."*
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; the exact-phrase deny list is our separate mechanical enforcement choice because these phrases are directly detectable. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow.
@@ -209,7 +209,7 @@ Do not use metaphors, similes, or phrases you have seen often in print. When a p
 
 LLMs trained on web text — press releases, blog posts, grant introductions, paper abstracts, corporate marketing — disproportionately reproduce clichéd phrases from that corpus. Readers who have processed many such sources recognize "pushes the boundaries" and "paradigm shift" as filler and skip the sentence; the distinctiveness of AI-written prose suffers in direct proportion. Orwell 1946 Rule 1 names the failure mode directly, predating LLMs by eighty years. Zhang et al. 2026 give empirical support for phrasing this class of rule as a negative directive in coding-agent instruction files; the phrase-list deny is our separate mechanical enforcement choice, independent of the Zhang paper, motivated by the observation that these specific phrases are directly detectable without a parse. The LLM-specific corollary — which the six BAD/GOOD examples above illustrate — is that if you cannot quote a specific number, comparison, or mechanism in place of the cliché, the cliché was hiding the absence of substance. Deleting the cliché and finding you cannot replace it with specifics is itself useful information.
 
-#### RULE-06: Do not use avoidable jargon where an everyday English word exists
+#### RULE-06: Do Not Use Avoidable Jargon Where an Everyday English Word Exists
 
 - **source**: Orwell 1946, "Politics and the English Language," Rule 5: *"Never use a foreign phrase, a scientific word, or a jargon word if you can think of an everyday English equivalent."* Pinker 2014 Ch. 2 treats concrete everyday language as the classic-style baseline; specialized terms are reserved for when they carry distinct information.
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -247,7 +247,7 @@ LLMs reproduce the corporate-technical register disproportionately because it is
 
 ### Claims and Calibration
 
-#### RULE-07: Use affirmative form for affirmative claims ("trivial" instead of "not important")
+#### RULE-07: Use Affirmative Form for Affirmative Claims ("Trivial" Instead of "Not Important")
 
 - **source**: Strunk & White §II.15: *"Put statements in positive form."*
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; RULE-07 carries a positive directive because the target is a constructive placement (choose the affirmative word) rather than an anti-pattern to flag. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow.
@@ -283,7 +283,7 @@ Replace "not important" with "trivial"; "did not remember" with "forgot"; "did n
 
 Double-negation phrasing ("not insignificant", "not uncommon", "not unlike") pervades academic and journalistic prose, and LLMs absorb the pattern from training. The cognitive cost is real: the reader holds "not" in working memory, parses the negated adjective, then negates again to recover the intended meaning. For simple affirmative states, this is wasted work. The rule does not ban honest negation; when something is genuinely absent, "no X" or "not X" is correct. The rule bans avoidable compound negation where a positive-form word already names the state. A downstream concern for AI-generated prose: double-negation also defeats tone and sentiment detection in downstream tooling, so in contexts where the text feeds another model (summarization, classification, moderation), positive form is operationally safer.
 
-#### RULE-08: Do not linguistically overstate or understate claims relative to the evidence
+#### RULE-08: Do Not Linguistically Overstate or Understate Claims Relative to the Evidence
 
 - **source**: Pinker 2014 Ch. 6 (calibrated claims; hedge calibration treated as a skill with verbs matched to evidence strength). Gopen & Swan 1990 (scientific attribution: the source of a claim should be visible in the sentence, and the verb should match the evidence).
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -321,7 +321,7 @@ LLMs trained on mixed-register corpora (research abstracts, press releases, gran
 
 ### Sentence Structure
 
-#### RULE-09: Express coordinate ideas in similar form (parallel structure)
+#### RULE-09: Express Coordinate Ideas in Similar Form (Parallel Structure)
 
 - **source**: Strunk & White §II.19: *"Express coordinate ideas in similar form."*
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; RULE-09 carries a positive directive because parallel structure is a constructive placement (match the form across items) rather than an anti-pattern to flag. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow.
@@ -354,7 +354,7 @@ Write coordinate ideas in the same grammatical form. In a list of three items, i
 
 LLMs often produce lists where the first one or two items set a structure, then subsequent items drift because the model samples each next item conditional on the topic rather than on the established structure. The drift is subtle: a reader scans item 1, forms an expected shape for items 2 and 3, then hits a mismatch and backtracks. Simple cases are mechanically checkable (lists where item 1 starts with verb X should have items 2 and 3 starting with verbs of the same tense; lists of noun phrases should remain noun phrases), but the general case requires parse. The practical remedy for AI generation: when generating a list, first decide the structure (all verb phrases? all noun phrases? subject-verb-object?), then generate each item against that structure rather than sampling freely. Strunk & White §II.19 gives the rule and a diagnostic: read the list with "that" connecting items; if any item fails the read, parallelism is broken.
 
-#### RULE-10: Keep related words together
+#### RULE-10: Keep Related Words Together
 
 - **source**: Strunk & White §II.20: *"Keep related words together."* Gopen & Swan 1990 treat verb-subject proximity as a structural readability concern in scientific prose specifically (long subject-to-verb gaps are one of the most common causes of unreadable science writing).
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; RULE-10 carries a positive directive because the target is a constructive placement (keep X close to Y) rather than an anti-pattern to flag. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow.
@@ -387,7 +387,7 @@ Keep subject close to verb, verb close to object, and modifier close to modified
 
 LLMs generate text token-by-token conditional on prior context, which encourages completeness (every qualifier added inline) over readability (qualifiers deferred until the main clause lands). The result: sentences where the subject and verb are separated by 20+ words of parenthetical qualification. Readers experience this as working-memory overflow. By the time the verb arrives, the reader has lost the subject and must backtrack. The same logic applies to verb-object and modifier-modified pairs. Gopen & Swan 1990 frame long subject-to-verb gaps as one of the most common causes of unreadable scientific prose; Strunk & White §II.20 give the principle in general form. For AI generation specifically, the practical remedy is to split the sentence: the main claim lands in the first sentence, supporting qualifications follow in a second sentence.
 
-#### RULE-11: Place new or important information in the stress position at the end of the sentence
+#### RULE-11: Place New or Important Information in the Stress Position at the End of the Sentence
 
 - **source**: Gopen & Swan 1990, "The Science of Scientific Writing" (stress-position framing; empirical treatment of reader expectation for new information at sentence end).
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; RULE-11 carries a positive directive because stress-position placement is a constructive structural rule rather than an anti-pattern to flag. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow.
@@ -420,7 +420,7 @@ End sentences with the information you want the reader to remember. The beginnin
 
 Gopen & Swan 1990 show empirically (American Scientist study of sentence clarity) that readers unconsciously expect the stress position for new information. When a sentence front-loads the new information and tails off into background, readers experience the sentence as flat and re-read to recover the claim. LLMs often produce the BAD pattern because token-by-token generation rewards completing the sentence with whatever is most fluent, frequently a prepositional phrase that restates topic material already established rather than introducing new information. The operational rewrite: identify the sentence's key claim, then rebuild the sentence so that the claim lands at the end. For multi-sentence units (paragraphs), the same logic applies at the paragraph level: the opening sentence frames; the final sentence lands the main point; middle sentences support.
 
-#### RULE-12: Break long sentences; vary length (split sentences over 30 words)
+#### RULE-12: Break Long Sentences; Vary Length (Split Sentences over 30 Words)
 
 - **source**: Strunk & White §II.18 (arrangement of sentences; varied length across a paragraph). Pinker 2014 Ch. 4 (syntax and working-memory limits; long sentences with nested clauses tax the reader's parsing budget).
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; RULE-12 carries a positive directive because sentence-splitting and length-variation are constructive structural choices rather than anti-patterns to flag. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow.
@@ -459,7 +459,7 @@ The following nine rules (RULE-A through RULE-I) come from the maintainer's obse
 
 ### Observed LLM Patterns
 
-#### RULE-A: Do not convert prose into bullet points unless the content is a genuine list
+#### RULE-A: Do Not Convert Prose into Bullet Points Unless the Content Is a Genuine List
 
 - **source**: Maintainer observation of LLM output across research, proposal, documentation, and agent-configuration projects, 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Do not convert paragraphs into bullet points unless the user asks for that format."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -535,7 +535,7 @@ Keep prose in paragraphs when ideas connect by cause-and-effect, argument, or na
 
 LLMs default to bullets whenever they present multiple ideas because bullets read as structured and signal "I am being organized." But bullets fragment reasoning: each bullet becomes an isolated shard, the connective tissue (because, therefore, however) disappears, and the reader reconstructs the argument from the shards. The specific 3-item triad is especially common; LLMs have learned that "first, second, third" structures feel balanced and complete, so they produce them even when the underlying content is two items or a flowing sentence. The fix: use bullets only when items are genuinely independent enumerations; use prose when ideas connect. The test sentence after drafting any list: can this become prose without loss? If yes, it probably should.
 
-#### RULE-B: Do not use em or en dashes as casual sentence punctuation
+#### RULE-B: Do Not Use Em or En Dashes as Casual Sentence Punctuation
 
 - **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Avoid heavy dash use. Do not use em dashes or en dashes as casual sentence punctuation. Prefer commas, semicolons, colons, or parentheses instead."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; the dash-as-punctuation regex flag is our separate mechanical enforcement choice (Zhang does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -568,7 +568,7 @@ Do not use em dashes or en dashes as casual sentence punctuation. Prefer commas 
 
 LLMs absorb the em dash as a favored connector from long-form journalism and essay prose (the register of magazine essays and essay-heavy blogs), where it carries rhythm and emphasis. In dense technical prose, every em dash is a pause the reader must hold in working memory while the parenthetical completes; two em dashes per sentence approach the working-memory ceiling for most readers. The recent public awareness of em dash overuse as an AI-tell is partly because LLMs produce them at several times the rate of skilled human technical writers, producing a cadence human readers recognize as AI-paced. Commas, semicolons, colons, and parentheses each carry a clearer semantic signal (list-separator, independent-clause break, expansion, aside); replacing em dashes with the punctuation that actually matches the relationship makes the sentence's logical structure explicit rather than rhythm-dependent. Normal hyphenation in compound words and technical terms remains correct; the rule targets dashes acting as punctuation, not hyphens joining words.
 
-#### RULE-C: Do not start consecutive sentences with the same word or phrase
+#### RULE-C: Do Not Start Consecutive Sentences with the Same Word or Phrase
 
 - **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Prefer not to start several consecutive sentences with the same word or phrase."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -601,7 +601,7 @@ Do not open two or more consecutive sentences with the same word. The pattern si
 
 LLMs producing text token-by-token often lock into a successful opener and repeat it. Once `The method ...` works, the next-token distribution for the following sentence frequently starts with `The method ...` again because the prefix has become conditionally likely given the topic. The result: paragraphs with three or four identically-opened sentences. Human readers read these as template-filled rather than argued; even when the content is correct, the form signals a machine pattern. The fix at generation time: after a sentence is drafted, the next sentence's opener should vary, either by moving the new information to the subject position, combining the two sentences, or using a connective. This rule interacts with RULE-12 (sentence length variation); both aim at paragraph-level rhythm.
 
-#### RULE-D: Do not overuse transition words ("Additionally", "Furthermore", "Moreover")
+#### RULE-D: Do Not Overuse Transition Words ("Additionally", "Furthermore", "Moreover")
 
 - **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Avoid overusing transition words like 'Additionally' or 'Furthermore.'"
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -634,7 +634,7 @@ Do not open sentences with "Additionally", "Furthermore", "Moreover", "In additi
 
 LLM training on formal essay corpora (academic prose, Wikipedia, editorial writing) over-represents explicit transitions. "Additionally", "Furthermore", "Moreover" appear at higher frequency in LLM output than in skilled technical prose, producing the distinctive sentence-initial cadence AI-generated text is recognized by. The fix: connective tissue should usually be implicit (the next sentence is obviously an addition because of its content) rather than marked. Explicit transitions remain legitimate where the logical move is non-obvious, or where a paragraph-level contrast needs flagging for the reader. Related: RULE-04 catches word-level filler phrases ("in order to", "due to the fact that"); RULE-D catches the specific sentence-initial transition pattern that RULE-04's phrase list does not target. Both rules cut needless words; they target different positions in the sentence.
 
-#### RULE-E: Do not close every paragraph with a summary sentence
+#### RULE-E: Do Not Close Every Paragraph with a Summary Sentence
 
 - **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Not every paragraph needs a tidy summary sentence at the end."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -667,9 +667,9 @@ Do not end every paragraph with a sentence that restates the paragraph's point (
 
 LLMs often add paragraph-closing summaries because academic and expository corpora include "topic sentence + body + summary sentence" structures prominently. The closer signals "I am finishing this thought" but adds no new information. Technical readers who skim skip the closer anyway (they read the topic sentence and the first specific claim); careful readers feel the redundancy as padding. Related: RULE-04 catches word-level filler phrases; RULE-E catches the paragraph-level padding pattern that RULE-04's word-level deny list does not reach. Both rules cut needless content; they operate at different structural levels (word versus paragraph).
 
-#### RULE-F: Use consistent terms; do not redefine abbreviations mid-document
+#### RULE-F: Use Consistent Terms; Do Not Redefine Abbreviations Mid-Document
 
-- **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Writing Defaults: "Use consistent terms. If an abbreviation is defined once, do not define it again later." Gopen & Swan 1990 discuss lexical cohesion in scientific writing (same term, same referent across sentences) as a structural readability concern.
+- **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Writing Defaults: "Use consistent terms. If an abbreviation is defined once, do not define it again later."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: medium. Recurring clarity failure in long documents; varied terms force the reader to check whether each new term refers to the same concept or a new one.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
@@ -700,7 +700,7 @@ Once you introduce a term or abbreviation, keep using it. Do not alternate "larg
 
 LLMs often vary terminology within a document because variety is mildly rewarded in the training distribution (reviewers and editors mark repetitive vocabulary as prose to be varied, and LLMs learn to alternate). But in technical writing, variety across terminology for the same entity masks the entity's identity and forces the reader to check whether each new term refers to the same concept. RULE-01 covers the first-use introduction of terms; RULE-F covers keeping them consistent thereafter. Gopen & Swan 1990 discuss this under "topic continuity", where subjects and entities should reappear as the same linguistic form across sentences. For documents produced in multi-turn generation, the risk is especially high because the model samples each new paragraph without guaranteed visibility into earlier-introduced terms, leading to drift. The fix at generation time: after defining a term, the agent should maintain a running glossary for the document and re-use the defined form consistently.
 
-#### RULE-G: Use title case for section and subsection headings
+#### RULE-G: Use Title Case for Section and Subsection Headings
 
 - **source**: Maintainer observation of LLM output 2022 to 2026. LLMs default to sentence case for Markdown and LaTeX headings; in academic and engineering contexts that call for title case, the sentence-case drift is a visible AI-tell.
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; RULE-G uses a positive directive because applying title case is a constructive placement rather than an anti-pattern to flag. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -733,7 +733,7 @@ Capitalize the first word, the last word, and all major words (nouns, verbs, adj
 
 LLMs default to sentence case for Markdown and LaTeX headings because their training data includes a substantial amount of modern blog and docs-site Markdown where sentence case is the convention (large platform developer documentation and docs-site prose). But academic and engineering venues (most conferences, most IEEE and ACM journals, most research groups' README conventions) use title case. A document with sentence-case headings inside a title-case context reads as machine-generated or unedited. The fix is mechanical: apply title case at heading write time. This rule is low-severity in terms of comprehension (readers recover meaning regardless) but high-visibility in terms of AI-tell detection, because headings are the first thing a skimmer sees, and miscased headings signal inattention.
 
-#### RULE-H: Support factual claims with citation or concrete evidence; do not be handwavy
+#### RULE-H: Support Factual Claims with Citation or Concrete Evidence; Do Not Be Handwavy
 
 - **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Writing Defaults: "If citing papers, verify that they exist." This rule is the flagship of the three-rule cluster against handwavy prose (RULE-03 on vague nouns, RULE-08 on uncalibrated verbs, RULE-H on unsupported claims).
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
@@ -769,7 +769,7 @@ When a sentence asserts a factual claim that warrants attribution (empirical res
 
 LLMs produce handwavy, citation-free claims as a default register absorbed from formulaic abstract and review prose in the training corpus. Phrases like "prior work shows", "recent studies suggest", "it is well known that", "many researchers believe" appear at high frequency in academic introductions and review articles, where they serve as transition filler between specific claims. LLMs sample them at comparable rates without carrying the specific attributions that human authors have in mind when writing them. Additionally, LLMs hallucinate citations that look plausible (matching author conventions, year ranges, venue patterns) but point to non-existent papers; the hallucination rate is well-documented across domains. Both failures compound: an uncited claim is unverifiable, and a fabricated citation is worse than no citation because it damages reader trust permanently once discovered. The operational test before writing any factual-claim sentence: is there a specific, verifiable source, observation, or number behind this? If yes, state it by author and year, or by dataset and measurement. If no, either find the source before writing, or rewrite the sentence as a claim about the author's own experience (which must still be concrete: numbers, dataset, conditions). For LLMs specifically: never generate a citation without first verifying via DBLP, arXiv, Google Scholar, or the cited paper's own bibliography. If verification is not possible in the current session, mark `[UNVERIFIED]` and flag for review. Related: RULE-03 fights vague nouns; RULE-08 fights uncalibrated verbs; RULE-H fights unsupported claims. All three aim at specific, verifiable, honest prose; a single sloppy sentence often fires all three rules simultaneously.
 
-#### RULE-I: Prefer full forms over contractions in technical prose
+#### RULE-I: Prefer Full Forms over Contractions in Technical Prose
 
 - **source**: Maintainer observation of LLM output 2022 to 2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Prefer full forms such as 'it is' and 'he would' rather than contractions."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; RULE-I uses a positive directive because preferring full forms is a constructive placement rather than an anti-pattern to flag. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
