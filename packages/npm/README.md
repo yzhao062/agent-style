@@ -9,7 +9,7 @@ Install:
 ```bash
 npm install -g agent-style
 # or run without installing:
-npx --yes agent-style@0.1.1 <subcommand>
+npx --yes agent-style@0.2.0 <subcommand>
 ```
 
 Basic use:
@@ -28,12 +28,12 @@ Programmatic use from Node:
 
 ```js
 const agentStyle = require('agent-style');
-console.log(agentStyle.version);                       // 0.1.1
+console.log(agentStyle.version);                       // 0.2.0
 console.log(agentStyle.listTools());
 agentStyle.enable('claude-code', { dryRun: true });
 ```
 
-Supported tools and install modes in v0.1.1:
+Supported tools and install modes in v0.2.0:
 
 | Tool | Install mode |
 | --- | --- |

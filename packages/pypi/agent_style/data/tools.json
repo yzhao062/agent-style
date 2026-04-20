@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "agent_style_version": "0.1.1",
+  "agent_style_version": "0.2.0",
   "tools": {
     "claude-code": {
       "install_mode": "import-marker",
@@ -51,6 +51,22 @@
       "adapter_source": "agents/aider-conventions.md",
       "load_class": "multi-file-required",
       "second_file_snippet": "read:\n  - .agent-style/aider-conventions.md\n  - .agent-style/RULES.md\n"
+    },
+    "style-review": {
+      "install_mode": "skill-with-references",
+      "skill_source": "skills/style-review/SKILL.md",
+      "references_source": "skills/style-review/references/",
+      "target_groups": [
+        {
+          "target_path": ".claude/skills/style-review/SKILL.md",
+          "surfaces": ["claude-code", "anthropic-skill"]
+        },
+        {
+          "target_path": ".agent-style/skills/style-review/references/",
+          "surfaces": ["claude-code", "anthropic-skill"]
+        }
+      ],
+      "manual_step_message": "style-review is not installed for {tool} (no skill support); use `agent-style review <file>` from the CLI to review prose manually."
     }
   }
 }

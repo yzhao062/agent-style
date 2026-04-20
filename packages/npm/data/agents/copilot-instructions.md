@@ -3,13 +3,13 @@
 <!-- Target path: <repo root>/.github/copilot-instructions.md -->
 <!-- Load class: single-file; install_mode: append-block -->
 
-# agent-style v0.1.1 — GitHub Copilot repo-wide adapter
+# agent-style v0.2.0 — GitHub Copilot repo-wide adapter
 
 agent-style is a literature-backed English technical-prose writing ruleset for AI agents. This adapter is appended to your existing `.github/copilot-instructions.md` inside a marker block so that future agent-style updates replace only the marker region and leave your other repo-level instructions intact. For a path-scoped variant (only attaches to prose files), use `agents/copilot-path-instructions.md` instead.
 
 ## Self-Verification Handshake
 
-When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.1.1 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
+When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.2.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
 
 ## Load Statement
 
@@ -50,4 +50,4 @@ Field-observed rules (maintainer observation of LLM output, 2022-2026):
 
 ## Full Rule Bodies (Canonical)
 
-Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.1.1/RULES.md for the pinned canonical source.
+Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.2.0/RULES.md for the pinned canonical source.

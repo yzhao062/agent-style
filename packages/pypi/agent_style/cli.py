@@ -16,12 +16,19 @@ Global:
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from typing import Any
 
 from agent_style import __version__
 from agent_style.installer import enable, disable, canonical_json
 from agent_style.registry import Registry, RegistryError
+from agent_style.review import (
+    audit as review_audit,
+    compare as review_compare,
+    RulesLoadError,
+)
+from agent_style.review.polish import PolishNotAvailableError, check_host_and_raise
 
 
 def _print_json_result(result: dict[str, Any]) -> None:
@@ -72,7 +79,13 @@ def _cmd_path(args: argparse.Namespace, registry: Registry) -> int:
 
 def _cmd_list_tools(args: argparse.Namespace, registry: Registry) -> int:
     for name, spec in registry.tools.items():
-        print(f"{name:18}  {spec['install_mode']:22}  {spec['target_path']}")
+        mode = spec["install_mode"]
+        if mode == "skill-with-references":
+            # Summarize target_groups[*].target_path joined by " + ".
+            paths = " + ".join(g["target_path"] for g in spec.get("target_groups", []))
+            print(f"{name:18}  {mode:22}  {paths}")
+        else:
+            print(f"{name:18}  {mode:22}  {spec['target_path']}")
     return 0
 
 
@@ -95,6 +108,153 @@ def _cmd_enable(args: argparse.Namespace, registry: Registry) -> int:
     return 0
 
 
+def _cmd_review(args: argparse.Namespace, registry: Registry) -> int:
+    """Review one or two Markdown files against agent-style's rules."""
+    # Polish path short-circuits outside a skill host.
+    if args.polish:
+        try:
+            check_host_and_raise()
+        except PolishNotAvailableError as exc:
+            sys.stderr.write(f"error: {exc}\n")
+            return 2
+
+    files = list(args.files or [])
+    if args.compare is not None:
+        # --compare A B: two-file delta. Ignore positional `files` if --compare given.
+        a, b = args.compare
+        try:
+            result = review_compare(
+                a, b,
+                mechanical_only=args.mechanical_only,
+                skill_host=False,
+            )
+        except (RulesLoadError, FileNotFoundError) as exc:
+            sys.stderr.write(f"error: {exc}\n")
+            return 2
+        payload = _compare_to_dict(result)
+        _print_review_json(payload)
+        return 0
+
+    if not files:
+        sys.stderr.write("error: review requires a FILE argument (or --compare A B)\n")
+        return 2
+    if len(files) > 1:
+        sys.stderr.write(
+            f"error: review takes 1 file argument; got {len(files)}. "
+            "For A/B compare, use --compare A B.\n"
+        )
+        return 2
+
+    file_path = files[0]
+    try:
+        result = review_audit(
+            file_path,
+            mechanical_only=args.mechanical_only,
+            audit_only=args.audit_only,
+            skill_host=False,
+        )
+    except (RulesLoadError, FileNotFoundError) as exc:
+        sys.stderr.write(f"error: {exc}\n")
+        return 2
+
+    payload = _audit_to_dict(result)
+    if args.json or args.audit_only or args.mechanical_only:
+        # All machine-readable paths emit canonical JSON.
+        _print_review_json(payload)
+    else:
+        _print_audit_human(payload)
+    return 0
+
+
+def _audit_to_dict(result) -> dict[str, Any]:
+    """Serialize AuditResult to a canonical-JSON-compatible dict.
+
+    rules_path is intentionally excluded: it carries the absolute filesystem
+    path of the resolved RULES.md, which differs between pip and npm installs
+    and would break --cli-parity byte identity. rules_source is included (both
+    ecosystems emit "package-bundle" when loading from their own bundle).
+    """
+    return {
+        "command": "review",
+        "file": _as_posix(result.file),
+        "rules_source": result.rules_source,
+        "total_violations": result.total_violations,
+        "rule_results": [
+            {
+                "rule": rr.rule,
+                "severity": rr.severity,
+                "detector": rr.detector,
+                "status": rr.status,
+                "count": rr.count,
+                "note": rr.note,
+                "violations": [
+                    {
+                        "line": v.line,
+                        "column": v.column,
+                        "excerpt": v.excerpt,
+                        "detail": v.detail,
+                    }
+                    for v in rr.violations
+                ],
+            }
+            for rr in result.rule_results
+        ],
+    }
+
+
+def _compare_to_dict(result) -> dict[str, Any]:
+    """Serialize CompareResult to a canonical-JSON-compatible dict.
+
+    rules_path is intentionally excluded (see _audit_to_dict for rationale).
+    """
+    return {
+        "command": "review-compare",
+        "file_a": _as_posix(result.file_a),
+        "file_b": _as_posix(result.file_b),
+        "rules_source": result.rules_source,
+        "total_a": result.total_a,
+        "total_b": result.total_b,
+        "per_rule_delta": {
+            rule_id: {"a": v["a"], "b": v["b"], "delta": v["delta"]}
+            for rule_id, v in result.per_rule_delta.items()
+        },
+    }
+
+
+def _print_review_json(payload: dict[str, Any]) -> None:
+    """Print review JSON without the enable/disable-style `actions` injection."""
+    sys.stdout.write(json.dumps(payload, sort_keys=True, ensure_ascii=False, indent=2))
+    sys.stdout.write("\n")
+
+
+def _as_posix(path: str) -> str:
+    """POSIX-relative path for canonical JSON (matches existing contract)."""
+    if path is None:
+        return None
+    # Strip leading ./ and normalize separators.
+    p = str(path).replace("\\", "/")
+    if p.startswith("./"):
+        p = p[2:]
+    return p
+
+
+def _print_audit_human(payload: dict[str, Any]) -> None:
+    """Human-readable audit output to stdout."""
+    f = payload["file"]
+    total = payload["total_violations"]
+    sys.stdout.write(f"agent-style review {f}: {total} violation(s)\n")
+    for rr in payload["rule_results"]:
+        if rr["status"] == "violation":
+            sys.stdout.write(
+                f"  {rr['rule']} [{rr['severity']}, {rr['detector']}]: {rr['count']}\n"
+            )
+            for v in rr["violations"][:5]:
+                sys.stdout.write(f"    L{v['line']}:C{v['column']}  {v['detail']}\n")
+    skipped = [rr for rr in payload["rule_results"] if rr["status"] == "skipped"]
+    if skipped:
+        sys.stdout.write(f"  ({len(skipped)} rule(s) skipped; run via a skill host for semantic coverage)\n")
+
+
 def _cmd_disable(args: argparse.Namespace, registry: Registry) -> int:
     try:
         result = disable(args.tool, registry, project_root=".", dry_run=args.dry_run)
@@ -105,6 +265,15 @@ def _cmd_disable(args: argparse.Namespace, registry: Registry) -> int:
         _print_json_result(result)
     else:
         _print_human_result(result, "disable")
+        # Surface the fail-closed message (drifted files or missing manifest with targets).
+        msg = result.get("message")
+        if msg:
+            sys.stderr.write(f"error: {msg}\n")
+    # If the installer refused to disable (fail-closed on drift or missing-manifest-with-targets),
+    # `enabled: True` remains in the result. Propagate that as a non-zero exit so shell callers
+    # and CI pipelines see the partial state.
+    if result.get("enabled") is True:
+        return 2
     return 0
 
 
@@ -148,6 +317,53 @@ def build_parser() -> argparse.ArgumentParser:
             action="store_true",
             help="Emit canonical JSON output (sorted keys, LF, POSIX paths).",
         )
+
+    # review subcommand
+    rp = sub.add_parser(
+        "review",
+        help=(
+            "Review one or two Markdown files against agent-style's rules. "
+            "Deterministic (mechanical + structural) from the plain CLI; "
+            "semantic rules need a skill host (Claude Code or Anthropic Skills)."
+        ),
+    )
+    rp.add_argument(
+        "files",
+        nargs="*",
+        help="File(s) to review. One file = audit; use --compare for two-file delta.",
+    )
+    rp.add_argument(
+        "--audit-only",
+        action="store_true",
+        help="Deterministic audit; semantic rules reported as 'skipped'. Emits JSON.",
+    )
+    rp.add_argument(
+        "--mechanical-only",
+        action="store_true",
+        help=(
+            "Strictest deterministic subset: mechanical detectors only. "
+            "Used by `verify-install.sh --cli-parity` as the byte-identity oracle."
+        ),
+    )
+    rp.add_argument(
+        "--compare",
+        nargs=2,
+        metavar=("A", "B"),
+        help="A/B compare: audit two files, report per-rule delta. No polish, no ask.",
+    )
+    rp.add_argument(
+        "--polish",
+        action="store_true",
+        help=(
+            "Produce a revised draft alongside the original. "
+            "Requires a skill host (Claude Code or Anthropic Skills); errors from the plain CLI."
+        ),
+    )
+    rp.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit canonical JSON output (implied by --audit-only and --mechanical-only).",
+    )
     return parser
 
 
@@ -165,6 +381,7 @@ def main(argv: list[str] | None = None) -> int:
         "list-tools": _cmd_list_tools,
         "enable": _cmd_enable,
         "disable": _cmd_disable,
+        "review": _cmd_review,
     }
     return dispatch[args.command](args, registry)
 

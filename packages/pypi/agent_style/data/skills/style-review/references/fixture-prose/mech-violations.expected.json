@@ -1,0 +1,18 @@
+{
+  "fixture": "mech-violations.md",
+  "purpose": "Exercises every mechanical detector. Dense jargon + clichés + one long sentence + one em-dash + three contractions + one transition opener.",
+  "total_violations": 22,
+  "per_rule_count": {
+    "RULE-05": 6,
+    "RULE-06": 10,
+    "RULE-12": 1,
+    "RULE-B": 1,
+    "RULE-D": 1,
+    "RULE-I": 3
+  },
+  "expected_skipped_rules": [
+    "RULE-01", "RULE-02", "RULE-03", "RULE-04", "RULE-07",
+    "RULE-08", "RULE-09", "RULE-10", "RULE-11",
+    "RULE-F", "RULE-H"
+  ]
+}

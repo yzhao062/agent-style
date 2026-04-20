@@ -167,11 +167,67 @@ mode_cli_parity() {
     done
   done
 
+  # --- review subcommand parity (deterministic --mechanical-only only) ---
+  # The plain CLI's review subcommand is deterministic when --mechanical-only is
+  # set: structural and semantic detectors both return status "skipped" from the
+  # plain CLI. We parity-check on a short fixture prose blob that has known
+  # violations the mechanical detectors will find.
+  local review_fixture_a="$scratch/review-fixture-a.md"
+  local review_fixture_b="$scratch/review-fixture-b.md"
+  cat > "$review_fixture_a" <<'FIXTURE_A'
+This PR introduces a novel optimization that leverages cutting-edge caching.
+
+Additionally, it facilitates future scalability. Additionally, sessions become more robust.
+
+Overall, these changes represent a significant step forward.
+FIXTURE_A
+  cat > "$review_fixture_b" <<'FIXTURE_B'
+Switch session caching from in-memory LRU to Redis with a 5-minute TTL.
+
+Trade-off: a Redis outage logs all users out.
+FIXTURE_B
+
+  local review_py_scratch="$scratch/py-scratch-review"
+  local review_node_scratch="$scratch/node-scratch-review"
+  mkdir -p "$review_py_scratch" "$review_node_scratch"
+
+  # review --mechanical-only (single file)
+  ( cd "$review_py_scratch" && PYTHONPATH="${pypi_dir_native}${pythonpath_sep}${PYTHONPATH:-}" \
+      "$python_bin" -m agent_style.cli review --mechanical-only "$review_fixture_a" ) \
+    > "$py_out_dir/review-mech.json" 2> "$py_out_dir/review-mech.err" || true
+  ( cd "$review_node_scratch" && node "$NPM_DIR/bin/agent-style.js" review --mechanical-only "$review_fixture_a" ) \
+    > "$node_out_dir/review-mech.json" 2> "$node_out_dir/review-mech.err" || true
+  tr -d '\r' < "$py_out_dir/review-mech.json" > "$py_out_dir/review-mech.norm"
+  tr -d '\r' < "$node_out_dir/review-mech.json" > "$node_out_dir/review-mech.norm"
+  if ! diff -q "$py_out_dir/review-mech.norm" "$node_out_dir/review-mech.norm" >/dev/null; then
+    echo "FAIL: JSON parity mismatch for review --mechanical-only" >&2
+    diff "$py_out_dir/review-mech.norm" "$node_out_dir/review-mech.norm" | head -40 >&2
+    failed=1
+  else
+    echo "  ok: review --mechanical-only"
+  fi
+
+  # review --mechanical-only --compare A B
+  ( cd "$review_py_scratch" && PYTHONPATH="${pypi_dir_native}${pythonpath_sep}${PYTHONPATH:-}" \
+      "$python_bin" -m agent_style.cli review --mechanical-only --compare "$review_fixture_a" "$review_fixture_b" ) \
+    > "$py_out_dir/review-cmp.json" 2> "$py_out_dir/review-cmp.err" || true
+  ( cd "$review_node_scratch" && node "$NPM_DIR/bin/agent-style.js" review --mechanical-only --compare "$review_fixture_a" "$review_fixture_b" ) \
+    > "$node_out_dir/review-cmp.json" 2> "$node_out_dir/review-cmp.err" || true
+  tr -d '\r' < "$py_out_dir/review-cmp.json" > "$py_out_dir/review-cmp.norm"
+  tr -d '\r' < "$node_out_dir/review-cmp.json" > "$node_out_dir/review-cmp.norm"
+  if ! diff -q "$py_out_dir/review-cmp.norm" "$node_out_dir/review-cmp.norm" >/dev/null; then
+    echo "FAIL: JSON parity mismatch for review --mechanical-only --compare" >&2
+    diff "$py_out_dir/review-cmp.norm" "$node_out_dir/review-cmp.norm" | head -40 >&2
+    failed=1
+  else
+    echo "  ok: review --mechanical-only --compare"
+  fi
+
   if (( failed )); then
     echo "FAIL: one or more JSON parity diffs; see above" >&2
     exit 1
   fi
-  echo "PASS: CLI parity check (5 tools × 2 subcommands = 10 JSON diffs)"
+  echo "PASS: CLI parity check (5 tools × 2 subcommands + 2 review = 12 JSON diffs)"
 }
 
 mode_default() {

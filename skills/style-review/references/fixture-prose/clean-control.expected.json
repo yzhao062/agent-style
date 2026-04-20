@@ -1,0 +1,11 @@
+{
+  "fixture": "clean-control.md",
+  "purpose": "Well-written prose with concrete claims, numbers, and explicit trade-offs. Should produce zero violations across all deterministic detectors. Regression guard against false positives.",
+  "total_violations": 0,
+  "per_rule_count": {},
+  "expected_skipped_rules": [
+    "RULE-01", "RULE-02", "RULE-03", "RULE-04", "RULE-07",
+    "RULE-08", "RULE-09", "RULE-10", "RULE-11",
+    "RULE-F", "RULE-H"
+  ]
+}

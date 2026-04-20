@@ -1,0 +1,16 @@
+{
+  "fixture": "struct-violations.md",
+  "purpose": "Exercises structural detectors: consecutive same-starts (RULE-C), 2-item bullet list (RULE-A), and an 'In conclusion' closer (RULE-E). Also triggers RULE-05 because the closer sentence contains 'significant step forward'.",
+  "total_violations": 5,
+  "per_rule_count": {
+    "RULE-05": 1,
+    "RULE-A": 1,
+    "RULE-C": 2,
+    "RULE-E": 1
+  },
+  "expected_skipped_rules": [
+    "RULE-01", "RULE-02", "RULE-03", "RULE-04", "RULE-07",
+    "RULE-08", "RULE-09", "RULE-10", "RULE-11",
+    "RULE-F", "RULE-H"
+  ]
+}

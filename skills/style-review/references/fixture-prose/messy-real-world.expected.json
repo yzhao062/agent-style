@@ -1,0 +1,19 @@
+{
+  "fixture": "messy-real-world.md",
+  "purpose": "Full Markdown document with frontmatter, headings, a table, a fenced Python code block (containing the word 'leverages', which must NOT fire RULE-06 because fence masking is correct), and two prose paragraphs. One em-dash in prose (RULE-B) and one run of three consecutive 'Stage' sentence starts (RULE-C). Regression guard for fence/table/frontmatter handling.",
+  "total_violations": 2,
+  "per_rule_count": {
+    "RULE-B": 1,
+    "RULE-C": 1
+  },
+  "expected_skipped_rules": [
+    "RULE-01", "RULE-02", "RULE-03", "RULE-04", "RULE-07",
+    "RULE-08", "RULE-09", "RULE-10", "RULE-11",
+    "RULE-F", "RULE-H"
+  ],
+  "regression_notes": [
+    "Word 'leverages' inside the fenced Python block must NOT trigger RULE-06.",
+    "Frontmatter YAML must NOT trigger RULE-G heading-case or RULE-12 sentence-length.",
+    "Table cells must NOT trigger any mechanical detector."
+  ]
+}

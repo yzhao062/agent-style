@@ -10,6 +10,60 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 *No unreleased changes queued.*
 
+## [0.2.0] — 2026-04-20
+
+### Added
+
+- **`style-review` skill: second-pass review loop** complementing the generation-time ruleset. The existing `enable <tool>` adapters remain soft enforcement (the model sees the rules and is asked to follow them, but can ignore them). The new skill is the opt-in post-hoc pass: the user asks for it explicitly, the skill audits the prose against the same 21 rules, and on confirmation produces a revised draft at `FILE.reviewed.md` without touching the source. Designed around the observation that prompt-loaded rules nudge the model but cannot override training-prior token distributions, and that adding more examples has diminishing returns — the complement is a review loop the user invokes after the first draft is written.
+
+- **`agent-style review <file>` CLI subcommand** in both the pip and npm packages. Deterministic mechanical + structural detection from the plain CLI (works in any pip / npm / curl / clone context). Flags:
+  - `--audit-only`: emit canonical JSON with per-rule violation counts and excerpts; no polish, no ask.
+  - `--mechanical-only`: strictest deterministic subset; used by `scripts/verify-install.sh --cli-parity` as the byte-identity oracle.
+  - `--compare A B`: A/B audit with per-rule delta (used for benchmarking).
+  - `--polish`: requires a skill host (Claude Code / Anthropic Skills); errors with an actionable message from the plain CLI.
+  - No new runtime dependencies in either ecosystem. Semantic rules (RULE-01, 03, 04, 08, 11, F, H) emit `status: "skipped"` from the plain CLI and are handled by the skill host.
+
+- **Ten deterministic detectors** covering the mechanical + structural subset of the 21-rule matrix:
+  - Mechanical: RULE-B (em/en-dash casual use), RULE-D (transition openers `Additionally` / `Furthermore` / `Moreover` / `In addition`), RULE-G (heading title case per RULE-G's own convention), RULE-I (contractions in formal prose), RULE-12 (sentences >30 words), RULE-05 (cliché phrase list from Orwell 1946 + RULES.md BAD examples), RULE-06 (45-word banned AI-tell list + Orwell Rule 5 jargon).
+  - Structural: RULE-A (bullet overuse: ≤2 items or all items ≤8 words), RULE-C (≥2 of 3 consecutive sentences share opening token), RULE-E (paragraph closers restating the topic).
+  - RULE-02, 07, 09, 10 structural detectors stubbed as skipped in v0.2.0 (deferred to v0.3.0).
+
+- **New `skill-with-references` install mode** in `tools.json`. `agent-style enable style-review` auto-detects which skill-capable surfaces are active in the project (Claude Code, Anthropic Skills, detected via existing `.agent-style/` or `.claude/skills/` files) and writes `SKILL.md` + `references/*` for each, deduplicated by target path. For tools without a skills directory (Codex, Copilot, Aider, Cursor), it prints a manual-step message pointing at the CLI fallback. No-surface case exits with `enabled: false, manual_step_required: true` and a message. Backward-compatible schema extension (`schema_version` stays at 1).
+
+- **Manifest-based safe disable**. `agent-style enable style-review` writes `.agent-style/skills/style-review/manifest.json` listing every path + sha256 it created. `disable` reads the manifest and removes only files whose current hash still matches; user-edited files are skipped and reported as `drifted`; empty directories are cleaned up; non-empty directories are left in place with a report. No blind recursive deletes.
+
+- **Bundled skill definition** at `skills/style-review/` (synced into both `packages/pypi/agent_style/data/skills/style-review/` and `packages/npm/data/skills/style-review/`):
+  - `SKILL.md` with invocation contract, workflow, polish invariants, and self-verification probe.
+  - `references/rule-detectors.md` — full 21-row detector matrix (bucket, approach, threshold, fixture).
+  - `references/revision-prompt.md` — polish-pass template with hard no-new-facts invariants (no metrics / citations / links / code behavior not in source; preserve Markdown structure; preserve meaning; preserve length budget).
+  - `references/fixture-prose/` — 5 fixtures (`mech-violations.md`, `struct-violations.md`, `mixed.md`, `messy-real-world.md`, `clean-control.md`) each with `*.expected.json` documenting per-rule violation counts. Fixtures drive the unit-test suite in both ecosystems.
+
+- **Unit tests** (new):
+  - Python: `packages/pypi/tests/test_review_fixtures.py` — 9 tests covering every fixture, plus regression guards (clean-control produces zero; fenced `leverages` not flagged; semantic-skipped contract; mechanical-only purity).
+  - Node: `packages/npm/test/review.test.js` — same 9 tests using `node --test` (stdlib; zero new deps). Fixtures and expected counts are byte-for-byte identical between Python and Node.
+
+- **Sanity benchmark** (Phase 3 from PLAN):
+  - `scripts/bench/tasks.md`: 10 concrete prose tasks (5 PR descriptions, 3 design-doc sections, 2 commit messages).
+  - `scripts/bench/run.sh`: bash runner that generates baseline vs treatment drafts via `claude -p`, scores each with `agent-style review --mechanical-only --audit-only`, and emits a Markdown scorecard at `docs/bench-<version>.md`.
+  - `.github/workflows/bench.yml`: `workflow_dispatch` CI job that runs the bench against the live Anthropic API, uploads the scorecard as an artifact. Explicitly workflow-dispatch only (no per-push firing) to keep API cost predictable (~$0.40–$0.80 per run).
+  - `docs/bench-0.2.0.md`: placeholder committed alongside this release; populated after the first workflow dispatch post-release. Explicitly framed as a sanity signal, not a ship gate.
+
+- **Schema extension** in `tools.json`:
+  - New `install_mode` value `skill-with-references` with mode-specific required fields (`skill_source`, `references_source`, `target_groups`, `manual_step_message`) and mode-specific forbidden fields (`target_path`, `adapter_source`, `load_class`). The validator in `registry.py` / `registry.js` rejects mixed-mode entries; existing 5-mode entries continue to validate as before. `schema_version` remains 1 (backward-compatible additions only).
+
+- **`list-tools` output** now handles mode-specific entries by summarizing `target_groups[*].target_path` joined by ` + ` for `skill-with-references`, without depending on the forbidden legacy fields.
+
+- **`scripts/verify-install.sh --cli-parity` extended to 12/12**: adds `review --mechanical-only FILE` and `review --mechanical-only --compare A B` diffs. The parity oracle uses `--mechanical-only` exclusively because structural detectors are also deterministic but heavier; `--mechanical-only` is the tightest subset. Parity harness continues to pass byte-identically across pip and npm on Windows Git Bash and Linux aarch64.
+
+### Changed
+
+- README rewritten to explain the soft-vs-hard-enforcement split explicitly: the generation-time adapters are soft-load (nudge), and `/style-review` is the opt-in second-pass enforcement loop (audit + diff). New "Second-pass review" section with both CLI and skill-host user paths. Per-surface install table gains a `style-review` row.
+
+### Notes
+
+- Phase 4 (benchmark) is shipped as runner + workflow + placeholder scorecard; the populated scorecard publishes post-release via `workflow_dispatch`. Subsequent releases rerun the benchmark to track delta between releases.
+- RULE-02, 07, 09, 10 structural detectors and all 7 semantic detectors remain as documented stubs in this release (`status: "skipped"` with actionable notes). Full coverage is a v0.3.0+ concern.
+
 ## [0.1.1] — 2026-04-19
 
 ### Fixed
@@ -44,6 +98,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 ---
 
-[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/yzhao062/agent-style/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/yzhao062/agent-style/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/yzhao062/agent-style/releases/tag/v0.1.0

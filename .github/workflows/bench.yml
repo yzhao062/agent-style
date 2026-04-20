@@ -1,0 +1,99 @@
+# SPDX-License-Identifier: MIT
+
+name: Sanity Benchmark
+
+# Runs scripts/bench/run.sh against the live Anthropic API to measure whether
+# agent-style v<N> reduces AI-tell density across a fixed 10-task prose set.
+# Explicitly workflow_dispatch only — the bench costs ~$0.40-$0.80 per run
+# and is not needed on every push (validate.yml + real-agent-smoke.yml cover
+# mechanical correctness; this workflow measures behavior).
+#
+# Required repository secrets:
+#   ANTHROPIC_API_KEY  https://console.anthropic.com/settings/keys
+#
+# Output: docs/bench-<version>.md scorecard (Markdown) uploaded as a workflow
+# artifact. Maintainer copies the artifact into the repo and commits it as
+# part of the release cycle.
+
+on:
+  workflow_dispatch:
+    inputs:
+      generations:
+        description: 'Generations per condition per task (default 2)'
+        required: false
+        default: '2'
+        type: string
+      install_from:
+        description: 'Install agent-style from "pypi" (released) or "branch" (local source)'
+        required: false
+        default: 'branch'
+        type: choice
+        options:
+          - pypi
+          - branch
+
+jobs:
+  bench:
+    name: Claude + agent-style sanity benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: Install agent-style
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event.inputs.install_from }}" = "pypi" ]; then
+            python -m pip install --upgrade pip
+            python -m pip install agent-style
+          else
+            python -m pip install --upgrade pip build
+            python -m build packages/pypi --outdir packages/pypi/dist
+            python -m pip install packages/pypi/dist/agent_style-*.whl
+          fi
+          agent-style --version
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Run sanity benchmark
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          GEN="${{ github.event.inputs.generations }}"
+          bash scripts/bench/run.sh --generations "$GEN"
+
+      - name: Find scorecard path
+        id: scorecard
+        run: |
+          set -euo pipefail
+          VERSION="$(agent-style --version | awk '{print $2}')"
+          echo "path=docs/bench-${VERSION}.md" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload scorecard artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: bench-${{ steps.scorecard.outputs.version }}
+          path: ${{ steps.scorecard.outputs.path }}
+          if-no-files-found: error
+
+      - name: Print scorecard summary to job log
+        run: |
+          set -euo pipefail
+          if [ -f "${{ steps.scorecard.outputs.path }}" ]; then
+            echo "::group::bench scorecard"
+            cat "${{ steps.scorecard.outputs.path }}"
+            echo "::endgroup::"
+          fi

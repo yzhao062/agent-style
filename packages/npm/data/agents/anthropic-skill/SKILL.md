@@ -7,13 +7,13 @@ description: Literature-backed English technical-prose writing rules. Use when w
 <!-- Target path: .claude/skills/agent-style/SKILL.md -->
 <!-- Load class: single-file; install_mode: owned-file -->
 
-# agent-style v0.1.1 — Anthropic Skills adapter
+# agent-style v0.2.0 — Anthropic Skills adapter
 
 agent-style is a literature-backed English technical-prose writing ruleset for AI agents. This adapter is an Anthropic Skill at `.claude/skills/agent-style/SKILL.md`. Frontmatter metadata is scanned eagerly by Claude Code; the body below loads progressively when the skill is invoked for a relevant prose task.
 
 ## Self-Verification Handshake
 
-When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.1.1 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
+When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.2.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
 
 ## Load Statement
 
@@ -54,4 +54,4 @@ Field-observed rules (maintainer observation of LLM output, 2022-2026):
 
 ## Full Rule Bodies (Canonical)
 
-Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.1.1/RULES.md for the pinned canonical source.
+Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.2.0/RULES.md for the pinned canonical source.

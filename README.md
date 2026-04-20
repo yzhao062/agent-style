@@ -97,23 +97,38 @@ See [`RULES.md`](RULES.md) for the full per-rule blocks with BAD/GOOD examples, 
 
 ## Use
 
-Two install paths: a CLI (recommended) or a manual `curl` recipe for users who prefer not to install a package. Both paths respect a strict no-overwrite contract: your existing instruction files are never overwritten.
+Two ways to enforce the rules in your AI agent's output. You typically use both:
 
-### Install via CLI
+- **1. Soft enforcement** (default): the rules are loaded at generation time, so the agent tries to follow them while writing the first draft. One `enable` command per tool; then the agent reads `agent-style`'s 21 rules as part of its context.
+- **2. Skill** (opt-in second pass): after the draft exists, you ask for a review. `style-review` audits the draft against the same 21 rules and, on your confirmation, writes a polished copy beside the original. Your source file is never touched.
+
+Install the CLI once; then pick the paths you want.
 
 ```bash
 pip install agent-style                              # Python users
 # or: npm install -g agent-style                     # Node users
-# or: npx --yes agent-style@0.1.1 <subcommand>       # no install needed
-
-agent-style list-tools                               # show supported tools
-agent-style enable claude-code                       # wire up Claude Code
-agent-style enable agents-md                         # wire up AGENTS.md (Codex, Jules, Zed, Warp, Gemini CLI, VS Code, and others)
-agent-style enable claude-code --dry-run             # preview changes without writing
-agent-style enable claude-code --dry-run --json      # machine-readable plan
-agent-style disable claude-code                      # reverse enable
-agent-style rules                                    # print bundled RULES.md to stdout
+# or: npx --yes agent-style@0.2.0 <subcommand>       # no install needed
 ```
+
+### 1. Soft Enforcement — rules at generation time
+
+```bash
+agent-style enable claude-code                       # wire up Claude Code
+# Inside a Claude Code session, your prose now follows agent-style's 21 rules.
+```
+
+Other tools work the same way — substitute the tool name:
+
+```bash
+agent-style list-tools                               # see all supported tools
+agent-style enable agents-md                         # Codex, Jules, Zed, Warp, Gemini CLI, VS Code, others
+agent-style enable cursor                            # Cursor
+agent-style enable copilot                           # GitHub Copilot (repo-wide)
+# ...
+agent-style disable <tool>                           # reverse an enable
+```
+
+**Caveats:** soft enforcement *nudges* the model. Training-prior vocabulary like `leverages`, `cutting-edge`, `Additionally`-openers, and closer sentences can still appear in the first draft, especially for prose over 200 words. That's why path 2 exists.
 
 <details>
 <summary><b>What <code>enable</code> Does per Tool (All Safe, All Idempotent)</b></summary>
@@ -129,29 +144,9 @@ For `print-only` and `multi-file-required`, the JSON output carries `manual_step
 
 </details>
 
-### Install via Manual `curl`
-
-For users who prefer not to install a package. Pins to a specific release so adapters and `RULES.md` stay consistent:
-
-```bash
-AGENT_STYLE_REF=v0.1.1
-mkdir -p .agent-style
-curl -fsSLo .agent-style/RULES.md       "https://raw.githubusercontent.com/yzhao062/agent-style/${AGENT_STYLE_REF}/RULES.md"
-curl -fsSLo .agent-style/claude-code.md "https://raw.githubusercontent.com/yzhao062/agent-style/${AGENT_STYLE_REF}/agents/claude-code.md"
-```
-
-Then add ONE line to your `CLAUDE.md` (create the file only if absent; never overwrite):
-
-```text
-@.agent-style/claude-code.md
-```
-
-For other surfaces, substitute the adapter filename and follow the per-surface table below. The `curl` commands only write under `.agent-style/`; the one-line import into your instruction file is the only edit you make to files you own.
-
-### Per-Surface Paths (v0.1.1 primary set)
-
 <details>
-<summary><b>Eight primary adapters (full matrix in <code>adapter-matrix.md</code>)</b></summary>
+<summary><b>Per-surface install table (v0.2.0 primary set)</b></summary>
+<br>
 
 | Tool | install_mode | Target path |
 | --- | --- | --- |
@@ -163,39 +158,125 @@ For other surfaces, substitute the adapter filename and follow the per-surface t
 | Anthropic Skills | `owned-file` | `.claude/skills/agent-style/SKILL.md` |
 | Codex (API / manual paste) | `print-only` | `.agent-style/codex-system-prompt.md` (user pastes into API system prompt) |
 | Aider | `multi-file-required` | `.agent-style/aider-conventions.md` + `.aider.conf.yml` snippet |
+| **style-review** (skill) | `skill-with-references` | `.claude/skills/style-review/SKILL.md` + `.agent-style/skills/style-review/references/` |
+
+Amazon Q Developer, JetBrains AI Assistant, Windsurf, Ollama, Replit, OpenCode, Continue.dev, Tabnine, OpenAI Agents SDK skills, and Copilot path-scoped variants beyond the above are planned for v1.1; see the "Planned adapters" section of [`adapter-matrix.md`](adapter-matrix.md).
 
 </details>
 
-Adapters for Amazon Q Developer, JetBrains AI Assistant, Windsurf, Ollama, Replit, OpenCode, Continue.dev, Tabnine, OpenAI Agents SDK skills, and Copilot path-scoped variants beyond the above are planned for v1.1; see the "Planned adapters" section of [`adapter-matrix.md`](adapter-matrix.md).
+<details>
+<summary><b>No-install path: pinned <code>curl</code> recipe</b></summary>
+<br>
 
-### Self-Verification
+Skip the package install; pin to a specific release so adapters and `RULES.md` stay consistent:
 
-After running `agent-style enable <tool>` (or completing the manual setup), ask your agent:
+```bash
+AGENT_STYLE_REF=v0.2.0
+mkdir -p .agent-style
+curl -fsSLo .agent-style/RULES.md       "https://raw.githubusercontent.com/yzhao062/agent-style/${AGENT_STYLE_REF}/RULES.md"
+curl -fsSLo .agent-style/claude-code.md "https://raw.githubusercontent.com/yzhao062/agent-style/${AGENT_STYLE_REF}/agents/claude-code.md"
+```
+
+Then add ONE line to your `CLAUDE.md` (create the file only if absent; never overwrite):
+
+```text
+@.agent-style/claude-code.md
+```
+
+For other surfaces, substitute the adapter filename. The `curl` commands only write under `.agent-style/`; the one-line import is the only edit you make to files you own.
+
+</details>
+
+### 2. Skill — `style-review` (opt-in second pass)
+
+Two ways to use it depending on whether you have a skill-capable host:
+
+```bash
+# Skill-host path (Claude Code / Anthropic Skills): install once, then /style-review <file>
+agent-style enable style-review                       # auto-detects active skill-capable surfaces
+# inside Claude Code:
+/style-review DESIGN.md
+
+# CLI path (works anywhere pip/npm runs; no skill host needed):
+agent-style review DESIGN.md                          # human-readable audit
+agent-style review DESIGN.md --audit-only             # machine-readable JSON
+agent-style review --compare a.md b.md                # A/B delta per rule
+```
+
+**What happens on `/style-review DESIGN.md`** (skill path):
+
+1. Deterministic audit of the file against all 21 rules.
+2. Skill asks: *"produce a polished draft at `DESIGN.reviewed.md`?"*
+3. On yes: writes a revised copy beside the original and shows the diff. **Source file is never touched.**
+
+**What you get from `agent-style review DESIGN.md`** (CLI path): the same deterministic audit — mechanical + structural detectors for em-dashes, jargon, transition openers, clichés, contractions, sentence length, bullet overuse, same-starts, paragraph closers. Semantic rules (vague claims, unsupported claims, etc.) return `status: "skipped"` because they need a skill host's model. No polish from the plain CLI.
+
+See [`docs/bench-0.2.0.md`](docs/bench-0.2.0.md) for a sanity benchmark of how much `style-review` actually reduces AI-tell density on 10 fixed tasks.
+
+<details>
+<summary><b>Skill workflow in detail (what the SKILL.md tells Claude Code to do)</b></summary>
+<br>
+
+1. Shells out to `agent-style review --audit-only DESIGN.md` for the deterministic audit (same JSON as the CLI path).
+2. Adds semantic judgment via the host model for the 7 rules that need context-aware reasoning: RULE-01 curse of knowledge, RULE-03 vague language, RULE-04 needless words, RULE-08 uncalibrated claims, RULE-11 stress position, RULE-F term drift, RULE-H citation discipline.
+3. Merges deterministic + semantic scorecard; reports per-rule counts and first 5 violations each.
+4. Asks the user: *"produce a polished draft at DESIGN.reviewed.md?"*
+5. On yes, composes a revision prompt using `references/revision-prompt.md` with hard invariants:
+   - **No new facts, metrics, citations, links, or code behavior** not in the source.
+   - Preserve Markdown structure (code fences, tables, frontmatter, links, heading levels, list nesting).
+   - Preserve meaning and length budget.
+6. Writes `DESIGN.reviewed.md` alongside `DESIGN.md`.
+7. Re-audits the revised draft; shows before → after scorecard and `diff DESIGN.md DESIGN.reviewed.md`.
+
+Source file is never touched. You merge hunks from the `.reviewed.md` by hand.
+
+</details>
+
+<details>
+<summary><b>Uninstall</b></summary>
+<br>
+
+Per-tool disable:
+
+```bash
+agent-style disable claude-code                       # or any other tool you enabled
+agent-style disable style-review                      # manifest-based safe removal
+```
+
+For `style-review`, disable reads `.agent-style/skills/style-review/manifest.json`, removes only files whose current sha256 still matches (leaves user-edited files alone and reports them as `drifted`), and cleans up empty directories. Never touches `.agent-style/RULES.md` or other-tool adapters.
+
+Full cleanup of the shared `.agent-style/` data (after disabling every tool you enabled):
+
+```bash
+rm -rf .agent-style/                                   # POSIX
+Remove-Item -Recurse -Force .agent-style               # PowerShell
+```
+
+</details>
+
+<details>
+<summary><b>Self-verification probe</b></summary>
+<br>
+
+After running `agent-style enable <tool>`, ask your agent:
 
 > Is agent-style active?
 
 Expected reply:
 
-> agent-style v0.1.1 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.
+> agent-style v0.2.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.
+
+For `style-review` specifically, ask:
+
+> Is style-review active?
+
+Expected reply:
+
+> style-review active: audit 21 rules (deterministic: RULE-B, D, G, I, 12, 05, 06, A, C, E; semantic via host: RULE-01, 03, 04, 08, 11, F, H); workflow at skills/style-review/SKILL.md.
 
 If the version string or rule count is missing, the file is on disk but not in your agent's active context. Check that your tool's instruction-file reload behavior picked up the new content (some tools require a session restart).
 
-### Uninstall
-
-Two-step recipe; `agent-style clean` ships as one command in v0.2.0:
-
-```bash
-# Step 1: remove the marker block from each instruction file you enabled
-agent-style disable claude-code
-agent-style disable cursor
-# ...repeat for each enabled tool; agent-style list-tools shows the set
-
-# Step 2: remove the shared .agent-style/ data
-rm -rf .agent-style/                              # POSIX
-Remove-Item -Recurse -Force .agent-style          # PowerShell
-```
-
-Skipping step 1 leaves orphan marker blocks in your instruction files; skipping step 2 leaves shared rule data on disk.
+</details>
 
 <details>
 <summary><b>Complementary Post-Hoc Linting</b></summary>
@@ -205,9 +286,9 @@ This repo is read at generation time. For a linter that runs over committed pros
 
 </details>
 
-### v0.2.0 Roadmap
+### v0.3.0 Roadmap
 
-Planned CLI additions: `agent-style update` (refresh installed adapters to latest), `agent-style override <RULE-ID> disable` (per-rule opt-out), `agent-style clean` (one-command uninstall), `.agent-style/config.toml` (project-level config), and filled adapters for the planned-adapter set above. Track progress in [`CHANGELOG.md`](CHANGELOG.md).
+Planned CLI additions: `agent-style update` (refresh installed adapters to latest), `agent-style override <RULE-ID> disable` (per-rule opt-out), `agent-style clean` (one-command uninstall), `.agent-style/config.toml` (project-level config), RULE-02 / 07 / 09 / 10 structural detectors filled in, and filled adapters for the planned-adapter set above (v1.1). Track progress in [`CHANGELOG.md`](CHANGELOG.md).
 
 <details>
 <summary><b>Curation and method</b></summary>

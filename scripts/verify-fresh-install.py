@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-"""End-to-end fresh-install verification of agent-style v0.1.1 from real PyPI + npm.
+"""End-to-end fresh-install verification of agent-style v0.2.0 from real PyPI + npm.
 
 Creates a scratch directory, makes fresh venv / npm install, exercises the
 CLI surface (`--version`, `list-tools`, `rules`, `enable --dry-run --json`,
@@ -14,7 +14,7 @@ import subprocess
 import sys
 import tempfile
 
-EXPECTED_VERSION = "0.1.1"
+EXPECTED_VERSION = "0.2.0"
 EXPECTED_TOOL_COUNT = 8
 
 SCRATCH = tempfile.mkdtemp(prefix="as-final-")

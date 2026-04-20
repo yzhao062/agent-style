@@ -22,7 +22,7 @@ agent-style rules                                    # print bundled RULES.md
 
 The CLI writes to `.agent-style/` in your project and safely adds a marker-wrapped reference to your existing instruction file (CLAUDE.md, AGENTS.md, .github/copilot-instructions.md, etc.). Existing content is preserved; writes are idempotent; `--dry-run` previews without changing any file.
 
-Supported tools and install modes in v0.1.1:
+Supported tools and install modes in v0.2.0:
 
 | Tool | Install mode |
 | --- | --- |

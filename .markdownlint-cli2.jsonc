@@ -20,6 +20,9 @@
   },
   "ignores": [
     "LICENSES/**",
-    "node_modules/**"
+    "node_modules/**",
+    "skills/**",
+    "packages/pypi/agent_style/data/skills/**",
+    "packages/npm/data/skills/**"
   ]
 }

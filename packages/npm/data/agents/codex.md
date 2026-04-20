@@ -3,13 +3,13 @@
 <!-- Target path (shipped): agents/codex.md in this repo; agent-style enable codex writes a copy to .agent-style/codex-system-prompt.md -->
 <!-- Load class: single-file; install_mode: print-only -->
 
-# agent-style v0.1.1 — Codex API adapter
+# agent-style v0.2.0 — Codex API adapter
 
 agent-style is a literature-backed English technical-prose writing ruleset for AI agents. This adapter is meant to be pasted as the system prompt (or developer instruction) for OpenAI Codex API invocations. For AGENTS.md-aware Codex runtimes, use `agents/AGENTS.md` instead.
 
 ## Self-Verification Handshake
 
-When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.1.1 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
+When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.2.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
 
 ## Load Statement
 
@@ -50,4 +50,4 @@ Field-observed rules (maintainer observation of LLM output, 2022-2026):
 
 ## Full Rule Bodies (Canonical)
 
-Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.1.1/RULES.md for the pinned canonical source.
+Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.2.0/RULES.md for the pinned canonical source.

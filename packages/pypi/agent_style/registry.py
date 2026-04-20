@@ -12,8 +12,23 @@ import os
 from typing import Any
 
 
-REQUIRED_FIELDS = {"install_mode", "target_path", "adapter_source", "load_class"}
-VALID_MODES = {"import-marker", "append-block", "owned-file", "multi-file-required", "print-only"}
+# Fields required for the existing 5 install modes (schema_version 1).
+LEGACY_REQUIRED_FIELDS = {"install_mode", "target_path", "adapter_source", "load_class"}
+
+# Fields required for skill-with-references (schema_version 1, backward compatible).
+SKILL_REQUIRED_FIELDS = {
+    "install_mode",
+    "skill_source",
+    "references_source",
+    "target_groups",
+    "manual_step_message",
+}
+# Fields forbidden for skill-with-references (they belong to the legacy 5-mode shape).
+SKILL_FORBIDDEN_FIELDS = {"target_path", "adapter_source", "load_class"}
+
+LEGACY_MODES = {"import-marker", "append-block", "owned-file", "multi-file-required", "print-only"}
+SKILL_MODES = {"skill-with-references"}
+VALID_MODES = LEGACY_MODES | SKILL_MODES
 
 
 class RegistryError(Exception):
@@ -55,17 +70,103 @@ class Registry:
                 "expected 1"
             )
         for name, spec in self.tools.items():
-            missing = REQUIRED_FIELDS - set(spec.keys())
-            if missing:
+            mode = spec.get("install_mode")
+            if mode is None:
                 raise RegistryError(
-                    f"tool {name!r} in tools.json is missing required fields: {sorted(missing)}"
+                    f"tool {name!r} in tools.json is missing 'install_mode'"
                 )
-            mode = spec["install_mode"]
             if mode not in VALID_MODES:
                 raise RegistryError(
                     f"tool {name!r} has invalid install_mode {mode!r}; "
                     f"expected one of {sorted(VALID_MODES)}"
                 )
+            if mode in LEGACY_MODES:
+                missing = LEGACY_REQUIRED_FIELDS - set(spec.keys())
+                if missing:
+                    raise RegistryError(
+                        f"tool {name!r} uses install_mode {mode!r} and is missing required fields: "
+                        f"{sorted(missing)}"
+                    )
+                forbidden_present = SKILL_REQUIRED_FIELDS & set(spec.keys()) - {"install_mode"}
+                if forbidden_present:
+                    raise RegistryError(
+                        f"tool {name!r} uses install_mode {mode!r} but has skill-mode-only fields: "
+                        f"{sorted(forbidden_present)}"
+                    )
+            elif mode in SKILL_MODES:
+                missing = SKILL_REQUIRED_FIELDS - set(spec.keys())
+                if missing:
+                    raise RegistryError(
+                        f"tool {name!r} uses install_mode {mode!r} and is missing required fields: "
+                        f"{sorted(missing)}"
+                    )
+                forbidden_present = SKILL_FORBIDDEN_FIELDS & set(spec.keys())
+                if forbidden_present:
+                    raise RegistryError(
+                        f"tool {name!r} uses install_mode {mode!r} but has legacy-mode-only fields: "
+                        f"{sorted(forbidden_present)} (these belong to the 5-mode shape)"
+                    )
+                # target_groups must be a list of {target_path, surfaces} with strict schema.
+                groups = spec["target_groups"]
+                if not isinstance(groups, list) or not groups:
+                    raise RegistryError(
+                        f"tool {name!r}: target_groups must be a non-empty list"
+                    )
+                # Surface names must resolve to legacy-mode tools (skill-mode tools
+                # cannot host other skills by construction).
+                known_surface_tools = {
+                    tn for tn, ts in self.tools.items()
+                    if ts.get("install_mode") in LEGACY_MODES
+                }
+                seen_normalized: dict[str, int] = {}
+                for i, g in enumerate(groups):
+                    if not isinstance(g, dict) or "target_path" not in g or "surfaces" not in g:
+                        raise RegistryError(
+                            f"tool {name!r}: target_groups[{i}] must have 'target_path' and 'surfaces'"
+                        )
+                    tp = g["target_path"]
+                    if not isinstance(tp, str) or not tp:
+                        raise RegistryError(
+                            f"tool {name!r}: target_groups[{i}].target_path must be a non-empty string"
+                        )
+                    if os.path.isabs(tp):
+                        raise RegistryError(
+                            f"tool {name!r}: target_groups[{i}].target_path {tp!r} must be relative, not absolute"
+                        )
+                    # Windows drive-qualified paths ("C:foo")
+                    if len(tp) >= 2 and tp[1] == ":":
+                        raise RegistryError(
+                            f"tool {name!r}: target_groups[{i}].target_path {tp!r} must not be drive-qualified"
+                        )
+                    tp_parts = tp.replace("\\", "/").split("/")
+                    if any(p == ".." for p in tp_parts):
+                        raise RegistryError(
+                            f"tool {name!r}: target_groups[{i}].target_path {tp!r} must not contain '..'"
+                        )
+                    surfaces = g["surfaces"]
+                    if not isinstance(surfaces, list) or not surfaces:
+                        raise RegistryError(
+                            f"tool {name!r}: target_groups[{i}].surfaces must be a non-empty list"
+                        )
+                    for j, s in enumerate(surfaces):
+                        if not isinstance(s, str) or not s:
+                            raise RegistryError(
+                                f"tool {name!r}: target_groups[{i}].surfaces[{j}] must be a non-empty string"
+                            )
+                        if s not in known_surface_tools:
+                            raise RegistryError(
+                                f"tool {name!r}: target_groups[{i}].surfaces[{j}]={s!r} does not match any "
+                                f"known non-skill tool; known surfaces are {sorted(known_surface_tools)}"
+                            )
+                    # Normalize for uniqueness: strip leading `./` and collapse `//`.
+                    norm = "/".join(p for p in tp_parts if p not in ("", "."))
+                    if norm in seen_normalized:
+                        raise RegistryError(
+                            f"tool {name!r}: target_groups[{i}].target_path {tp!r} collides with "
+                            f"target_groups[{seen_normalized[norm]}] after normalization; "
+                            "combine them into a single entry and merge the surfaces lists"
+                        )
+                    seen_normalized[norm] = i
 
     def get(self, tool: str) -> dict[str, Any]:
         """Return the spec for a tool, or raise RegistryError if unknown."""

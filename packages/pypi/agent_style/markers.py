@@ -3,7 +3,7 @@
 
 A marker block is a region between HTML comments:
 
-    <!-- BEGIN agent-style v0.1.1 -->
+    <!-- BEGIN agent-style v0.2.0 -->
     ...generated content...
     <!-- END agent-style -->
 
@@ -107,6 +107,6 @@ def content_hash_placeholder() -> str:
 
     Marker blocks (unlike owned files) do not carry a content hash; the block's presence
     and version are the only identification. This helper exists for symmetry with
-    owned_file.py's signature logic and is not used in v0.1.1.
+    owned_file.py's signature logic and is not used in v0.2.0.
     """
     return "n/a"
