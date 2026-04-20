@@ -92,7 +92,7 @@ See [`RULES.md`](RULES.md) for the full per-rule blocks with BAD/GOOD examples, 
 
 ## Who It Is For
 
-- **AI coding and writing agents:** Claude Code, Codex, GitHub Copilot, Cursor, Aider, Anthropic Skills, Replit Agent, Windsurf, Amazon Q Developer, JetBrains AI Assistant, Ollama, Continue.dev, Tabnine, OpenCode, OpenAI Agents SDK skills, and any `AGENTS.md`-compliant tool. Each agent reads the ruleset as part of its system prompt or project config.
+- **AI coding and writing agents:** Claude Code, Codex, GitHub Copilot, Cursor, Aider, Anthropic Skills, Kiro, Replit Agent, Windsurf, Amazon Q Developer, JetBrains AI Assistant, Ollama, Continue.dev, Tabnine, OpenCode, OpenAI Agents SDK skills, and any `AGENTS.md`-compliant tool. Each agent reads the ruleset as part of its system prompt or project config.
 - **Maintainers of those agents' configurations** who want generated prose to follow literature-backed writing conventions rather than reproduce common LLM tell-patterns.
 
 ## Use
@@ -139,6 +139,7 @@ agent-style disable <tool>                           # reverse an enable
 - **Cursor, Copilot path-scoped, Anthropic Skills (`owned-file`)**: writes a new agent-style-owned file at the tool's rule-directory path (`.cursor/rules/agent-style.mdc`, `.github/instructions/agent-style.instructions.md`, `.claude/skills/agent-style/SKILL.md`). Fails closed if a non-agent-style file is already there.
 - **Codex API (`print-only`)**: writes `.agent-style/codex-system-prompt.md`; prints the prompt body to stdout, manual-step instructions to stderr. You paste the prompt into your Codex API `system_prompt`.
 - **Aider (`multi-file-required`)**: writes `.agent-style/aider-conventions.md`; prints a `.aider.conf.yml` snippet to stderr. You paste both files into the config.
+- **Kiro (`owned-file`)**: writes `.kiro/steering/agent-style.md` as an auto-included steering file. Kiro loads it at session start for every interaction in the workspace.
 
 For `print-only` and `multi-file-required`, the JSON output carries `manual_step_required: true` and `enabled: false`; exit code stays 0 (the CLI did everything it can do) and the first line of human output is exactly `manual step required:` followed by the specific action.
 
@@ -158,6 +159,7 @@ For `print-only` and `multi-file-required`, the JSON output carries `manual_step
 | Anthropic Skills | `owned-file` | `.claude/skills/agent-style/SKILL.md` |
 | Codex (API / manual paste) | `print-only` | `.agent-style/codex-system-prompt.md` (user pastes into API system prompt) |
 | Aider | `multi-file-required` | `.agent-style/aider-conventions.md` + `.aider.conf.yml` snippet |
+| Kiro (AWS IDE) | `owned-file` | `.kiro/steering/agent-style.md` |
 | **style-review** (skill) | `skill-with-references` | `.claude/skills/style-review/SKILL.md` + `.agent-style/skills/style-review/references/` |
 
 Amazon Q Developer, JetBrains AI Assistant, Windsurf, Ollama, Replit, OpenCode, Continue.dev, Tabnine, OpenAI Agents SDK skills, and Copilot path-scoped variants beyond the above are planned for v1.1; see the "Planned adapters" section of [`adapter-matrix.md`](adapter-matrix.md).

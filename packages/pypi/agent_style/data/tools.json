@@ -52,6 +52,12 @@
       "load_class": "multi-file-required",
       "second_file_snippet": "read:\n  - .agent-style/aider-conventions.md\n  - .agent-style/RULES.md\n"
     },
+    "kiro": {
+      "install_mode": "owned-file",
+      "target_path": ".kiro/steering/agent-style.md",
+      "adapter_source": "agents/kiro-steering.md",
+      "load_class": "single-file"
+    },
     "style-review": {
       "install_mode": "skill-with-references",
       "skill_source": "skills/style-review/SKILL.md",

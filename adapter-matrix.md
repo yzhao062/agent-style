@@ -2,7 +2,7 @@
 
 # Adapter Matrix
 
-Every shipped adapter file in `agents/`, with its target path, install mode, and load class. v0.2.0 ships 8 primary adapters; 11 additional tool surfaces are on the v1.1 "Planned adapters" roadmap.
+Every shipped adapter file in `agents/`, with its target path, install mode, and load class. v0.2.0 ships 9 primary adapters plus the `style-review` skill; 10 additional tool surfaces are on the v1.1 "Planned adapters" roadmap.
 
 ## Primary Adapters (v0.2.0, Shipped)
 
@@ -16,6 +16,7 @@ Every shipped adapter file in `agents/`, with its target path, install mode, and
 | GitHub Copilot (path-scoped) | `agents/copilot-path-instructions.md` | `.github/instructions/agent-style.instructions.md` | `owned-file` | single-file |
 | Cursor | `agents/cursor-rule.mdc` | `.cursor/rules/agent-style.mdc` | `owned-file` | single-file |
 | Aider | `agents/aider-conventions.md` | `.agent-style/aider-conventions.md` + `.aider.conf.yml` snippet | `multi-file-required` | multi-file-required |
+| Kiro (AWS IDE) | `agents/kiro-steering.md` | `.kiro/steering/agent-style.md` | `owned-file` | single-file |
 
 **Install**: run `agent-style enable <tool>` (creates `.agent-style/RULES.md`, copies the adapter, safe-appends or writes the target file), or follow the manual `curl` recipe in `README.md` for equivalent manual steps. Both paths never overwrite existing user content.
 
