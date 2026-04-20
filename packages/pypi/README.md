@@ -34,9 +34,8 @@ Supported tools and install modes in v0.2.0:
 | anthropic-skill | owned-file (writes `.claude/skills/agent-style/SKILL.md`) |
 | codex | print-only (writes `.agent-style/codex-system-prompt.md`; stdout = prompt) |
 | aider | multi-file-required (writes `.agent-style/aider-conventions.md`; stderr = `.aider.conf.yml` snippet) |
-| kiro | owned-file (writes `.kiro/steering/agent-style.md`) |
 
-The full rule set lives in the canonical repository at https://github.com/yzhao062/agent-style. This PyPI package bundles `RULES.md`, `NOTICE.md`, the 9 primary adapters, and the `tools.json` registry; running `agent-style rules` prints the bundled `RULES.md` for quick review.
+The full rule set lives in the canonical repository at https://github.com/yzhao062/agent-style. This PyPI package bundles `RULES.md`, `NOTICE.md`, the 8 primary adapters, and the `tools.json` registry; running `agent-style rules` prints the bundled `RULES.md` for quick review.
 
 ## License
 

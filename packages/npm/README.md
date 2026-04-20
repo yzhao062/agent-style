@@ -45,7 +45,6 @@ Supported tools and install modes in v0.2.0:
 | anthropic-skill | owned-file |
 | codex | print-only |
 | aider | multi-file-required |
-| kiro | owned-file |
 
 Canonical repository: https://github.com/yzhao062/agent-style
 
