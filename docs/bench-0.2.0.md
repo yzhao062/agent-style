@@ -1,27 +1,38 @@
 # agent-style bench — v0.2.0
 
-*This is a placeholder. Populate by running the sanity benchmark on the release commit:*
+- Model: Claude Code default (claude -p)
+- Generations per condition: 2
+- Date: 2026-04-20T07:15:31Z
+- agent-style version: 0.2.0
 
-```bash
-# Local (maintainer):
-export ANTHROPIC_API_KEY=...
-bash scripts/bench/run.sh --generations 2
+## Per-task per-rule delta (mechanical + structural; semantic excluded)
 
-# CI (recommended):
-gh workflow run bench.yml --field generations=2 --field install_from=pypi --ref main
-gh run download --name bench-0.2.0       # download the scorecard artifact
-cp bench-0.2.0.md docs/bench-0.2.0.md    # commit alongside v0.2.0
-```
+| Task | Baseline total | Treatment total | Delta | Dominant rule |
+|---|---|---|---|---|
+| pr-01-redis-cache | 4 | 6 | 2 | — |
+| pr-02-jwt-rotation | 2 | 0 | -2 | RULE-12 |
+| pr-03-auth-middleware | 0 | 2 | 2 | — |
+| pr-04-db-index | 4 | 3 | -1 | RULE-12 |
+| pr-05-dependency-bump | 1 | 1 | 0 | — |
+| design-01-incident-response | 9 | 0 | -9 | RULE-12 |
+| design-02-rate-limiter | 14 | 11 | -3 | RULE-I |
+| design-03-schema-migration | 12 | 6 | -6 | RULE-12 |
+| commit-01-fix-timezone | 1 | 1 | 0 | — |
+| commit-02-feat-pagination | 0 | 0 | 0 | — |
 
-See [`scripts/bench/tasks.md`](../scripts/bench/tasks.md) for the 10 task prompts and [`scripts/bench/run.sh`](../scripts/bench/run.sh) for the runner.
+## Totals
 
-## Methodology (for readers of the final scorecard)
+| | Baseline | Treatment | Delta |
+|---|---|---|---|
+| total violations | 47 | 30 | -17 |
 
-- Ten fixed tasks (5 PR descriptions, 3 design-doc sections, 2 commit messages)
-- For each task, the bench generates `N` baseline drafts (no agent-style loaded in the project) and `N` treatment drafts (`agent-style enable claude-code` active) using the same Claude Code model and prompt.
-- Each draft is scored with `agent-style review --mechanical-only --audit-only` — deterministic by construction; semantic rules are excluded from the benchmark to keep the per-run numbers reproducible.
-- Per-rule deltas aggregate across all drafts; the per-task row shows the single most-improved rule ID for that task.
+## Per-rule aggregate
 
-## Why "sanity" and not a ship gate
+| Rule | Baseline | Treatment | Delta |
+|---|---|---|---|
+| RULE-12 | 24 | 18 | -6 |
+| RULE-B | 15 | 9 | -6 |
+| RULE-G | 5 | 2 | -3 |
+| RULE-I | 3 | 1 | -2 |
 
-The PLAN marks this benchmark as a **sanity signal**, not a statistical claim. Ten tasks at two generations each is small enough that prompt variance can dominate any single-task row. The aggregate "total violations" delta is a directional read on whether the ruleset moves the needle at all, not a guarantee of a specific percentage. The benchmark's real job: catch regressions between releases by rerunning with the same task set and watching the baseline→treatment delta shape stay roughly stable.
+_Sanity benchmark; numbers are directional, not a claim of statistical significance. See `scripts/bench/tasks.md` and the generated drafts under `/tmp/as-bench-Jf4NOk` (ephemeral) for the underlying data._
