@@ -11,10 +11,35 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MODE="${1:-both}"
 
-PY_DIR_NATIVE="$(cygpath -w "$ROOT/packages/pypi" 2>/dev/null || echo "$ROOT/packages/pypi")"
-PY_SEP=":"; [[ "$(uname -s)" == MINGW* || "$(uname -s)" == CYGWIN* ]] && PY_SEP=";"
+# Platform-aware PYTHONPATH: use Windows-native separators on MSYS/Cygwin, POSIX elsewhere.
+case "$(uname -s)" in
+  MINGW*|CYGWIN*|MSYS*)
+    PY_DIR_NATIVE="$(cygpath -w "$ROOT/packages/pypi" 2>/dev/null || echo "$ROOT/packages/pypi")"
+    PY_SEP=";"
+    ;;
+  *)
+    PY_DIR_NATIVE="$ROOT/packages/pypi"
+    PY_SEP=":"
+    ;;
+esac
 export PYTHONPATH="${PY_DIR_NATIVE}${PY_SEP}${PYTHONPATH:-}"
-PY_CLI="/c/Users/yuezh/miniforge3/envs/py312/python.exe -m agent_style.cli"
+
+# Python binary: prefer AGENT_STYLE_PYTHON env override; else Miniforge py312 on
+# Windows; else python3 / python on PATH.
+if [[ -n "${AGENT_STYLE_PYTHON:-}" ]]; then
+  PY_BIN="$AGENT_STYLE_PYTHON"
+elif [[ -x "/c/Users/yuezh/miniforge3/envs/py312/python.exe" ]]; then
+  PY_BIN="/c/Users/yuezh/miniforge3/envs/py312/python.exe"
+elif command -v python3 >/dev/null 2>&1; then
+  PY_BIN="$(command -v python3)"
+elif command -v python >/dev/null 2>&1; then
+  PY_BIN="$(command -v python)"
+else
+  echo "error: no Python interpreter found (tried \$AGENT_STYLE_PYTHON, Miniforge py312, python3, python)" >&2
+  exit 2
+fi
+
+PY_CLI="$PY_BIN -m agent_style.cli"
 NODE_CLI="node $ROOT/packages/npm/bin/agent-style.js"
 
 pass() { printf "  \e[32mPASS\e[0m %s\n" "$1"; }
@@ -96,7 +121,7 @@ run_suite() {
   manifest_native="$(cygpath -w "$manifest" 2>/dev/null || echo "$manifest")"
   local outside_name
   outside_name="$(basename "$outside")"
-  /c/Users/yuezh/miniforge3/envs/py312/python.exe -c "
+  "$PY_BIN" -c "
 import json
 p = r'''$manifest_native'''
 with open(p, encoding='utf-8') as f:
@@ -132,7 +157,7 @@ with open(p, 'w', encoding='utf-8') as f:
   local manifest_5="$scratch/.agent-style/skills/style-review/manifest.json"
   local manifest_5_native
   manifest_5_native="$(cygpath -w "$manifest_5" 2>/dev/null || echo "$manifest_5")"
-  /c/Users/yuezh/miniforge3/envs/py312/python.exe -c "
+  "$PY_BIN" -c "
 import json
 p = r'''$manifest_5_native'''
 with open(p, encoding='utf-8') as f:
@@ -202,7 +227,7 @@ with open(p, 'w', encoding='utf-8') as f:
   local manifest_7="$scratch/.agent-style/skills/style-review/manifest.json"
   local manifest_7_native
   manifest_7_native="$(cygpath -w "$manifest_7" 2>/dev/null || echo "$manifest_7")"
-  /c/Users/yuezh/miniforge3/envs/py312/python.exe -c "
+  "$PY_BIN" -c "
 import json
 p = r'''$manifest_7_native'''
 with open(p, encoding='utf-8') as f:
