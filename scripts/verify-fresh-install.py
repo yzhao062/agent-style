@@ -15,7 +15,7 @@ import sys
 import tempfile
 
 EXPECTED_VERSION = "0.2.0"
-EXPECTED_TOOL_COUNT = 8
+EXPECTED_TOOL_COUNT = 9  # 0.2.0 adds `style-review` to the existing 8
 
 SCRATCH = tempfile.mkdtemp(prefix="as-final-")
 print(f"scratch: {SCRATCH}")
