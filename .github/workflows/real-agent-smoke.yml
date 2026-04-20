@@ -1,0 +1,208 @@
+# SPDX-License-Identifier: MIT
+
+name: Real-Agent Smoke
+
+# Exercises Claude Code and Codex non-interactively against the real
+# Anthropic and OpenAI APIs to verify that `agent-style enable <tool>`
+# actually installs the adapter and that each agent reads it and returns
+# the expected self-verification probe. GitHub Actions runners do not
+# ship the agents; this workflow installs them, uses API-key secrets,
+# and spends roughly $0.04 per run (three short API calls).
+#
+# Triggers are intentionally narrow to keep API cost low. This is a
+# behavior-verification run, not a per-push check; mechanical drift is
+# caught by validate.yml on every push.
+#
+#   - release.published  validates each release after it is tagged
+#   - workflow_dispatch  manual run against any branch from the Actions UI
+#
+# Required repository secrets:
+#   ANTHROPIC_API_KEY  https://console.anthropic.com/settings/keys
+#   OPENAI_API_KEY     https://platform.openai.com/api-keys
+#
+# The expected agent-style version comes from `agent-style --version`
+# of the installed package (not from the repo checkout), so the probe
+# assertion always matches the version actually shipped.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  claude-pip:
+    name: Claude Code sees adapter (installed via pip)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: Install agent-style via pip
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install agent-style
+
+      - name: Enable Claude Code adapter
+        run: |
+          set -euo pipefail
+          agent-style enable claude-code
+          echo "--- CLAUDE.md ---"
+          cat CLAUDE.md
+          echo "--- .agent-style/ ---"
+          ls -la .agent-style/
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Probe Claude for the self-verification handshake
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          EXPECTED_VERSION=$(agent-style --version | awk '{print $2}')
+          echo "expected version: $EXPECTED_VERSION"
+          PROMPT='Is agent-style active? Reply on one line using the exact literal sentence from your adapter.'
+          RESP=$(claude -p "$PROMPT")
+          echo "::group::claude response"
+          echo "$RESP"
+          echo "::endgroup::"
+          MISSING=()
+          for token in "agent-style" "$EXPECTED_VERSION" "21 rules" "RULE-01" "RULE-A"; do
+            if ! grep -q -- "$token" <<<"$RESP"; then
+              MISSING+=("$token")
+            fi
+          done
+          if [ "${#MISSING[@]}" -gt 0 ]; then
+            echo "::error::Claude response missing expected tokens: ${MISSING[*]}"
+            exit 1
+          fi
+          echo "PASS: Claude sees agent-style $EXPECTED_VERSION adapter (installed via pip) with both rule groups"
+
+  claude-npm:
+    name: Claude Code sees adapter (installed via npm)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: Install agent-style via npm
+        run: npm install -g agent-style
+
+      - name: Enable Claude Code adapter
+        run: |
+          set -euo pipefail
+          agent-style enable claude-code
+          echo "--- CLAUDE.md ---"
+          cat CLAUDE.md
+          echo "--- .agent-style/ ---"
+          ls -la .agent-style/
+
+      - name: Check `agent-style rules` does not truncate on pipe (regression from v0.1.0)
+        run: |
+          set -euo pipefail
+          RULES_BYTES=$(agent-style rules | wc -c)
+          echo "rules output bytes: $RULES_BYTES"
+          if [ "$RULES_BYTES" -lt 80000 ]; then
+            echo "::error::regression: agent-style rules piped output truncated at $RULES_BYTES bytes"
+            exit 1
+          fi
+          # Sanity check: head -3 exits cleanly (EPIPE handling)
+          agent-style rules | head -3
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Probe Claude for the self-verification handshake
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          EXPECTED_VERSION=$(agent-style --version | awk '{print $2}')
+          echo "expected version: $EXPECTED_VERSION"
+          PROMPT='Is agent-style active? Reply on one line using the exact literal sentence from your adapter.'
+          RESP=$(claude -p "$PROMPT")
+          echo "::group::claude response"
+          echo "$RESP"
+          echo "::endgroup::"
+          MISSING=()
+          for token in "agent-style" "$EXPECTED_VERSION" "21 rules" "RULE-01" "RULE-A"; do
+            if ! grep -q -- "$token" <<<"$RESP"; then
+              MISSING+=("$token")
+            fi
+          done
+          if [ "${#MISSING[@]}" -gt 0 ]; then
+            echo "::error::Claude response missing expected tokens: ${MISSING[*]}"
+            exit 1
+          fi
+          echo "PASS: Claude sees agent-style $EXPECTED_VERSION adapter (installed via npm) with both rule groups"
+
+  codex:
+    name: Codex sees adapter via AGENTS.md
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install agent-style via pip
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install agent-style
+
+      - name: Enable the AGENTS.md adapter (safe-append)
+        run: |
+          set -euo pipefail
+          # The repo ships agents/AGENTS.md (the adapter SOURCE), not a
+          # project-root AGENTS.md that Codex would actually read. The
+          # enable subcommand creates / safe-appends to root AGENTS.md.
+          agent-style enable agents-md
+          echo "--- AGENTS.md ---"
+          cat AGENTS.md
+
+      # Use OpenAI's official action rather than `npm install -g @openai/codex`
+      # + direct `codex exec`, because the action starts the Responses API
+      # proxy that API-key auth requires.
+      - name: Run Codex via official action
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt: "Is agent-style active? Reply on one line using the exact literal sentence from AGENTS.md."
+          output-file: codex-response.txt
+          safety-strategy: drop-sudo
+          sandbox: read-only
+
+      - name: Verify Codex response matches the self-verification handshake
+        run: |
+          set -euo pipefail
+          EXPECTED_VERSION=$(agent-style --version | awk '{print $2}')
+          echo "expected version: $EXPECTED_VERSION"
+          RESP=$(cat codex-response.txt)
+          echo "::group::codex response"
+          echo "$RESP"
+          echo "::endgroup::"
+          MISSING=()
+          for token in "agent-style" "$EXPECTED_VERSION" "21 rules" "RULE-01" "RULE-A"; do
+            if ! grep -q -- "$token" <<<"$RESP"; then
+              MISSING+=("$token")
+            fi
+          done
+          if [ "${#MISSING[@]}" -gt 0 ]; then
+            echo "::error::Codex response missing expected tokens: ${MISSING[*]}"
+            exit 1
+          fi
+          echo "PASS: Codex sees agent-style $EXPECTED_VERSION adapter with both rule groups"
