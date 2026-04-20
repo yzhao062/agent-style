@@ -8,9 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 ## [Unreleased]
 
-### Added
-
-- **Kiro (AWS IDE) adapter** via steering file (`install_mode: owned-file`). `agent-style enable kiro` writes `.kiro/steering/agent-style.md` with `inclusion: auto` frontmatter; Kiro loads steering files into every agent interaction, so the 21 rules apply to all prose generation in the workspace. Same 5-point content contract as the other primary adapters (versioned self-verification handshake, compact directives, load statement, full-body pointer, escape hatch). `adapter-matrix.md` bumped to 9 primary adapters. Thanks @Alex-jjh ([#2](https://github.com/yzhao062/agent-style/pull/2)) for the adapter.
+*No unreleased changes queued.*
 
 ## [0.2.0] — 2026-04-20
 
