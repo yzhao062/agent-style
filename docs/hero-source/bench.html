@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: MIT -->
+<!--
+  agent-style bench scorecard panel.
+  Visualizes the docs/bench-0.2.0.md numbers in the editorial style of
+  hero.html and sources.html: cream paper, double-rule frame, Georgia +
+  Segoe UI + mono typography, green accent for the improvement arc.
+
+  Render at 3x DPI:
+    "C:/Program Files/Google/Chrome/Application/chrome.exe" \
+      --headless --disable-gpu --hide-scrollbars \
+      --force-device-scale-factor=3 --window-size=1200,600 \
+      --screenshot="C:/Users/yuezh/PycharmProjects/agent-style/docs/bench.png" \
+      "file:///C:/Users/yuezh/PycharmProjects/agent-style/docs/hero-source/bench.html"
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>agent-style — bench scorecard</title>
+<style>
+  :root {
+    --paper: #f7f3ea;
+    --paper-deep: #ebe5d4;
+    --ink: #1a1815;
+    --ink-mid: #4a463e;
+    --rule: #8a8370;
+    --tile-bg: #fffdf7;
+    --baseline-bg: #e6dfc8;       /* muted sandstone for baseline bars */
+    --baseline-border: #a89c72;
+    --treatment-bg: #cbdcb7;       /* soft green for treatment bars */
+    --treatment-border: #7fa268;
+    --accent: #3d5e2a;             /* deep green for delta numbers */
+    --caveat: #8a2d2d;             /* dusty red accent for caveat chip */
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .bench {
+    width: 1200px;
+    padding: 26px 34px 24px 34px;
+    box-sizing: border-box;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px var(--ink-mid);
+  }
+  .top-label {
+    font-family: "Segoe UI", "SF Pro Text", system-ui, sans-serif;
+    letter-spacing: 0.22em;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  /* Headline: big arrow between baseline and treatment totals */
+  .headline {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .headline-number {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: "Playfair Display", Georgia, serif;
+    white-space: nowrap;
+  }
+  .headline-number .baseline-val {
+    font-size: 46px;
+    font-weight: 700;
+    color: var(--ink-mid);
+  }
+  .headline-number .arrow {
+    font-size: 34px;
+    color: var(--rule);
+    font-weight: 400;
+  }
+  .headline-number .treatment-val {
+    font-size: 58px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .headline-number .delta {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 16px;
+    color: var(--accent);
+    padding: 3px 9px;
+    background: var(--tile-bg);
+    border: 1px solid var(--treatment-border);
+    border-radius: 3px;
+    margin-left: 6px;
+    font-weight: 600;
+  }
+  .headline-copy {
+    font-family: Georgia, serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .headline-copy .lead {
+    font-size: 15.5px;
+    font-weight: 600;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* Section label (small caps, divider rule above) */
+  .section-label {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-mid);
+    font-weight: 600;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-top: 1px solid var(--rule);
+    opacity: 0.95;
+    margin-top: 6px;
+  }
+
+  /* Per-rule bar rows */
+  .rules {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .rule-row {
+    display: grid;
+    grid-template-columns: 170px 1fr 84px;
+    gap: 14px;
+    align-items: center;
+  }
+  .rule-id-col {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 12px;
+    color: var(--ink);
+  }
+  .rule-id-col .id {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .rule-id-col .label {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 10.5px;
+    color: var(--ink-mid);
+    display: block;
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+  .bar-cluster {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 11px;
+  }
+  .bar .tag {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 9.5px;
+    color: var(--ink-mid);
+    width: 68px;
+    flex-shrink: 0;
+  }
+  .bar-fill {
+    height: 11px;
+    border-radius: 2px;
+    border: 1px solid var(--baseline-border);
+    background: var(--baseline-bg);
+  }
+  .bar.treatment .bar-fill {
+    background: var(--treatment-bg);
+    border-color: var(--treatment-border);
+  }
+  .bar .count {
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 600;
+    min-width: 22px;
+  }
+  .delta-col {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 700;
+    text-align: right;
+  }
+
+  .legend {
+    display: flex;
+    gap: 22px;
+    justify-content: center;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 11px;
+    color: var(--ink-mid);
+    margin: 4px 0 14px 0;
+  }
+  .legend .swatch {
+    display: inline-block;
+    width: 18px;
+    height: 10px;
+    border-radius: 2px;
+    vertical-align: middle;
+    margin-right: 6px;
+    border: 1px solid var(--baseline-border);
+    background: var(--baseline-bg);
+  }
+  .legend .swatch.treatment {
+    background: var(--treatment-bg);
+    border-color: var(--treatment-border);
+  }
+
+  /* Per-task highlight chips */
+  .highlights {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .highlight {
+    background: var(--tile-bg);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--treatment-border);
+    padding: 9px 12px 9px 12px;
+    border-radius: 2px;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 11.5px;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .highlight .name {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 11px;
+    color: var(--ink-mid);
+    letter-spacing: 0.02em;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .highlight .nums {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 17px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .highlight .nums .base {
+    color: var(--ink-mid);
+    font-weight: 400;
+  }
+  .highlight .nums .arr {
+    color: var(--rule);
+    font-weight: 400;
+    margin: 0 4px;
+  }
+  .highlight .note {
+    font-size: 10.5px;
+    color: var(--ink-mid);
+    display: block;
+    margin-top: 1px;
+  }
+
+  .footer {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 11px;
+    color: var(--ink-mid);
+    text-align: center;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding-top: 10px;
+    border-top: 1px solid var(--rule);
+  }
+  .footer .sep { color: var(--rule); margin: 0 9px; }
+  .footer code {
+    font-family: "SF Mono", Consolas, monospace;
+    text-transform: none;
+    letter-spacing: 0;
+    background: white;
+    padding: 1px 5px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    font-size: 10px;
+    color: var(--ink-mid);
+  }
+  .footer .caveat {
+    color: var(--caveat);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+  }
+</style>
+</head>
+<body>
+<div class="bench">
+
+  <div class="top-label">sanity benchmark · agent-style v0.2.0 · 10 fixed prose tasks</div>
+
+  <div class="headline">
+    <div class="headline-number">
+      <span class="baseline-val">47</span>
+      <span class="arrow">&rarr;</span>
+      <span class="treatment-val">30</span>
+      <span class="delta">&minus;17 (&minus;36%)</span>
+    </div>
+    <div class="headline-copy">
+      <span class="lead">Does <code style="font-family:'SF Mono',Consolas,monospace;font-size:13px;background:#fff;border:1px solid var(--rule);padding:0 4px;border-radius:2px">agent-style</code> actually reduce AI-tell density?</span>
+      On 10 fixed prose tasks (5 PR descriptions, 3 design-doc sections, 2 commit messages),
+      two generations each, Claude Code drafted with <em>agent-style</em> loaded at generation time
+      logged fewer mechanical + structural rule violations.
+    </div>
+  </div>
+
+  <div class="section-label">per-rule aggregate</div>
+
+  <div class="rules">
+
+    <div class="rule-row">
+      <div class="rule-id-col">
+        <span class="id">RULE-12</span>
+        <span class="label">sentences over 30 words</span>
+      </div>
+      <div class="bar-cluster">
+        <div class="bar baseline">
+          <span class="tag">baseline</span>
+          <span class="bar-fill" style="width: 100%;"></span>
+          <span class="count">24</span>
+        </div>
+        <div class="bar treatment">
+          <span class="tag">treatment</span>
+          <span class="bar-fill" style="width: 75%;"></span>
+          <span class="count">18</span>
+        </div>
+      </div>
+      <div class="delta-col">&minus;6</div>
+    </div>
+
+    <div class="rule-row">
+      <div class="rule-id-col">
+        <span class="id">RULE-B</span>
+        <span class="label">em / en-dash casual punctuation</span>
+      </div>
+      <div class="bar-cluster">
+        <div class="bar baseline">
+          <span class="tag">baseline</span>
+          <span class="bar-fill" style="width: 62.5%;"></span>
+          <span class="count">15</span>
+        </div>
+        <div class="bar treatment">
+          <span class="tag">treatment</span>
+          <span class="bar-fill" style="width: 37.5%;"></span>
+          <span class="count">9</span>
+        </div>
+      </div>
+      <div class="delta-col">&minus;6</div>
+    </div>
+
+    <div class="rule-row">
+      <div class="rule-id-col">
+        <span class="id">RULE-G</span>
+        <span class="label">heading title case</span>
+      </div>
+      <div class="bar-cluster">
+        <div class="bar baseline">
+          <span class="tag">baseline</span>
+          <span class="bar-fill" style="width: 20.8%;"></span>
+          <span class="count">5</span>
+        </div>
+        <div class="bar treatment">
+          <span class="tag">treatment</span>
+          <span class="bar-fill" style="width: 8.3%;"></span>
+          <span class="count">2</span>
+        </div>
+      </div>
+      <div class="delta-col">&minus;3</div>
+    </div>
+
+    <div class="rule-row">
+      <div class="rule-id-col">
+        <span class="id">RULE-I</span>
+        <span class="label">contractions in formal prose</span>
+      </div>
+      <div class="bar-cluster">
+        <div class="bar baseline">
+          <span class="tag">baseline</span>
+          <span class="bar-fill" style="width: 12.5%;"></span>
+          <span class="count">3</span>
+        </div>
+        <div class="bar treatment">
+          <span class="tag">treatment</span>
+          <span class="bar-fill" style="width: 4.2%;"></span>
+          <span class="count">1</span>
+        </div>
+      </div>
+      <div class="delta-col">&minus;2</div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <span><span class="swatch"></span>baseline&nbsp; (no <em>agent-style</em> loaded)</span>
+    <span><span class="swatch treatment"></span>treatment&nbsp; (agent-style at generation time)</span>
+  </div>
+
+  <div class="section-label">per-task highlights</div>
+
+  <div class="highlights">
+    <div class="highlight">
+      <span class="name">design-01 · incident-response</span>
+      <span class="nums"><span class="base">9</span><span class="arr">&rarr;</span>0</span>
+      <span class="note">largest single-task drop; all 9 RULE-12 sentences split.</span>
+    </div>
+    <div class="highlight">
+      <span class="name">design-03 · schema-migration</span>
+      <span class="nums"><span class="base">12</span><span class="arr">&rarr;</span>6</span>
+      <span class="note">halved; transitions + long sentences rewritten.</span>
+    </div>
+    <div class="highlight">
+      <span class="name">design-02 · rate-limiter</span>
+      <span class="nums"><span class="base">14</span><span class="arr">&rarr;</span>11</span>
+      <span class="note">partial; dense technical prose resists nudge alone.</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    sanity benchmark
+    <span class="sep">&middot;</span>
+    10 tasks &middot; 2 generations each
+    <span class="sep">&middot;</span>
+    <span class="caveat">directional, not statistically significant</span>
+    <span class="sep">&middot;</span>
+    reproduce: <code>gh workflow run bench.yml</code>
+  </div>
+
+</div>
+</body>
+</html>

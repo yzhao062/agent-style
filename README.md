@@ -211,7 +211,9 @@ agent-style review --compare a.md b.md                # A/B delta per rule
 
 **What you get from `agent-style review DESIGN.md`** (CLI path): the same deterministic audit — mechanical + structural detectors for em-dashes, jargon, transition openers, clichés, contractions, sentence length, bullet overuse, same-starts, paragraph closers. Semantic rules (vague claims, unsupported claims, etc.) return `status: "skipped"` because they need a skill host's model. No polish from the plain CLI.
 
-See [`docs/bench-0.2.0.md`](docs/bench-0.2.0.md) for a sanity benchmark of how much `style-review` actually reduces AI-tell density on 10 fixed tasks.
+![agent-style v0.2.0 sanity bench: 47 to 30 AI-tell violations across 10 fixed prose tasks, per-rule breakdown and top per-task deltas, with an explicit directional-not-statsig caveat](docs/bench.png)
+
+Sanity bench on 10 fixed prose tasks (5 PR descriptions, 3 design-doc sections, 2 commit messages), 2 generations each, Claude Code drafting with `agent-style` loaded at generation time vs not. See [`docs/bench-0.2.0.md`](docs/bench-0.2.0.md) for the raw scorecard and [`scripts/bench/run.sh`](scripts/bench/run.sh) + [`.github/workflows/bench.yml`](.github/workflows/bench.yml) to reproduce.
 
 <details>
 <summary><b>Skill workflow in detail (what the SKILL.md tells Claude Code to do)</b></summary>
