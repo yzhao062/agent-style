@@ -1,0 +1,151 @@
+# SPDX-License-Identifier: MIT
+#
+# Adapter smoke — OpenAI Agents SDK. Installs agent-style, enables the codex
+# adapter (which writes the Codex system prompt to .agent-style/), then uses
+# the OpenAI Agents SDK to run an Agent configured with that system prompt
+# against 3 fixed prompts. Scores each draft with agent-style review
+# --mechanical-only --audit-only. Enforces two gates: each draft must be
+# >= 20 chars, and total mechanical violations across the 3 drafts must stay
+# under the calibrated threshold (25; nano is the weakest of the three adapter
+# smokes, so the ceiling is higher than aider's or gemini's).
+#
+# Secrets: OPENAI_API_KEY (reused from real-agent-smoke).
+# Cost: ~$0.01 per run on gpt-5.4-nano (~$0.75/$4.50 per M in/out).
+
+name: Adapter Smoke — OpenAI Agents SDK (Codex)
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: 'OpenAI model (gpt-5.4-nano, gpt-5.4, …)'
+        required: false
+        default: 'gpt-5.4-nano'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_MODEL: ${{ github.event.inputs.model }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install agent-style + openai-agents
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip build
+          python -m build packages/pypi --outdir packages/pypi/dist
+          python -m pip install packages/pypi/dist/agent_style-*.whl openai-agents
+          sudo apt-get update -qq && sudo apt-get install -y -qq jq
+          agent-style --version
+          python -c "import agents; print('openai-agents', agents.__version__)"
+
+      - name: Enable codex adapter in scratch workspace
+        id: setup
+        run: |
+          set -euo pipefail
+          SCRATCH="$(mktemp -d)"
+          cd "$SCRATCH"
+          agent-style enable codex > /dev/null
+          head -20 .agent-style/codex-system-prompt.md
+          mkdir drafts
+          echo "scratch=$SCRATCH" >> "$GITHUB_OUTPUT"
+
+      - name: Generate 3 drafts via Agents SDK
+        env:
+          SCRATCH: ${{ steps.setup.outputs.scratch }}
+        run: |
+          set -euo pipefail
+          cd "$SCRATCH"
+          cat > run_agent.py <<'PYEOF'
+          import os, sys
+          from agents import Agent, Runner
+          from pathlib import Path
+
+          sys_prompt = Path(".agent-style/codex-system-prompt.md").read_text(encoding="utf-8")
+          model = os.environ["OPENAI_MODEL"]
+
+          prompts = [
+              ("drafts/pr-desc.md",
+               "Write a 3-sentence GitHub PR description for a change that switches session "
+               "storage from in-memory LRU to Redis with a 5-minute TTL. Include the rollout "
+               "plan and the biggest trade-off. Output only the PR description text, no commentary."),
+              ("drafts/design.md",
+               "Write a 120-word design-doc section titled 'Incident detection' about automated "
+               "5xx rate alerting for a payment authorization API. Output only the section body "
+               "under an H2 heading; no commentary."),
+              ("drafts/commit.md",
+               "Write a 2-line Git commit message for a bug fix: the /reports endpoint rounded "
+               "timestamps before applying the user's timezone offset, causing events near "
+               "midnight to show up on the wrong day. First line <= 50 chars, imperative mood. "
+               "Output only the commit message, no commentary."),
+          ]
+
+          agent = Agent(name="prose-writer", instructions=sys_prompt, model=model)
+          for out, prompt in prompts:
+              result = Runner.run_sync(agent, prompt)
+              Path(out).write_text(result.final_output, encoding="utf-8")
+              print(f"wrote {out} ({len(result.final_output)} chars)")
+          PYEOF
+          python run_agent.py
+          ls -la drafts/
+          wc -c drafts/*.md
+
+      - name: Score drafts + enforce gates
+        env:
+          SCRATCH: ${{ steps.setup.outputs.scratch }}
+          # Nano is the weakest model of the three adapter smokes; threshold
+          # set at 25 = ~8.3/draft to allow for nano's lower instruction-
+          # following fidelity. Bump down if swapped to gpt-5.4 full.
+          VIOLATION_THRESHOLD: 25
+        run: |
+          set -euo pipefail
+          cd "$SCRATCH"
+          failed=0
+          total=0
+          # Gate 1 (hard): each draft must exist and be >= 20 chars.
+          for f in drafts/pr-desc.md drafts/design.md drafts/commit.md; do
+            if [ ! -s "$f" ] || [ "$(wc -c < "$f")" -lt 20 ]; then
+              echo "::error::gate-1 fail: $f is empty or under 20 chars"
+              failed=1
+            fi
+          done
+          [ "$failed" -eq 0 ] || exit 1
+          # Per-draft score + per-rule breakdown for diagnostics.
+          for f in drafts/*.md; do
+            json=$(agent-style review --mechanical-only --audit-only "$f")
+            if ! count=$(jq -er '.total_violations | numbers' <<<"$json"); then
+              echo "::error::score JSON missing numeric .total_violations for $f"
+              echo "$json"
+              exit 1
+            fi
+            echo "::group::$f — $count violations"
+            jq -r '.rule_results | map(select(.count > 0)) | .[] | "  \(.rule): \(.count)"' <<<"$json"
+            echo "::endgroup::"
+            total=$((total + count))
+          done
+          echo "TOTAL: $total violations across 3 drafts (threshold $VIOLATION_THRESHOLD)"
+          # Gate 2 (soft): aggregate violation count must be under calibrated threshold.
+          if [ "$total" -ge "$VIOLATION_THRESHOLD" ]; then
+            echo "::error::gate-2 fail: $total >= $VIOLATION_THRESHOLD; adapter likely not applied or model broke"
+            exit 1
+          fi
+          echo "PASS: gates 1+2 clear ($total / $VIOLATION_THRESHOLD)"
+
+      - name: Upload drafts + prompt
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: agents-sdk-drafts
+          path: |
+            ${{ steps.setup.outputs.scratch }}/drafts
+            ${{ steps.setup.outputs.scratch }}/.agent-style
+          if-no-files-found: error

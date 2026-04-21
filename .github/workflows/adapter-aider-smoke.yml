@@ -1,0 +1,140 @@
+# SPDX-License-Identifier: MIT
+#
+# Adapter smoke — Aider. Installs agent-style, enables the aider adapter in a
+# scratch workspace, runs aider against 3 fixed prompts (writing prose into
+# empty target files), and scores each draft with agent-style review
+# --mechanical-only --audit-only. Enforces two gates: each draft must be
+# >= 20 chars, and total mechanical violations across the 3 drafts must stay
+# under the calibrated threshold (15).
+#
+# Secrets: ANTHROPIC_API_KEY (reused from real-agent-smoke; aider points at
+# Sonnet by default).
+# Cost: ~$0.10 per run on Sonnet 4.6 for 3 short drafts.
+
+name: Adapter Smoke — Aider
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: 'Aider LLM alias (sonnet, opus, gpt-4o, …)'
+        required: false
+        default: 'sonnet'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      AIDER_MODEL: ${{ github.event.inputs.model }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install agent-style + aider
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip build
+          python -m build packages/pypi --outdir packages/pypi/dist
+          python -m pip install packages/pypi/dist/agent_style-*.whl aider-chat
+          sudo apt-get update -qq && sudo apt-get install -y -qq jq
+          agent-style --version
+          aider --version
+
+      - name: Enable aider adapter in scratch workspace
+        id: setup
+        run: |
+          set -euo pipefail
+          SCRATCH="$(mktemp -d)"
+          cd "$SCRATCH"
+          agent-style enable aider
+          cat > .aider.conf.yml <<'EOF'
+          read:
+            - .agent-style/aider-conventions.md
+            - .agent-style/RULES.md
+          auto-commits: false
+          no-git: true
+          yes-always: true
+          EOF
+          git init -q
+          git config user.email bot@example.com
+          git config user.name bot
+          git add .
+          git commit -q -m init
+          mkdir drafts
+          : > drafts/pr-desc.md
+          : > drafts/design.md
+          : > drafts/commit.md
+          echo "scratch=$SCRATCH" >> "$GITHUB_OUTPUT"
+
+      - name: Generate 3 drafts via aider
+        env:
+          SCRATCH: ${{ steps.setup.outputs.scratch }}
+        run: |
+          set -euo pipefail
+          cd "$SCRATCH"
+          aider drafts/pr-desc.md --message "Replace the content of drafts/pr-desc.md with a 3-sentence GitHub PR description for a change that switches session storage from in-memory LRU to Redis with a 5-minute TTL. Include the rollout plan and the biggest trade-off." --no-show-model-warnings --model "$AIDER_MODEL" 2>&1 | tail -20
+          aider drafts/design.md  --message "Replace the content of drafts/design.md with a 120-word design-doc section titled 'Incident detection' about automated 5xx rate alerting for a payment authorization API." --no-show-model-warnings --model "$AIDER_MODEL" 2>&1 | tail -20
+          aider drafts/commit.md  --message "Replace the content of drafts/commit.md with a 2-line Git commit message for a bug fix: the /reports endpoint rounded timestamps before applying the user's timezone offset, causing events near midnight to show up on the wrong day. First line <= 50 chars, imperative mood." --no-show-model-warnings --model "$AIDER_MODEL" 2>&1 | tail -20
+          ls -la drafts/
+          wc -c drafts/*.md
+
+      - name: Score drafts + enforce gates
+        env:
+          SCRATCH: ${{ steps.setup.outputs.scratch }}
+          # Calibrated to docs/bench-0.2.0.md: Sonnet-class treatment averages
+          # ~1.5 violations/draft; threshold = 3 drafts × 5/draft (3.3x headroom).
+          VIOLATION_THRESHOLD: 15
+        run: |
+          set -euo pipefail
+          cd "$SCRATCH"
+          failed=0
+          total=0
+          # Gate 1 (hard): each draft must exist and be >= 20 chars.
+          for f in drafts/pr-desc.md drafts/design.md drafts/commit.md; do
+            if [ ! -s "$f" ] || [ "$(wc -c < "$f")" -lt 20 ]; then
+              echo "::error::gate-1 fail: $f is empty or under 20 chars"
+              failed=1
+            fi
+          done
+          [ "$failed" -eq 0 ] || exit 1
+          # Per-draft score + per-rule breakdown for diagnostics.
+          for f in drafts/*.md; do
+            json=$(agent-style review --mechanical-only --audit-only "$f")
+            # Require numeric .total_violations; a missing/null value fails the
+            # job with an explicit message rather than an opaque Bash arithmetic
+            # error under `set -u`.
+            if ! count=$(jq -er '.total_violations | numbers' <<<"$json"); then
+              echo "::error::score JSON missing numeric .total_violations for $f"
+              echo "$json"
+              exit 1
+            fi
+            echo "::group::$f — $count violations"
+            jq -r '.rule_results | map(select(.count > 0)) | .[] | "  \(.rule): \(.count)"' <<<"$json"
+            echo "::endgroup::"
+            total=$((total + count))
+          done
+          echo "TOTAL: $total violations across 3 drafts (threshold $VIOLATION_THRESHOLD)"
+          # Gate 2 (soft): aggregate violation count must be under calibrated threshold.
+          if [ "$total" -ge "$VIOLATION_THRESHOLD" ]; then
+            echo "::error::gate-2 fail: $total >= $VIOLATION_THRESHOLD; adapter likely not applied or model broke"
+            exit 1
+          fi
+          echo "PASS: gates 1+2 clear ($total / $VIOLATION_THRESHOLD)"
+
+      - name: Upload drafts + config
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: aider-drafts
+          path: |
+            ${{ steps.setup.outputs.scratch }}/drafts
+            ${{ steps.setup.outputs.scratch }}/.agent-style
+            ${{ steps.setup.outputs.scratch }}/.aider.conf.yml
+          if-no-files-found: error

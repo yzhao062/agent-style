@@ -147,6 +147,136 @@ jobs:
           fi
           echo "PASS: Claude sees agent-style $EXPECTED_VERSION adapter (installed via npm) with both rule groups"
 
+  style-review-skill:
+    name: Claude Code sees style-review skill
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: Install agent-style from branch source
+        # Install from branch rather than PyPI so manual workflow_dispatch runs
+        # validate the repo's current state (skills post-v0.2.0 may not yet be
+        # in the published package). On release.published, the checkout is the
+        # tag, so the branch install matches the release contents.
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip build
+          python -m build packages/pypi --outdir packages/pypi/dist
+          python -m pip install packages/pypi/dist/agent_style-*.whl
+          agent-style --version
+
+      - name: Enable claude-code first (so style-review sees an active surface)
+        run: |
+          set -euo pipefail
+          agent-style enable claude-code
+          agent-style enable style-review
+          echo "--- installed skill files ---"
+          ls -la .claude/skills/style-review/
+          ls -la .agent-style/skills/style-review/references/
+          echo "--- manifest ---"
+          cat .agent-style/skills/style-review/manifest.json | head -20
+
+      - name: Static check — skill body contains the handshake sentence
+        run: |
+          set -euo pipefail
+          SKILL=.claude/skills/style-review/SKILL.md
+          [ -f "$SKILL" ] || { echo "::error::$SKILL missing"; exit 1; }
+          MISSING=()
+          for token in "style-review active" "21 rules" "deterministic" "semantic via host" "workflow at skills/style-review"; do
+            if ! grep -q -- "$token" "$SKILL"; then
+              MISSING+=("$token")
+            fi
+          done
+          if [ "${#MISSING[@]}" -gt 0 ]; then
+            echo "::error::skill body missing tokens: ${MISSING[*]}"
+            exit 1
+          fi
+          echo "PASS: skill body carries the full handshake"
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Probe Claude for the style-review handshake
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          PROMPT='Is style-review active? Reply on one line using the exact literal sentence from the skill.'
+          RESP=$(claude -p "$PROMPT")
+          echo "::group::claude response"
+          echo "$RESP"
+          echo "::endgroup::"
+          MISSING=()
+          for token in "style-review active" "21 rules" "deterministic" "semantic via host"; do
+            if ! grep -q -- "$token" <<<"$RESP"; then
+              MISSING+=("$token")
+            fi
+          done
+          if [ "${#MISSING[@]}" -gt 0 ]; then
+            echo "::error::Claude response missing style-review tokens: ${MISSING[*]}"
+            exit 1
+          fi
+          echo "PASS: Claude sees style-review skill with the full handshake"
+
+  kiro-adapter-body:
+    name: Kiro adapter body is well-formed (static)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install agent-style from branch source
+        # Install from branch rather than PyPI: Kiro was added post-v0.2.0 via
+        # PR #2 and is not yet in the published package.
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip build
+          python -m build packages/pypi --outdir packages/pypi/dist
+          python -m pip install packages/pypi/dist/agent_style-*.whl
+          agent-style --version
+
+      - name: Enable kiro adapter
+        run: |
+          set -euo pipefail
+          agent-style enable kiro
+          echo "--- .kiro/steering/agent-style.md ---"
+          cat .kiro/steering/agent-style.md
+
+      - name: Static check — adapter body carries the handshake + YAML frontmatter
+        run: |
+          set -euo pipefail
+          FILE=.kiro/steering/agent-style.md
+          EXPECTED_VERSION=$(agent-style --version | awk '{print $2}')
+          [ -f "$FILE" ] || { echo "::error::$FILE missing"; exit 1; }
+          MISSING=()
+          for token in "agent-style v$EXPECTED_VERSION" "21 rules" "RULE-01" "RULE-A" "inclusion: auto"; do
+            if ! grep -q -- "$token" "$FILE"; then
+              MISSING+=("$token")
+            fi
+          done
+          if [ "${#MISSING[@]}" -gt 0 ]; then
+            echo "::error::kiro adapter body missing tokens: ${MISSING[*]}"
+            exit 1
+          fi
+          # Frontmatter shape: line 1 = opening `---`, line 3 = `inclusion: auto`,
+          # line 4 = closing `---`. Exact-line checks so the closing delimiter
+          # cannot be satisfied by the opener alone.
+          sed -n '1p' "$FILE" | grep -qx -- '---'            || { echo "::error::kiro adapter: line 1 is not '---'"; exit 1; }
+          sed -n '3p' "$FILE" | grep -qx -- 'inclusion: auto' || { echo "::error::kiro adapter: line 3 is not 'inclusion: auto'"; exit 1; }
+          sed -n '4p' "$FILE" | grep -qx -- '---'            || { echo "::error::kiro adapter: line 4 is not '---' (frontmatter unclosed)"; exit 1; }
+          echo "PASS: kiro adapter body $EXPECTED_VERSION carries the full handshake + frontmatter"
+
   codex:
     name: Codex sees adapter via AGENTS.md
     runs-on: ubuntu-latest

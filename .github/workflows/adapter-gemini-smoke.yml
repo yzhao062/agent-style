@@ -1,0 +1,145 @@
+# SPDX-License-Identifier: MIT
+#
+# Adapter smoke — Gemini CLI (AGENTS.md proxy). Installs agent-style, enables
+# the agents-md adapter in a scratch workspace, configures Gemini CLI to read
+# AGENTS.md as context (its default is GEMINI.md), runs Gemini CLI against 3
+# fixed prompts, and scores each draft with agent-style review
+# --mechanical-only --audit-only. Enforces two gates: each draft must be
+# >= 20 chars, and total mechanical violations across the 3 drafts must stay
+# under the calibrated threshold (20; Flash is weaker at instruction-following
+# than Sonnet, so the ceiling is higher than aider's).
+#
+# This is the cheapest smoke: Gemini Flash free tier covers ~1500 req/day.
+#
+# Secrets: GEMINI_API_KEY (free tier is sufficient for this run).
+# Cost: $0 on Flash free tier.
+
+name: Adapter Smoke — Gemini CLI (AGENTS.md)
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: 'Gemini model (gemini-2.5-flash, gemini-2.5-pro, …)'
+        required: false
+        default: 'gemini-2.5-flash'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_MODEL: ${{ github.event.inputs.model }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '20'
+
+      - name: Install agent-style + gemini-cli
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip build
+          python -m build packages/pypi --outdir packages/pypi/dist
+          python -m pip install packages/pypi/dist/agent_style-*.whl
+          npm install -g @google/gemini-cli
+          sudo apt-get update -qq && sudo apt-get install -y -qq jq
+          agent-style --version
+          gemini --version || true
+
+      - name: Enable agents-md adapter + point Gemini at AGENTS.md
+        id: setup
+        run: |
+          set -euo pipefail
+          SCRATCH="$(mktemp -d)"
+          cd "$SCRATCH"
+          agent-style enable agents-md
+          # Gemini CLI defaults to GEMINI.md for context; override via settings
+          # so it reads the AGENTS.md this adapter writes. Keep GEMINI.md as a
+          # fallback so the setting is forward-compatible.
+          mkdir -p .gemini
+          cat > .gemini/settings.json <<'EOF'
+          {
+            "context": {
+              "fileName": ["AGENTS.md", "GEMINI.md"]
+            }
+          }
+          EOF
+          head -20 AGENTS.md
+          mkdir drafts
+          echo "scratch=$SCRATCH" >> "$GITHUB_OUTPUT"
+
+      - name: Generate 3 drafts via Gemini CLI
+        env:
+          SCRATCH: ${{ steps.setup.outputs.scratch }}
+        run: |
+          set -euo pipefail
+          cd "$SCRATCH"
+          P1="Write a 3-sentence GitHub PR description for a change that switches session storage from in-memory LRU to Redis with a 5-minute TTL. Include the rollout plan and the biggest trade-off. Output only the PR description text, no commentary."
+          P2="Write a 120-word design-doc section titled 'Incident detection' about automated 5xx rate alerting for a payment authorization API. Output only the section body under an H2 heading; no commentary."
+          P3="Write a 2-line Git commit message for a bug fix: the /reports endpoint rounded timestamps before applying the user's timezone offset, causing events near midnight to show up on the wrong day. First line <= 50 chars, imperative mood. Output only the commit message, no commentary."
+          gemini --prompt "$P1" --model "$GEMINI_MODEL" > drafts/pr-desc.md || true
+          gemini --prompt "$P2" --model "$GEMINI_MODEL" > drafts/design.md  || true
+          gemini --prompt "$P3" --model "$GEMINI_MODEL" > drafts/commit.md  || true
+          ls -la drafts/
+          wc -c drafts/*.md
+
+      - name: Score drafts + enforce gates
+        env:
+          SCRATCH: ${{ steps.setup.outputs.scratch }}
+          # Flash is weaker at instruction-following than Sonnet; threshold set
+          # at 20 = ~6.7/draft (vs Sonnet treatment mean ~1.5/draft in bench).
+          VIOLATION_THRESHOLD: 20
+        run: |
+          set -euo pipefail
+          cd "$SCRATCH"
+          failed=0
+          total=0
+          # Gate 1 (hard): each draft must exist and be >= 20 chars.
+          for f in drafts/pr-desc.md drafts/design.md drafts/commit.md; do
+            if [ ! -s "$f" ] || [ "$(wc -c < "$f")" -lt 20 ]; then
+              echo "::error::gate-1 fail: $f is empty or under 20 chars"
+              failed=1
+            fi
+          done
+          [ "$failed" -eq 0 ] || exit 1
+          # Per-draft score + per-rule breakdown for diagnostics.
+          for f in drafts/*.md; do
+            json=$(agent-style review --mechanical-only --audit-only "$f")
+            if ! count=$(jq -er '.total_violations | numbers' <<<"$json"); then
+              echo "::error::score JSON missing numeric .total_violations for $f"
+              echo "$json"
+              exit 1
+            fi
+            echo "::group::$f — $count violations"
+            jq -r '.rule_results | map(select(.count > 0)) | .[] | "  \(.rule): \(.count)"' <<<"$json"
+            echo "::endgroup::"
+            total=$((total + count))
+          done
+          echo "TOTAL: $total violations across 3 drafts (threshold $VIOLATION_THRESHOLD)"
+          # Gate 2 (soft): aggregate violation count must be under calibrated threshold.
+          if [ "$total" -ge "$VIOLATION_THRESHOLD" ]; then
+            echo "::error::gate-2 fail: $total >= $VIOLATION_THRESHOLD; adapter likely not applied or model broke"
+            exit 1
+          fi
+          echo "PASS: gates 1+2 clear ($total / $VIOLATION_THRESHOLD)"
+
+      - name: Upload drafts + AGENTS.md + gemini settings
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: gemini-drafts
+          path: |
+            ${{ steps.setup.outputs.scratch }}/drafts
+            ${{ steps.setup.outputs.scratch }}/AGENTS.md
+            ${{ steps.setup.outputs.scratch }}/.agent-style
+            ${{ steps.setup.outputs.scratch }}/.gemini
+          if-no-files-found: error
