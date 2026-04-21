@@ -8,7 +8,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 ## [Unreleased]
 
-_No unreleased changes queued._
+*No unreleased changes queued.*
 
 ## [0.3.0] — 2026-04-21
 
