@@ -8,6 +8,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 ## [Unreleased]
 
+_No unreleased changes queued._
+
+## [0.3.0] — 2026-04-21
+
 The v0.3.0 cycle turns the bench from a narrow, API-billable CI job into a full-family, long-form, zero-cost local tool: **5 runners** (claude, copilot, codex, gemini, openai) covering every major CLI-based coding agent, **academic-prose task coverage** (paper abstract / methods / experiments / related work) where AI-tells actually accumulate, and **subscription-first auth** that brings the per-release cost from ~$2.50 to $0. See the per-change entries below.
 
 ### Added
@@ -122,7 +126,8 @@ The v0.3.0 cycle turns the bench from a narrow, API-billable CI job into a full-
 
 ---
 
-[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/yzhao062/agent-style/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/yzhao062/agent-style/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/yzhao062/agent-style/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/yzhao062/agent-style/releases/tag/v0.1.0

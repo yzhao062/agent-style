@@ -182,7 +182,7 @@ Amazon Q Developer, JetBrains AI Assistant, Windsurf, Ollama, Replit, OpenCode, 
 Skip the package install; pin to a specific release so adapters and `RULES.md` stay consistent:
 
 ```bash
-AGENT_STYLE_REF=v0.2.0
+AGENT_STYLE_REF=v0.3.0
 mkdir -p .agent-style
 curl -fsSLo .agent-style/RULES.md       "https://raw.githubusercontent.com/yzhao062/agent-style/${AGENT_STYLE_REF}/RULES.md"
 curl -fsSLo .agent-style/claude-code.md "https://raw.githubusercontent.com/yzhao062/agent-style/${AGENT_STYLE_REF}/agents/claude-code.md"
