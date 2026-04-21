@@ -2,19 +2,29 @@
 
 name: Sanity Benchmark (3-model matrix)
 
-# DO NOT ADD push / pull_request / schedule TRIGGERS. Each full matrix
-# dispatch costs ~$1.47 across three model providers (Claude Opus 4.7 +
-# Gemini 2.5 Pro + GPT-5.4). Manual workflow_dispatch only — for release-cut
-# benchmarks and ad-hoc validation. A confirm input gate blocks accidental
-# clicks.
+# DO NOT ADD push / pull_request / schedule TRIGGERS.
 #
-# Cost per dispatch (default models):
-#   runners=all    — full matrix              ~$1.47 (Claude $1.20 + Gemini $0.10 + OpenAI $0.17)
-#   runners=claude — Claude Opus leg only     ~$1.20
-#   runners=gemini — Gemini Pro leg only      ~$0.10 (free tier may cover)
-#   runners=openai — OpenAI leg only          ~$0.17
-# Single-runner mode is meant for cheap targeted reruns; aggregation is
-# skipped in that mode.
+# WHEN TO DISPATCH: only on major/minor releases (v0.3.0, v0.4.0, v1.0.0)
+# or for explicit ad-hoc validation. Do NOT dispatch for every patch
+# release (v0.2.1, v0.2.2) — the handshake checks in real-agent-smoke.yml
+# already guard mechanical correctness on release.published at ~$0.04 per
+# run. This workflow is for publication-quality behavioral data only.
+#
+# COST MODEL. Defaults use cheap tiers so a casual dispatch is safe. For
+# publication-worthy data on a big release, override the model inputs to
+# flagships (opus / pro / gpt-5.4). Single-runner reruns skip aggregation.
+#
+#   Default matrix (sonnet / flash / nano)   ~$0.45 total
+#     Claude Sonnet 4.6 leg                  ~$0.40  (measured: $3/$15 per M; 40 calls × ~2k in + ~500 out)
+#     Gemini 2.5 Flash leg                   ~$0     (free tier covers 40 calls/day)
+#     OpenAI GPT-5.4 Nano leg                ~$0.02
+#
+#   Flagship matrix (opus / pro / gpt-5.4)   ~$2.20-$2.50 total
+#     Claude Opus 4.7 leg                    ~$1.95  (measured on Apr 21 2026)
+#     Gemini 2.5 Pro leg                     ~$0.10
+#     OpenAI GPT-5.4 leg                     ~$0.17
+#
+# A required confirm="run" input blocks accidental clicks either way.
 #
 # Required repository secrets:
 #   ANTHROPIC_API_KEY  https://console.anthropic.com/settings/keys
@@ -23,13 +33,13 @@ name: Sanity Benchmark (3-model matrix)
 #
 # Output: docs/bench-<VERSION>.md (aggregated matrix, runners=all only) +
 # per-runner scorecards uploaded as artifacts. Maintainer commits the
-# aggregated scorecard as part of the release cycle.
+# aggregated scorecard on the big-release cycle.
 
 on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: 'Type "run" to confirm you accept the cost for this dispatch (full matrix ~$1.47; single runner $0.01-$1.20).'
+        description: 'Type "run" to confirm cost: full matrix at defaults ~$0.45; flagship override ~$2.20-$2.50; single-runner $0-$2.00.'
         required: true
         type: string
       runners:
@@ -59,17 +69,17 @@ on:
           - pypi
           - branch
       claude_model:
-        description: 'Claude Code model (opus, sonnet, or full id)'
+        description: 'Claude Code model. Default is Sonnet (cheap); override to claude-opus-4-7 for publication-quality data.'
         required: false
-        default: 'claude-opus-4-7'
+        default: 'claude-sonnet-4-6'
       gemini_model:
-        description: 'Gemini model (gemini-2.5-pro, gemini-2.5-flash)'
+        description: 'Gemini model. Default is Flash (free tier); override to gemini-2.5-pro for flagship data.'
         required: false
-        default: 'gemini-2.5-pro'
+        default: 'gemini-2.5-flash'
       openai_model:
-        description: 'OpenAI model (gpt-5.4, gpt-5.4-mini, gpt-5.4-nano)'
+        description: 'OpenAI model. Default is Nano (cheap); override to gpt-5.4 for flagship data.'
         required: false
-        default: 'gpt-5.4'
+        default: 'gpt-5.4-nano'
 
 permissions:
   contents: read

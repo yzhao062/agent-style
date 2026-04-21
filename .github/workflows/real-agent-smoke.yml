@@ -70,7 +70,10 @@ jobs:
           EXPECTED_VERSION=$(agent-style --version | awk '{print $2}')
           echo "expected version: $EXPECTED_VERSION"
           PROMPT='Is agent-style active? Reply on one line using the exact literal sentence from your adapter.'
-          RESP=$(claude -p "$PROMPT")
+          # --model sonnet: handshake probes only verify adapter loading +
+          # instruction following, not prose quality; Sonnet is ~5x cheaper
+          # than Opus for equivalent signal on a 1-call probe.
+          RESP=$(claude -p --model sonnet "$PROMPT")
           echo "::group::claude response"
           echo "$RESP"
           echo "::endgroup::"
@@ -131,7 +134,10 @@ jobs:
           EXPECTED_VERSION=$(agent-style --version | awk '{print $2}')
           echo "expected version: $EXPECTED_VERSION"
           PROMPT='Is agent-style active? Reply on one line using the exact literal sentence from your adapter.'
-          RESP=$(claude -p "$PROMPT")
+          # --model sonnet: handshake probes only verify adapter loading +
+          # instruction following, not prose quality; Sonnet is ~5x cheaper
+          # than Opus for equivalent signal on a 1-call probe.
+          RESP=$(claude -p --model sonnet "$PROMPT")
           echo "::group::claude response"
           echo "$RESP"
           echo "::endgroup::"
@@ -222,7 +228,10 @@ jobs:
             'Here is the full contents of .claude/skills/style-review/SKILL.md:' \
             "$SKILL_BODY" \
             'Reply on one line with the exact literal self-verification sentence from the skill (starts with "style-review active"). Output only that sentence, nothing else.')
-          RESP=$(claude -p "$PROMPT")
+          # --model sonnet: handshake probes only verify adapter loading +
+          # instruction following, not prose quality; Sonnet is ~5x cheaper
+          # than Opus for equivalent signal on a 1-call probe.
+          RESP=$(claude -p --model sonnet "$PROMPT")
           echo "::group::claude response"
           echo "$RESP"
           echo "::endgroup::"
