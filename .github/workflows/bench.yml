@@ -1,28 +1,37 @@
 # SPDX-License-Identifier: MIT
 
-name: Sanity Benchmark
+name: Sanity Benchmark (3-model matrix)
 
-# Runs scripts/bench/run.sh against the live Anthropic API to measure whether
-# agent-style v<N> reduces AI-tell density across a fixed 10-task prose set.
-# Explicitly workflow_dispatch only — the bench costs ~$0.40-$0.80 per run
-# and is not needed on every push (validate.yml + real-agent-smoke.yml cover
-# mechanical correctness; this workflow measures behavior).
+# DO NOT ADD push / pull_request / schedule TRIGGERS. Each full matrix
+# dispatch costs ~$1.47 across three model providers (Claude Opus 4.7 +
+# Gemini 2.5 Pro + GPT-5.4). Manual workflow_dispatch only — for release-cut
+# benchmarks and ad-hoc validation. A confirm input gate blocks accidental
+# clicks.
 #
 # Required repository secrets:
 #   ANTHROPIC_API_KEY  https://console.anthropic.com/settings/keys
+#   GEMINI_API_KEY     https://aistudio.google.com/apikey  (free tier OK)
+#   OPENAI_API_KEY     https://platform.openai.com/api-keys
 #
-# Output: docs/bench-<version>.md scorecard (Markdown) uploaded as a workflow
-# artifact. Maintainer copies the artifact into the repo and commits it as
-# part of the release cycle.
+# Output: docs/bench-<VERSION>.md (aggregated matrix) + per-runner scorecards
+# uploaded as artifacts. Maintainer commits the aggregated scorecard as part
+# of the release cycle.
 
 on:
   workflow_dispatch:
     inputs:
+      confirm:
+        description: 'Type "run" to confirm you accept the ~$1.47 cost for this dispatch.'
+        required: true
+        type: string
       generations:
-        description: 'Generations per condition per task (default 2)'
+        description: 'Generations per condition per task; must be 1 or 2 (higher multiplies cost)'
         required: false
         default: '2'
-        type: string
+        type: choice
+        options:
+          - '1'
+          - '2'
       install_from:
         description: 'Install agent-style from "pypi" (released) or "branch" (local source)'
         required: false
@@ -31,13 +40,50 @@ on:
         options:
           - pypi
           - branch
+      claude_model:
+        description: 'Claude Code model (opus, sonnet, or full id)'
+        required: false
+        default: 'claude-opus-4-7'
+      gemini_model:
+        description: 'Gemini model (gemini-2.5-pro, gemini-2.5-flash)'
+        required: false
+        default: 'gemini-2.5-pro'
+      openai_model:
+        description: 'OpenAI model (gpt-5.4, gpt-5.4-mini, gpt-5.4-nano)'
+        required: false
+        default: 'gpt-5.4'
+
+permissions:
+  contents: read
 
 jobs:
-  bench:
-    name: Claude + agent-style sanity benchmark
+  confirm:
+    name: Confirm dispatch intent
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Require confirm="run"
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event.inputs.confirm }}" != "run" ]; then
+            echo "::error::bench dispatch requires confirm input = \"run\" (you typed: '${{ github.event.inputs.confirm }}')"
+            exit 1
+          fi
+          echo "confirm input accepted"
+
+  bench:
+    name: Bench — ${{ matrix.runner }}
+    needs: [confirm]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [claude, gemini, openai]
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v5
 
       - uses: actions/setup-python@v6
         with:
@@ -46,6 +92,16 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '20'
+
+      - name: Verify required secret for this runner
+        run: |
+          set -euo pipefail
+          case "${{ matrix.runner }}" in
+            claude) [ -n "$ANTHROPIC_API_KEY" ] || { echo "::error::ANTHROPIC_API_KEY missing"; exit 1; } ;;
+            gemini) [ -n "$GEMINI_API_KEY" ]    || { echo "::error::GEMINI_API_KEY missing"; exit 1; } ;;
+            openai) [ -n "$OPENAI_API_KEY" ]    || { echo "::error::OPENAI_API_KEY missing"; exit 1; } ;;
+          esac
+          echo "secret ok for ${{ matrix.runner }}"
 
       - name: Install agent-style
         run: |
@@ -60,40 +116,109 @@ jobs:
           fi
           agent-style --version
 
-      - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code
-
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: Run sanity benchmark
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - name: Install runner toolchain
         run: |
           set -euo pipefail
-          GEN="${{ github.event.inputs.generations }}"
-          bash scripts/bench/run.sh --generations "$GEN"
+          case "${{ matrix.runner }}" in
+            claude) npm install -g @anthropic-ai/claude-code ;;
+            gemini) npm install -g @google/gemini-cli ;;
+            openai) python -m pip install openai-agents ;;
+          esac
+          sudo apt-get update -qq && sudo apt-get install -y -qq jq
+
+      - name: Select model for this runner
+        id: model
+        run: |
+          set -euo pipefail
+          case "${{ matrix.runner }}" in
+            claude) echo "value=${{ github.event.inputs.claude_model }}" >> "$GITHUB_OUTPUT" ;;
+            gemini) echo "value=${{ github.event.inputs.gemini_model }}" >> "$GITHUB_OUTPUT" ;;
+            openai) echo "value=${{ github.event.inputs.openai_model }}" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+      - name: Run bench
+        run: |
+          set -euo pipefail
+          bash scripts/bench/run.sh \
+            --runner "${{ matrix.runner }}" \
+            --model "${{ steps.model.outputs.value }}" \
+            --generations "${{ github.event.inputs.generations }}"
 
       - name: Find scorecard path
         id: scorecard
         run: |
           set -euo pipefail
           VERSION="$(agent-style --version | awk '{print $2}')"
-          echo "path=docs/bench-${VERSION}.md" >> "$GITHUB_OUTPUT"
+          echo "path=docs/bench-${VERSION}-${{ matrix.runner }}.md" >> "$GITHUB_OUTPUT"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
-      - name: Upload scorecard artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: bench-${{ steps.scorecard.outputs.version }}
-          path: ${{ steps.scorecard.outputs.path }}
-          if-no-files-found: error
-
-      - name: Print scorecard summary to job log
+      - name: Echo scorecard to log
         run: |
-          set -euo pipefail
           if [ -f "${{ steps.scorecard.outputs.path }}" ]; then
-            echo "::group::bench scorecard"
+            echo "::group::scorecard"
             cat "${{ steps.scorecard.outputs.path }}"
             echo "::endgroup::"
           fi
+
+      - name: Upload per-runner scorecard
+        uses: actions/upload-artifact@v6
+        with:
+          name: bench-${{ steps.scorecard.outputs.version }}-${{ matrix.runner }}
+          path: ${{ steps.scorecard.outputs.path }}
+          if-no-files-found: error
+
+  aggregate:
+    name: Aggregate — 3-model scorecard
+    needs: [bench]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install agent-style (for version lookup)
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event.inputs.install_from }}" = "pypi" ]; then
+            python -m pip install --upgrade pip
+            python -m pip install agent-style
+          else
+            python -m pip install --upgrade pip build
+            python -m build packages/pypi --outdir packages/pypi/dist
+            python -m pip install packages/pypi/dist/agent_style-*.whl
+          fi
+
+      - name: Download all per-runner artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+
+      - name: Aggregate scorecards
+        id: aggregate
+        run: |
+          set -euo pipefail
+          VERSION="$(agent-style --version | awk '{print $2}')"
+          mkdir -p docs
+          python scripts/bench/aggregate.py \
+            --version "$VERSION" \
+            --output "docs/bench-${VERSION}.md" \
+            "artifacts/bench-${VERSION}-claude/bench-${VERSION}-claude.md" \
+            "artifacts/bench-${VERSION}-gemini/bench-${VERSION}-gemini.md" \
+            "artifacts/bench-${VERSION}-openai/bench-${VERSION}-openai.md"
+          echo "path=docs/bench-${VERSION}.md" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Echo combined scorecard
+        run: |
+          echo "::group::combined scorecard"
+          cat "${{ steps.aggregate.outputs.path }}"
+          echo "::endgroup::"
+
+      - name: Upload combined scorecard
+        uses: actions/upload-artifact@v6
+        with:
+          name: bench-${{ steps.aggregate.outputs.version }}-combined
+          path: ${{ steps.aggregate.outputs.path }}
+          if-no-files-found: error
