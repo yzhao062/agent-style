@@ -10,6 +10,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 *No unreleased changes queued.*
 
+## [0.3.1] — 2026-04-21
+
+### Fixed
+
+- **Adapter self-verification strings bumped from v0.2.0 to v0.3.1.** The v0.3.0 release bumped the three package version files (`pyproject.toml`, `__init__.py`, `package.json`) but missed the hardcoded `v0.2.0` strings in `agents/*.md`, `agents/*.mdc`, `packages/pypi/agent_style/data/agents/`, `packages/npm/data/agents/`, and the pinned upstream URLs in the same files. `real-agent-smoke` on the v0.3.0 tag caught the handshake mismatch: Claude replied `agent-style v0.2.0 active: 21 rules...` when the probe expected `0.3.0`. This release restores consistency across the 32 files involved. No rule content, adapter logic, or bench infrastructure changes.
+
+- **`README.md` version references**: `AGENT_STYLE_REF=v0.2.0` → `v0.3.1` in the `curl` recipe, the per-surface install table ("v0.2.0 primary set" → "v0.3.1 primary set"), and the self-verification probe example.
+
+- **`adapter-matrix.md`**: "v0.2.0 ships 9 primary adapters" → "v0.3.1 ships 9 primary adapters".
+
+### Process note
+
+The v0.3.0 cut did the version bump by manual `sed` across only the three package version files, skipping `scripts/bump-version.py` (which walks `git ls-files` and catches the adapter handshake strings and pinned upstream URLs). For v0.3.2+, `RELEASING.md` step "Version Bump Across the Three Files" should be read as a minimum — maintainers must also run `python scripts/bump-version.py <OLD> <NEW>` before tagging to avoid a 0.3.0-style handshake drift.
+
 ## [0.3.0] — 2026-04-21
 
 The v0.3.0 cycle turns the bench from a narrow, API-billable CI job into a full-family, long-form, zero-cost local tool: **5 runners** (claude, copilot, codex, gemini, openai) covering every major CLI-based coding agent, **academic-prose task coverage** (paper abstract / methods / experiments / related work) where AI-tells actually accumulate, and **subscription-first auth** that brings the per-release cost from ~$2.50 to $0. See the per-change entries below.
@@ -126,7 +140,8 @@ The v0.3.0 cycle turns the bench from a narrow, API-billable CI job into a full-
 
 ---
 
-[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/yzhao062/agent-style/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/yzhao062/agent-style/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/yzhao062/agent-style/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/yzhao062/agent-style/compare/v0.1.0...v0.1.1
