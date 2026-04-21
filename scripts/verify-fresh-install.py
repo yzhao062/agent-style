@@ -14,8 +14,8 @@ import subprocess
 import sys
 import tempfile
 
-EXPECTED_VERSION = "0.2.0"
-EXPECTED_TOOL_COUNT = 9  # 0.2.0 adds `style-review` to the existing 8
+EXPECTED_VERSION = "0.3.1"
+EXPECTED_TOOL_COUNT = 10  # v0.3.0 added Kiro to the 9 existing (8 primary + style-review skill)
 
 SCRATCH = tempfile.mkdtemp(prefix="as-final-")
 print(f"scratch: {SCRATCH}")

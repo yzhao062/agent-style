@@ -116,7 +116,7 @@ Install the CLI once; then pick the paths you want.
 ```bash
 pip install agent-style                              # Python users
 # or: npm install -g agent-style                     # Node users
-# or: npx --yes agent-style@0.2.0 <subcommand>       # no install needed
+# or: npx --yes agent-style@0.3.1 <subcommand>       # no install needed
 ```
 
 ### 1. Soft Enforcement — rules at generation time

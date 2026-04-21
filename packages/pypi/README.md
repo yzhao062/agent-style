@@ -22,7 +22,7 @@ agent-style rules                                    # print bundled RULES.md
 
 The CLI writes to `.agent-style/` in your project and safely adds a marker-wrapped reference to your existing instruction file (CLAUDE.md, AGENTS.md, .github/copilot-instructions.md, etc.). Existing content is preserved; writes are idempotent; `--dry-run` previews without changing any file.
 
-Supported tools and install modes in v0.2.0:
+Supported tools and install modes in v0.3.1:
 
 | Tool | Install mode |
 | --- | --- |
@@ -43,4 +43,4 @@ The full rule set lives in the canonical repository at https://github.com/yzhao0
 - Code: MIT (`LICENSES/MIT.txt`).
 - Bundled prose (`RULES.md`, `NOTICE.md`, adapters): CC BY 4.0 (`LICENSES/CC-BY-4.0.txt`).
 
-Roadmap (v0.2.0+): `agent-style update` (pull refreshed adapters), `agent-style override <RULE> disable` (per-rule opt-out), `agent-style clean` (single-command uninstall), `.agent-style/config.toml` (project-level config).
+Roadmap (v0.3.1+): `agent-style update` (pull refreshed adapters), `agent-style override <RULE> disable` (per-rule opt-out), `agent-style clean` (single-command uninstall), `.agent-style/config.toml` (project-level config).
