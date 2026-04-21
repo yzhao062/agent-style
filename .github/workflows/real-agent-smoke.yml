@@ -204,12 +204,24 @@ jobs:
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Probe Claude for the style-review handshake
+      - name: Probe Claude — skill body is well-formed to an LLM reader
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           set -euo pipefail
-          PROMPT='Is style-review active? Reply on one line using the exact literal sentence from the skill.'
+          # `claude -p` runs one-shot without skill auto-discovery: the skill's
+          # SKILL.md sits on disk but is not pulled into session context unless
+          # the user explicitly triggers it (via `/style-review` in interactive
+          # mode). To test the skill body end-to-end without depending on
+          # skill-trigger semantics or tool-use permissions, inline the skill
+          # contents into the prompt and ask Claude to extract the handshake.
+          # This proves (a) the installer wrote the file, (b) the file carries
+          # the handshake, (c) an LLM can parse the skill body structure.
+          SKILL_BODY=$(cat .claude/skills/style-review/SKILL.md)
+          PROMPT=$(printf '%s\n\n%s\n\n%s' \
+            'Here is the full contents of .claude/skills/style-review/SKILL.md:' \
+            "$SKILL_BODY" \
+            'Reply on one line with the exact literal self-verification sentence from the skill (starts with "style-review active"). Output only that sentence, nothing else.')
           RESP=$(claude -p "$PROMPT")
           echo "::group::claude response"
           echo "$RESP"
@@ -224,7 +236,7 @@ jobs:
             echo "::error::Claude response missing style-review tokens: ${MISSING[*]}"
             exit 1
           fi
-          echo "PASS: Claude sees style-review skill with the full handshake"
+          echo "PASS: Claude extracted the full style-review handshake from the skill body"
 
   kiro-adapter-body:
     name: Kiro adapter body is well-formed (static)
