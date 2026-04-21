@@ -206,6 +206,93 @@ git push origin main
 rm -f vX.Y.Z-release-notes.md
 ```
 
+## CI API Cost Exposure (for humans and agents)
+
+Every workflow in `.github/workflows/` that calls a model API has a documented
+per-dispatch cost. Before any `gh workflow run` on a workflow that is not free,
+**agents MUST confirm with the user** — "the user approved a larger task" is
+not blanket approval for paid dispatch. Each workflow click is a separate
+billable action.
+
+### Workflow cost table
+
+| Workflow | Trigger(s) | Cost per run | Safeguards |
+|---|---|---|---|
+| `validate.yml` | push + PR | $0 (no API calls) | — |
+| `real-agent-smoke.yml` | `release: published` + manual | ~$0.05 | Sonnet pin on Claude probes; handshake-only |
+| `bench.yml` (cheap default) | manual | ~$0.45 | `confirm="run"` + Sonnet 4.6 / Gemini Flash / GPT-5.4 Nano defaults |
+| `bench.yml` (flagship inputs) | manual | **~$2.20-$2.50** | requires explicit `claude_model=claude-opus-4-7` override |
+| `bench.yml` (single runner) | manual | $0-$2.00 | `runners=<one>` skips aggregation |
+| `adapter-aider-smoke.yml` | manual | ~$0.10 | Sonnet 4.6 via Aider |
+| `adapter-gemini-smoke.yml` | manual | $0 (Flash free tier) | — |
+| `adapter-agents-sdk-smoke.yml` | manual | ~$0.01 | GPT-5.4 Nano |
+
+### Dispatch-approval policy (for agents)
+
+Any `gh workflow run` on a workflow whose per-dispatch cost is **above $0.01**
+requires explicit per-dispatch user approval, even inside a broader approved
+task. Before dispatching:
+
+1. Name the workflow and the measured or estimated cost for this specific set
+   of inputs.
+2. State the hypothesis you expect the run to verify.
+3. Wait for an explicit `dispatch` / `go` / `yes` from the user.
+
+`validate.yml` and `adapter-gemini-smoke.yml` (free tier) may be dispatched
+inside an approved task without per-run confirmation.
+
+### Annual cost forecast
+
+| Category | Typical year |
+|---|---|
+| `real-agent-smoke` auto-triggered on ~5 releases | ~$0.25 |
+| `bench` on 2-3 major/minor releases (flagship tier) | ~$5-$7.50 |
+| Ad-hoc adapter smokes during debugging | ~$0-$5 |
+| **Total** | **~$5-$15** |
+
+v0.2.0 dev-cycle reality check: ~$2.45 on bench work (one flagship matrix at
+$2.35 + one Gemini-only rerun at $0.10) plus ~$0.10-$0.20 on adapter-smoke
+validation. Total v0.2.0 CI spend: ~$2.55-$2.65.
+
+## Bench (Major/Minor Releases Only)
+
+The 3-model matrix bench (`.github/workflows/bench.yml`) is **opt-in** and **expensive**. Dispatch only on major / minor releases (v0.3.0, v0.4.0, v1.0.0). **Do not** dispatch on patch releases (v0.2.1, v0.2.2). Per-release mechanical correctness is already covered by `real-agent-smoke.yml` (~$0.04 per release, auto-triggered on `release: published`); `bench.yml` exists to produce publication-quality behavioral data for the README figure and deserves human judgment each time.
+
+### Cost (measured on 2026-04-21 billing, 40 calls per model per matrix leg)
+
+| Dispatch mode | What you get | Approx cost |
+|---|---|---|
+| `runners=all`, default cheap-tier inputs | Sonnet 4.6 / Gemini Flash / GPT-5.4 Nano matrix — regression check | ~$0.45 |
+| `runners=all`, flagship override inputs | Opus 4.7 / Gemini Pro / GPT-5.4 matrix — **publication-quality data** | **~$2.20–$2.50** |
+| `runners=<one>`, any model | Single-leg rerun — for cheap targeted validation after a fix | $0–$2.00 |
+
+### Cadence
+
+```bash
+# One dispatch per major/minor release, flagship-tier inputs.
+# Expects: ANTHROPIC_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY as repo secrets.
+gh workflow run bench.yml \
+  --repo yzhao062/agent-style --ref main \
+  -f confirm=run \
+  -f runners=all \
+  -f install_from=branch \
+  -f claude_model=claude-opus-4-7 \
+  -f gemini_model=gemini-2.5-pro \
+  -f openai_model=gpt-5.4
+```
+
+### After the dispatch completes
+
+1. **Download artifacts** (per-runner scorecards + aggregated combined scorecard) from the workflow run.
+2. **Review per-model results honestly.** Not every model will show a strong reduction — publish what you actually observed. The v0.2.0 run showed Claude Opus at −47%, GPT-5.4 at −23%, and Gemini Pro at +13% (noise on a clean baseline). Archive uninformative legs under `docs/bench-<VERSION>-<runner>-archive.md` with a short note rather than dropping them from the tree.
+4. **Commit the combined scorecard** to `docs/bench-<VERSION>.md`. If you are regenerating the README bench figure, re-render `docs/bench.png` from `docs/hero-source/bench.html` at 3x DPI and commit.
+5. **Update README caption** to reflect which models are headlined.
+
+### When a bench dispatch fails mid-run
+
+- **Gemini-only rerun after a fix**: use `-f runners=gemini` — ~$0 on free Flash tier, ~$0.10 on Pro. Aggregation is skipped in single-runner mode.
+- **Splicing stale + fresh data**: `scripts/bench/aggregate.py` accepts N arbitrary `bench-<version>-<runner>.md` files as positional args. Download the still-valid artifacts from the prior run, the fresh ones from the rerun, and run aggregate locally — no need to redispatch a full matrix just to regenerate a combined scorecard.
+
 ## Common Gotchas
 
 - **PyPI CDN cache**: after `twine upload`, a fresh `pip install --upgrade` may still report the previous version for 1-2 minutes. Always use `--force-reinstall --no-cache-dir` with an explicit `==X.Y.Z` for verification.

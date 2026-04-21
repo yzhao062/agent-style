@@ -60,11 +60,12 @@ case "${RUNNER:-}" in
 esac
 [[ -n "$MODEL" ]] || { echo "error: --model required" >&2; exit 2; }
 
-# Hard cap on --generations. The workflow_dispatch cost estimate (~$1.47 at
-# GENS=2, per-model flagships) assumes 2 generations. Anything higher
-# multiplies cost proportionally; a typo like "20" would 10x the bill. If a
-# larger run is ever warranted, bump this cap intentionally and update the
-# cost estimate in the workflow comment in the same commit.
+# Hard cap on --generations. The workflow_dispatch cost estimates in
+# bench.yml (~$0.45 at cheap defaults, ~$2.20-$2.50 at flagship-tier
+# inputs) assume 2 generations. Anything higher multiplies cost
+# proportionally; a typo like "20" would 10x the bill. If a larger run
+# is ever warranted, bump this cap intentionally and update the cost
+# estimates in bench.yml's header comment in the same commit.
 case "$GENS" in
   1|2) ;;
   *) echo "error: --generations must be 1 or 2 (got: $GENS); higher values multiply cost and are not budget-approved" >&2; exit 2 ;;

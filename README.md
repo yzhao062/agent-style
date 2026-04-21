@@ -18,6 +18,7 @@
 
 [Before / after](#before-and-after) &nbsp;·&nbsp;
 [What it is](#what-it-is) &nbsp;·&nbsp;
+[Does it work?](#does-it-work) &nbsp;·&nbsp;
 [Use](#use)
 
 </div>
@@ -89,6 +90,14 @@ Structural patterns logged from LLM output across research, proposal, documentat
 **Escape hatch** (Orwell 1946 Rule 6): *"Break any of these rules sooner than say anything outright barbarous."* Rules are guides to clarity, not ends in themselves.
 
 See [`RULES.md`](RULES.md) for the full per-rule blocks with BAD/GOOD examples, enforcement tier, and rationale.
+
+## Does It Work?
+
+![agent-style v0.2.0 sanity bench across Claude Opus 4.7 and OpenAI GPT-5.4: 62 to 33 (-47%) and 26 to 20 (-23%) AI-tell violations respectively across 10 fixed prose tasks, per-rule breakdown, directional-not-statsig caveat](docs/bench.png)
+
+Sanity bench on 10 fixed prose tasks (5 PR descriptions, 3 design-doc sections, 2 commit messages), 2 generations each, flagship models drafting with `agent-style` loaded at generation time vs not. **Claude Opus 4.7 dropped 47% (62 → 33 violations); OpenAI GPT-5.4 dropped 23% (26 → 20).** Two models shown; [`docs/bench-0.2.0-gemini-archive.md`](docs/bench-0.2.0-gemini-archive.md) archives the Gemini 2.5 Pro run (baseline already very clean, so the ruleset has little headroom — informative but not headlined). See [`docs/bench-0.2.0.md`](docs/bench-0.2.0.md) for the raw matrix scorecard and [`scripts/bench/run.sh`](scripts/bench/run.sh) + [`.github/workflows/bench.yml`](.github/workflows/bench.yml) to reproduce.
+
+Numbers are directional, not statsig: 10 tasks × 2 generations × 2 conditions = 40 calls per model. The takeaway is that the ruleset reduces mechanical AI-tell density on models where it matters; the exact size of the drop varies with each model's baseline.
 
 ## Who It Is For
 
@@ -213,9 +222,7 @@ agent-style review --compare a.md b.md                # A/B delta per rule
 
 **What you get from `agent-style review DESIGN.md`** (CLI path): the same deterministic audit — mechanical + structural detectors for em-dashes, jargon, transition openers, clichés, contractions, sentence length, bullet overuse, same-starts, paragraph closers. Semantic rules (vague claims, unsupported claims, etc.) return `status: "skipped"` because they need a skill host's model. No polish from the plain CLI.
 
-![agent-style v0.2.0 sanity bench across Claude Opus 4.7 and OpenAI GPT-5.4: 62 to 33 (-47%) and 26 to 20 (-23%) AI-tell violations respectively across 10 fixed prose tasks, per-rule breakdown, directional-not-statsig caveat](docs/bench.png)
-
-Sanity bench on 10 fixed prose tasks (5 PR descriptions, 3 design-doc sections, 2 commit messages), 2 generations each, flagship models drafting with `agent-style` loaded at generation time vs not. Two models shown; [`docs/bench-0.2.0-gemini-archive.md`](docs/bench-0.2.0-gemini-archive.md) archives the Gemini 2.5 Pro result (baseline already very clean, so the ruleset adds marginal noise — informative but not headlined). See [`docs/bench-0.2.0.md`](docs/bench-0.2.0.md) for the raw matrix scorecard and [`scripts/bench/run.sh`](scripts/bench/run.sh) + [`.github/workflows/bench.yml`](.github/workflows/bench.yml) to reproduce.
+See the [Does It Work?](#does-it-work) section above for measured mechanical-violation reductions on Claude Opus 4.7 and OpenAI GPT-5.4.
 
 <details>
 <summary><b>Skill workflow in detail (what the SKILL.md tells Claude Code to do)</b></summary>
