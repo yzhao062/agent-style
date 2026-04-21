@@ -25,9 +25,9 @@
 
 ## Before and After
 
-![agent-style hero: 21 rules, then a PR-description drafted by an AI agent (with rule violations highlighted) alongside the revised version at the same budget](docs/hero.png)
+![agent-style hero: 21 rules, then three real v0.3.0 bench before/after pairs (product description, design-doc section, paper related-work section) with rule violations highlighted in the AI drafts and concrete details highlighted in the agent-style-loaded revisions](docs/hero.png)
 
-The top row is the identity: 21 rules, 12 canonical plus 9 field-observed; bordered red marks the two critical rules (RULE-01 curse-of-knowledge and RULE-H citation discipline). The bottom row is the mechanism: a typical AI-drafted PR description on the left (highlighted phrases are rule violations), the specific rules that fire in the middle, and the revised version on the right, with the same budget, same register, still a PR description rather than a technical report.
+The top row is the identity: 21 rules, 12 canonical plus 9 field-observed; bordered red marks the two critical rules (RULE-01 curse-of-knowledge and RULE-H citation discipline). The bottom three rows are the mechanism, each pulled from a real v0.3.0 bench draft pair (same prompt, independent generations with and without the ruleset): a product description on Gemini 3 Flash (8 → 0 violations), a design-doc section on Claude Opus 4.7 (14 → 7), and a paper related-work section on Gemini 3 Flash (6 → 4; the source drafts are anchored to three prompt-named benchmarks (AgentBench, BFCL, tau-bench) so the style delta measured by `agent-style review` is isolated from fabricated-citation noise, though the displayed baseline snippet stops before the third name to keep the panel to three sentences). Each row shows the AI draft on the left with rule-violating phrases highlighted, the specific rules that fire in the middle, and the revised version on the right at the same length budget, same register, same document type.
 
 ## What It Is
 
@@ -93,11 +93,11 @@ See [`RULES.md`](RULES.md) for the full per-rule blocks with BAD/GOOD examples, 
 
 ## Does It Work?
 
-![agent-style v0.2.0 sanity bench across Claude Opus 4.7 and OpenAI GPT-5.4: 62 to 33 (-47%) and 26 to 20 (-23%) AI-tell violations respectively across 10 fixed prose tasks, per-rule breakdown, directional-not-statsig caveat](docs/bench.png)
+![agent-style v0.3.0 sanity bench across Claude Opus 4.7, OpenAI GPT-5.4 via Codex CLI, and Gemini 3 Flash: 105 to 58 (-45%), 51 to 28 (-45%), and 79 to 14 (-82%) AI-tell violations across 10 fixed prose tasks, per-rule breakdown, directional-not-statsig caveat](docs/bench.png)
 
-Sanity bench on 10 fixed prose tasks (5 PR descriptions, 3 design-doc sections, 2 commit messages), 2 generations each, flagship models drafting with `agent-style` loaded at generation time vs not. **Claude Opus 4.7 dropped 47% (62 → 33 violations); OpenAI GPT-5.4 dropped 23% (26 → 20).** Two models shown; [`docs/bench-0.2.0-gemini-archive.md`](docs/bench-0.2.0-gemini-archive.md) archives the Gemini 2.5 Pro run (baseline already very clean, so the ruleset has little headroom — informative but not headlined). See [`docs/bench-0.2.0.md`](docs/bench-0.2.0.md) for the raw matrix scorecard and [`scripts/bench/run.sh`](scripts/bench/run.sh) + [`.github/workflows/bench.yml`](.github/workflows/bench.yml) to reproduce.
+Sanity bench on 10 fixed prose tasks (2 PR descriptions, 1 design-doc section, 1 commit message, 4 paper sections, 1 product description, 1 NSF-style specific aim), 2 generations per condition, flagship models drafting with `agent-style` loaded at generation time vs not. Three models shown: **Claude Opus 4.7 dropped 45% (105 → 58 violations); OpenAI GPT-5.4 via Codex CLI dropped 45% (51 → 28); Gemini 3 Flash dropped 82% (79 → 14).** The GitHub Copilot CLI runner was tested but excluded from the figure because its `-p` programmatic mode does not load instruction files (+3% noise; see [`CHANGELOG.md`](CHANGELOG.md) Notes). See [`docs/bench-0.3.0.md`](docs/bench-0.3.0.md) for the full scorecard across all 4 runners plus per-runner drafts under [`docs/bench-0.3.0-drafts/`](docs/bench-0.3.0-drafts/), and [`RELEASING.md`](RELEASING.md) "Bench (Local Only)" for reproduction steps.
 
-Numbers are directional, not statsig: 10 tasks × 2 generations × 2 conditions = 40 calls per model. The takeaway is that the ruleset reduces mechanical AI-tell density on models where it matters; the exact size of the drop varies with each model's baseline.
+Numbers are directional, not statsig: 10 tasks × 2 generations × 2 conditions = 40 calls per runner. The takeaway is that the ruleset reduces mechanical AI-tell density across every frontier family where the instruction file actually reaches the model's context; the exact size of the drop varies with each model's baseline (heavier in models that emit more long sentences / em-dashes by default, smaller or zero in already-clean models).
 
 ## Who It Is For
 

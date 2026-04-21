@@ -3,16 +3,20 @@
 <!--
   agent-style bench scorecard panel (2-model).
 
-  Renders the cross-model headline numbers from docs/bench-0.2.0.md in the
+  Renders the cross-model headline numbers from docs/bench-0.3.0.md in the
   editorial style of hero.html and sources.html: cream paper, double-rule
   frame, Georgia + Segoe UI + mono typography, green accent for the
-  improvement arc. Two stacked per-model panels keep the story legible
-  without a dense grouped-bar chart.
+  improvement arc. Three stacked per-model panels (Claude Opus, OpenAI
+  GPT-5.4 via Codex CLI, Gemini 3 Flash) keep the story legible without
+  a dense grouped-bar chart. Copilot is measured in the bench but
+  excluded from this figure because CLI -p programmatic mode does not
+  load instruction files (see CHANGELOG).
 
-  Render at 3x DPI:
+  Render at 3x DPI (window taller than 2-panel v0.2.0 figure to fit
+  three panels without clipping):
     "C:/Program Files/Google/Chrome/Application/chrome.exe" \
       --headless --disable-gpu --hide-scrollbars \
-      --force-device-scale-factor=3 --window-size=1280,900 \
+      --force-device-scale-factor=3 --window-size=1280,1400 \
       --screenshot="C:/Users/yuezh/PycharmProjects/agent-style/docs/bench.png" \
       "file:///C:/Users/yuezh/PycharmProjects/agent-style/docs/hero-source/bench.html"
 -->
@@ -36,6 +40,7 @@
     --caveat: #8a2d2d;             /* dusty red accent for caveat chip */
     --claude-accent: #3d5a7a;      /* steel blue for Claude panel tab */
     --openai-accent: #2d5f3f;      /* forest green for OpenAI panel tab */
+    --gemini-accent: #55336a;      /* deep plum for Gemini panel tab */
   }
   html, body {
     margin: 0;
@@ -95,6 +100,7 @@
   }
   .panel.claude { border-top-color: var(--claude-accent); }
   .panel.openai { border-top-color: var(--openai-accent); }
+  .panel.gemini { border-top-color: var(--gemini-accent); }
 
   .panel-head {
     display: grid;
@@ -297,13 +303,14 @@
 <body>
 <div class="bench">
 
-  <div class="top-label">sanity benchmark · agent-style v0.2.0 · 10 fixed prose tasks · 2 models</div>
+  <div class="top-label">sanity benchmark · agent-style v0.3.0 · 10 fixed prose tasks · 3 models</div>
 
   <div class="question">
     <span class="q">Does <code>agent-style</code> actually reduce AI-tell density?</span><br>
-    On 10 fixed prose tasks (5 PR descriptions, 3 design docs, 2 commit messages),
-    two generations each, flagship models drafted with <em>agent-style</em> loaded
-    at generation time logged fewer mechanical rule violations.
+    On 10 fixed prose tasks (2 PR descriptions, 1 design-doc section, 1 commit message,
+    4 paper sections, 1 product description, 1 NSF specific aim), two generations each,
+    flagship models drafted with <em>agent-style</em> loaded at generation time logged
+    fewer mechanical rule violations across every family we tested.
   </div>
 
   <!-- ============= Claude Opus 4.7 panel ============= -->
@@ -314,10 +321,10 @@
         <span class="pod">via Claude Code CLI · <code style="font-family:'SF Mono',Consolas,monospace;font-size:10px;background:#fff;border:1px solid var(--rule);padding:0 3px;border-radius:2px">claude -p</code></span>
       </div>
       <div class="panel-nums">
-        <span class="baseline-val">62</span>
+        <span class="baseline-val">105</span>
         <span class="arrow">&rarr;</span>
-        <span class="treatment-val">33</span>
-        <span class="delta">&minus;29 (&minus;47%)</span>
+        <span class="treatment-val">58</span>
+        <span class="delta">&minus;47 (&minus;45%)</span>
       </div>
     </div>
     <div class="rules">
@@ -327,10 +334,10 @@
           <span class="label">sentences &gt; 30 words</span>
         </div>
         <div class="bar-cluster">
-          <div class="bar baseline"><span class="bar-fill" style="width: 100%;"></span><span class="count">33</span></div>
-          <div class="bar treatment"><span class="bar-fill" style="width: 69.7%;"></span><span class="count">23</span></div>
+          <div class="bar baseline"><span class="bar-fill" style="width: 100%;"></span><span class="count">62</span></div>
+          <div class="bar treatment"><span class="bar-fill" style="width: 72.6%;"></span><span class="count">45</span></div>
         </div>
-        <div class="delta-col">&minus;10</div>
+        <div class="delta-col">&minus;17</div>
       </div>
       <div class="rule-row">
         <div class="rule-id-col">
@@ -338,21 +345,10 @@
           <span class="label">em / en-dash casual use</span>
         </div>
         <div class="bar-cluster">
-          <div class="bar baseline"><span class="bar-fill" style="width: 39.4%;"></span><span class="count">13</span></div>
+          <div class="bar baseline"><span class="bar-fill" style="width: 43.5%;"></span><span class="count">27</span></div>
           <div class="bar treatment"><span class="bar-fill" style="width: 0%;"></span><span class="count">0</span></div>
         </div>
-        <div class="delta-col">&minus;13</div>
-      </div>
-      <div class="rule-row">
-        <div class="rule-id-col">
-          <span class="id">RULE-G</span>
-          <span class="label">heading title case</span>
-        </div>
-        <div class="bar-cluster">
-          <div class="bar baseline"><span class="bar-fill" style="width: 24.2%;"></span><span class="count">8</span></div>
-          <div class="bar treatment"><span class="bar-fill" style="width: 18.2%;"></span><span class="count">6</span></div>
-        </div>
-        <div class="delta-col">&minus;2</div>
+        <div class="delta-col">&minus;27</div>
       </div>
       <div class="rule-row">
         <div class="rule-id-col">
@@ -360,36 +356,47 @@
           <span class="label">contractions, formal prose</span>
         </div>
         <div class="bar-cluster">
-          <div class="bar baseline"><span class="bar-fill" style="width: 24.2%;"></span><span class="count">8</span></div>
-          <div class="bar treatment"><span class="bar-fill" style="width: 12.1%;"></span><span class="count">4</span></div>
+          <div class="bar baseline"><span class="bar-fill" style="width: 22.6%;"></span><span class="count">14</span></div>
+          <div class="bar treatment"><span class="bar-fill" style="width: 16.1%;"></span><span class="count">10</span></div>
         </div>
         <div class="delta-col">&minus;4</div>
       </div>
+      <div class="rule-row">
+        <div class="rule-id-col">
+          <span class="id">RULE-G</span>
+          <span class="label">heading title case</span>
+        </div>
+        <div class="bar-cluster">
+          <div class="bar baseline"><span class="bar-fill" style="width: 3.2%;"></span><span class="count">2</span></div>
+          <div class="bar treatment"><span class="bar-fill" style="width: 4.8%;"></span><span class="count">3</span></div>
+        </div>
+        <div class="delta-col">+1</div>
+      </div>
     </div>
     <div class="highlight-line">
-      <span class="name">pr-01-redis-cache</span>
-      <span class="nums">12&rarr;3</span>
+      <span class="name">paper-04-related-work</span>
+      <span class="nums">20&rarr;8</span>
       &nbsp;&middot;&nbsp;
-      <span class="name">pr-02-jwt-rotation</span>
-      <span class="nums">10&rarr;4</span>
+      <span class="name">grant-01-nsf-aim</span>
+      <span class="nums">18&rarr;8</span>
       &nbsp;&middot;&nbsp;
-      <span class="name">design-03-schema-migration</span>
-      <span class="nums">11&rarr;6</span>
+      <span class="name">design-02-rate-limiter</span>
+      <span class="nums">14&rarr;7</span>
     </div>
   </div>
 
-  <!-- ============= GPT-5.4 panel ============= -->
+  <!-- ============= OpenAI GPT-5.4 via Codex CLI panel ============= -->
   <div class="panel openai">
     <div class="panel-head">
       <div class="panel-title">
         OpenAI GPT-5.4
-        <span class="pod">via openai-agents SDK · <code style="font-family:'SF Mono',Consolas,monospace;font-size:10px;background:#fff;border:1px solid var(--rule);padding:0 3px;border-radius:2px">Runner.run_sync</code></span>
+        <span class="pod">via Codex CLI · <code style="font-family:'SF Mono',Consolas,monospace;font-size:10px;background:#fff;border:1px solid var(--rule);padding:0 3px;border-radius:2px">codex exec</code></span>
       </div>
       <div class="panel-nums">
-        <span class="baseline-val">26</span>
+        <span class="baseline-val">51</span>
         <span class="arrow">&rarr;</span>
-        <span class="treatment-val">20</span>
-        <span class="delta">&minus;6 (&minus;23%)</span>
+        <span class="treatment-val">28</span>
+        <span class="delta">&minus;23 (&minus;45%)</span>
       </div>
     </div>
     <div class="rules">
@@ -399,10 +406,32 @@
           <span class="label">sentences &gt; 30 words</span>
         </div>
         <div class="bar-cluster">
-          <div class="bar baseline"><span class="bar-fill" style="width: 100%;"></span><span class="count">18</span></div>
-          <div class="bar treatment"><span class="bar-fill" style="width: 88.9%;"></span><span class="count">16</span></div>
+          <div class="bar baseline"><span class="bar-fill" style="width: 100%;"></span><span class="count">47</span></div>
+          <div class="bar treatment"><span class="bar-fill" style="width: 51.1%;"></span><span class="count">24</span></div>
         </div>
-        <div class="delta-col">&minus;2</div>
+        <div class="delta-col">&minus;23</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-id-col">
+          <span class="id">RULE-G</span>
+          <span class="label">heading title case</span>
+        </div>
+        <div class="bar-cluster">
+          <div class="bar baseline"><span class="bar-fill" style="width: 4.3%;"></span><span class="count">2</span></div>
+          <div class="bar treatment"><span class="bar-fill" style="width: 4.3%;"></span><span class="count">2</span></div>
+        </div>
+        <div class="delta-col zero">0</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-id-col">
+          <span class="id">RULE-I</span>
+          <span class="label">contractions, formal prose</span>
+        </div>
+        <div class="bar-cluster">
+          <div class="bar baseline"><span class="bar-fill" style="width: 4.3%;"></span><span class="count">2</span></div>
+          <div class="bar treatment"><span class="bar-fill" style="width: 4.3%;"></span><span class="count">2</span></div>
+        </div>
+        <div class="delta-col zero">0</div>
       </div>
       <div class="rule-row">
         <div class="rule-id-col">
@@ -415,16 +444,66 @@
         </div>
         <div class="delta-col zero">0</div>
       </div>
+    </div>
+    <div class="highlight-line">
+      <span class="name">paper-03-experiments</span>
+      <span class="nums">7&rarr;2</span>
+      &nbsp;&middot;&nbsp;
+      <span class="name">paper-01-abstract</span>
+      <span class="nums">7&rarr;3</span>
+      &nbsp;&middot;&nbsp;
+      <span class="name">grant-01-nsf-aim</span>
+      <span class="nums">8&rarr;5</span>
+    </div>
+  </div>
+
+  <!-- ============= Gemini 3 Flash panel ============= -->
+  <div class="panel gemini">
+    <div class="panel-head">
+      <div class="panel-title">
+        Gemini 3 Flash
+        <span class="pod">via Gemini CLI · <code style="font-family:'SF Mono',Consolas,monospace;font-size:10px;background:#fff;border:1px solid var(--rule);padding:0 3px;border-radius:2px">gemini --model flash</code></span>
+      </div>
+      <div class="panel-nums">
+        <span class="baseline-val">79</span>
+        <span class="arrow">&rarr;</span>
+        <span class="treatment-val">14</span>
+        <span class="delta">&minus;65 (&minus;82%)</span>
+      </div>
+    </div>
+    <div class="rules">
       <div class="rule-row">
         <div class="rule-id-col">
-          <span class="id">RULE-G</span>
-          <span class="label">heading title case</span>
+          <span class="id">RULE-12</span>
+          <span class="label">sentences &gt; 30 words</span>
         </div>
         <div class="bar-cluster">
-          <div class="bar baseline"><span class="bar-fill" style="width: 33.3%;"></span><span class="count">6</span></div>
+          <div class="bar baseline"><span class="bar-fill" style="width: 100%;"></span><span class="count">40</span></div>
+          <div class="bar treatment"><span class="bar-fill" style="width: 15.0%;"></span><span class="count">6</span></div>
+        </div>
+        <div class="delta-col">&minus;34</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-id-col">
+          <span class="id">RULE-06</span>
+          <span class="label">plain English over jargon</span>
+        </div>
+        <div class="bar-cluster">
+          <div class="bar baseline"><span class="bar-fill" style="width: 37.5%;"></span><span class="count">15</span></div>
+          <div class="bar treatment"><span class="bar-fill" style="width: 5.0%;"></span><span class="count">2</span></div>
+        </div>
+        <div class="delta-col">&minus;13</div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-id-col">
+          <span class="id">RULE-B</span>
+          <span class="label">em / en-dash casual use</span>
+        </div>
+        <div class="bar-cluster">
+          <div class="bar baseline"><span class="bar-fill" style="width: 20.0%;"></span><span class="count">8</span></div>
           <div class="bar treatment"><span class="bar-fill" style="width: 0%;"></span><span class="count">0</span></div>
         </div>
-        <div class="delta-col">&minus;6</div>
+        <div class="delta-col">&minus;8</div>
       </div>
       <div class="rule-row">
         <div class="rule-id-col">
@@ -432,21 +511,21 @@
           <span class="label">contractions, formal prose</span>
         </div>
         <div class="bar-cluster">
-          <div class="bar baseline"><span class="bar-fill" style="width: 11.1%;"></span><span class="count">2</span></div>
-          <div class="bar treatment"><span class="bar-fill" style="width: 22.2%;"></span><span class="count">4</span></div>
+          <div class="bar baseline"><span class="bar-fill" style="width: 17.5%;"></span><span class="count">7</span></div>
+          <div class="bar treatment"><span class="bar-fill" style="width: 2.5%;"></span><span class="count">1</span></div>
         </div>
-        <div class="delta-col positive">+2</div>
+        <div class="delta-col">&minus;6</div>
       </div>
     </div>
     <div class="highlight-line">
-      <span class="name">design-02-rate-limiter</span>
-      <span class="nums">7&rarr;3</span>
+      <span class="name">paper-03-experiments</span>
+      <span class="nums">13&rarr;0</span>
       &nbsp;&middot;&nbsp;
-      <span class="name">design-03-schema-migration</span>
-      <span class="nums">4&rarr;3</span>
+      <span class="name">grant-01-nsf-aim</span>
+      <span class="nums">19&rarr;7</span>
       &nbsp;&middot;&nbsp;
-      <span class="name">pr-03-auth-middleware</span>
-      <span class="nums">1&rarr;0</span>
+      <span class="name">paper-02-methods</span>
+      <span class="nums">13&rarr;2</span>
     </div>
   </div>
 
@@ -458,11 +537,11 @@
   <div class="footer">
     sanity benchmark
     <span class="sep">&middot;</span>
-    10 tasks &middot; 2 generations each &middot; same 10 prompts per model
+    10 tasks &middot; 2 generations each &middot; 4 runners tested; Copilot CLI excluded from figure (see CHANGELOG)
     <span class="sep">&middot;</span>
     <span class="caveat">directional, not statistically significant</span>
     <span class="sep">&middot;</span>
-    reproduce: <code>gh workflow run bench.yml</code>
+    reproduce: <code>bash scripts/bench/run.sh</code> locally
   </div>
 
 </div>

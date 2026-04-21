@@ -1,0 +1,7 @@
+I’m checking the existing draft artifacts so I can keep the wording aligned with the intended change and rollout details.
+
+This change moves the session cache from the in-process LRU to Redis so session state survives process restarts, stays consistent across replicas, and no longer depends on local memory in a single app instance.  
+The implementation preserves the current session semantics while replacing local cache reads and writes with Redis-backed operations and adding the configuration needed to connect to the shared cache.  
+Rollout will happen in stages: deploy Redis support behind a flag, enable it for a small canary slice, watch cache hit rate, latency, and error volume, then ramp to 100% before removing the old LRU path.  
+The biggest trade-off is that session access now depends on an external networked service, which adds operational complexity and a small latency cost in exchange for cross-instance correctness and durability.
+

@@ -2,12 +2,20 @@
 <!-- SPDX-License-Identifier: MIT -->
 <!--
   agent-style hero figure source.
-  Render: open in Chrome / Edge and save as PNG at 1280 × 720, OR run:
-    "C:/Program Files/Google/Chrome/Application/chrome.exe" \
-      --headless --disable-gpu --hide-scrollbars \
-      --window-size=1280,720 \
-      --screenshot="C:/Users/yuezh/PycharmProjects/agent-style/docs/hero.png" \
-      "file:///C:/Users/yuezh/PycharmProjects/agent-style/docs/hero-source/hero.html"
+
+  Three rows of real v0.3.0 bench before/after pairs (product
+  description, design-doc section, paper related-work section) replace
+  the earlier single synthetic PR example. Each row: AI draft (tells
+  highlighted) | rules fire chips | agent-style-loaded revision
+  (concrete details highlighted).
+
+  Render at 3x DPI via Playwright (Chrome --force-device-scale-factor
+  is unreliable on recent versions; see scripts/render-bench-png.py):
+    python scripts/render-bench-png.py \
+      --src docs/hero-source/hero.html \
+      --selector .hero \
+      --out docs/hero.png \
+      --viewport-height 1800
 -->
 <html lang="en">
 <head>
@@ -113,13 +121,39 @@
   .rule-legend .sep { color: var(--rule); margin: 0 10px; }
   .rule-legend .crit-mark { color: #7a2614; font-weight: 600; }
 
-  /* mechanism section */
-  .mechanism {
+  /* mechanism section — 3 stacked rows, one per real bench example */
+  .mechanism-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin: 28px 0 0 0;
+  }
+  .mechanism-row {
     display: grid;
     grid-template-columns: 1fr 170px 1fr;
     gap: 18px;
-    margin: 28px 0 0 0;
     align-items: stretch;
+  }
+  .mechanism-row-label {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-mid);
+    margin: 6px 0 -4px 0;
+    font-weight: 600;
+  }
+  .mechanism-row-label .delta {
+    color: var(--accent);
+    font-family: "SF Mono", Consolas, monospace;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    margin-left: 6px;
+  }
+  .mechanism-row-label .runner {
+    color: var(--rule);
+    font-weight: 400;
   }
   .panel {
     background: white;
@@ -250,24 +284,95 @@
     <span class="crit-mark">bordered red = critical</span>
   </div>
 
-  <div class="mechanism">
-    <div class="panel draft">
-      <div class="panel-label">AI draft: PR description</div>
-      <p>This PR introduces a <span class="tell">novel caching optimization</span> that <span class="tell">leverages</span> <span class="tell">cutting-edge</span> infrastructure to improve <span class="tell">overall system performance</span>. <span class="tell">Additionally</span>, it enhances session <span class="tell">robustness</span> and <span class="tell">paves the way</span> for future scalability. <span class="tell">Overall, these changes represent a significant step forward in our session management capabilities.</span></p>
+  <div class="mechanism-stack">
+
+    <!-- Row 1: Product intro — Gemini 3 Flash, 8 → 0 -->
+    <div class="mechanism-row-label">
+      Product description
+      <span class="runner">· Gemini 3 Flash</span>
+      <span class="delta">8 → 0 violations</span>
     </div>
-    <div class="fire-col">
-      <div class="arrow">↦ RULES FIRE</div>
-      <div class="fire-chip"><span class="id">RULE-05</span><span class="label">cliché</span></div>
-      <div class="fire-chip"><span class="id">RULE-06</span><span class="label">jargon</span></div>
-      <div class="fire-chip crit"><span class="id">RULE-H</span><span class="label">unsupported</span></div>
-      <div class="fire-chip"><span class="id">RULE-03</span><span class="label">vague</span></div>
-      <div class="fire-chip"><span class="id">RULE-D</span><span class="label">transition</span></div>
-      <div class="fire-chip"><span class="id">RULE-E</span><span class="label">closer</span></div>
+    <div class="mechanism-row">
+      <div class="panel draft">
+        <div class="panel-label">AI draft (no rules loaded)</div>
+        <p>In the <span class="tell">high-stakes environment</span> of modern microservices, the database is both the <span class="tell">ultimate source of truth</span> and a <span class="tell">frequent point of catastrophic failure</span>. Schema Drift Watch provides the necessary <span class="tell">guardrails</span> for teams who need to <span class="tell">scale their infrastructure</span> without sacrificing <span class="tell">stability</span>.</p>
+      </div>
+      <div class="fire-col">
+        <div class="arrow">↦ RULES FIRE</div>
+        <div class="fire-chip"><span class="id">RULE-05</span><span class="label">cliché</span></div>
+        <div class="fire-chip"><span class="id">RULE-06</span><span class="label">jargon</span></div>
+        <div class="fire-chip"><span class="id">RULE-03</span><span class="label">vague</span></div>
+      </div>
+      <div class="panel revised">
+        <div class="panel-label">with agent-style loaded</div>
+        <p>Backend engineers maintaining microservices that share a database often struggle with invisible dependencies. Schema Drift Watch monitors the gap between service code and the live database to prevent <span class="concrete">silent production failures</span> when a column is dropped or renamed.</p>
+      </div>
     </div>
-    <div class="panel revised">
-      <div class="panel-label">revised: same budget, same register</div>
-      <p>Switch session caching from in-memory LRU to Redis with a <span class="concrete">5-minute TTL</span>. Sessions now survive pod restarts; per-pod memory drops from <span class="concrete">1.2 GB to 280 MB</span>. Trade-off: a Redis outage logs all users out, but session lookup already fails closed, so the user impact is a <span class="concrete">401, not a 500</span>.</p>
+
+    <!-- Row 2: Design doc rate-limiter — Claude Opus 4.7, 14 → 7 -->
+    <div class="mechanism-row-label">
+      Design doc section
+      <span class="runner">· Claude Opus 4.7</span>
+      <span class="delta">14 → 7 violations</span>
     </div>
+    <div class="mechanism-row">
+      <div class="panel draft">
+        <div class="panel-label">AI draft (no rules loaded)</div>
+        <p>Developers who believe a limit was applied incorrectly<span class="tell">&mdash;</span>for example, due to shared NAT egress or a misattributed token<span class="tell">&mdash;</span>can file an appeal through the developer portal's &ldquo;Rate limit review&rdquo; form, which routes to the API platform team for a response within two business days.</p>
+      </div>
+      <div class="fire-col">
+        <div class="arrow">↦ RULES FIRE</div>
+        <div class="fire-chip"><span class="id">RULE-B</span><span class="label">em-dash</span></div>
+        <div class="fire-chip"><span class="id">RULE-12</span><span class="label">long sentence</span></div>
+      </div>
+      <div class="panel revised">
+        <div class="panel-label">with agent-style loaded</div>
+        <p>Developers who believe a limit fired incorrectly, for example when a shared NAT collapses many users onto one IP or a token is misclassified as free tier, may file an appeal at <span class="concrete">api-support@example.com</span> with the request ID from the 429 response.</p>
+      </div>
+    </div>
+
+    <!-- Row 3: Paper related-work section — Gemini 3 Flash, 6 → 4.
+         Content-anchored at the SOURCE-DRAFT level: both baseline and
+         treatment full drafts name the same three benchmarks (AgentBench,
+         BFCL, tau-bench) because the prompt pins them. The baseline
+         excerpt displayed here stops before the tau-bench sentence to
+         keep the panel to three sentences; the treatment excerpt happens
+         to reach all three because treatment prose is more compact. The
+         anchor claim applies to the source drafts in
+         docs/bench-0.3.0-drafts/gemini/paper-04-*, not to the
+         side-by-side panel text. This swap replaced paper-01-abstract,
+         whose baseline and treatment drafts invented different algorithm
+         names (GraphContrast vs GCAD) and different metric numbers,
+         confounding the style comparison.
+
+         FOLLOW-UP v0.3.1+ (see TODO.md "Hero figure — paper row polish"):
+         the paper prose in both draft and revised reads stiffer than
+         the other two rows; the baseline's "However... Similarly..."
+         opener cluster is the clearest AI-tell we could isolate from
+         the bench, but the treatment is not particularly crisp. Replace
+         with a cleaner pair when a future bench run surfaces one
+         (or when we re-run with a tightened prompt). -->
+    <div class="mechanism-row-label">
+      Paper related-work section
+      <span class="runner">· Gemini 3 Flash</span>
+      <span class="delta">6 → 4 violations</span>
+    </div>
+    <div class="mechanism-row">
+      <div class="panel draft">
+        <div class="panel-label">AI draft (no rules loaded)</div>
+        <p>Early efforts like AgentBench established a multi-domain framework for measuring agentic capabilities. <span class="tell">However</span>, AgentBench often prioritizes overall task success over the granular analysis of tool-use mechanics. <span class="tell">Similarly</span>, BFCL provides a rigorous assessment of syntactically correct function calls but <span class="tell">frequently lacks the long-horizon reasoning and stateful persistence required for autonomous agents in dynamic settings</span>.</p>
+      </div>
+      <div class="fire-col">
+        <div class="arrow">↦ RULES FIRE</div>
+        <div class="fire-chip"><span class="id">RULE-D</span><span class="label">transition</span></div>
+        <div class="fire-chip"><span class="id">RULE-12</span><span class="label">long sentence</span></div>
+      </div>
+      <div class="panel revised">
+        <div class="panel-label">with agent-style loaded</div>
+        <p>AgentBench provides a comprehensive framework for assessing LLMs as agents in varied environments. tau-bench focuses on user-centric tool-use in realistic scenarios. <span class="concrete">BFCL specifically targets the accuracy of function calling within API-driven contexts.</span></p>
+      </div>
+    </div>
+
   </div>
 
   <div class="footer">

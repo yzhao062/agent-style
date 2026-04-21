@@ -9,29 +9,57 @@
 # scorecard at docs/bench-<VERSION>-<RUNNER>.md. Use
 # `scripts/bench/aggregate.py` to combine multiple runners into a matrix.
 #
+# This script is one runner. The full local bench runs four runners in
+# parallel; see RELEASING.md "Bench (Local Only)" section for the
+# parallel-launch pattern expected on the maintainer workstation.
+#
 # Usage:
-#   bash scripts/bench/run.sh --runner <claude|gemini|openai> --model <id> \
-#                             [--output PATH] [--generations N]
+#   bash scripts/bench/run.sh --runner <claude|gemini|openai|codex|copilot> --model <id> \
+#                             [--output PATH] [--generations N] [--keep-scratch]
+#
+# Flags:
+#   --output PATH       Override default scorecard path (docs/bench-<VER>-<RUNNER>.md).
+#   --generations N     1 or 2. N=2 matches the published v0.2.0 bench methodology.
+#   --keep-scratch      Do not delete the scratch dir holding per-task drafts at exit.
+#                       Prints the path so you can inspect generated prose.
 #
 # Runners:
 #   claude  — Claude Code CLI. Treatment: `agent-style enable claude-code`.
 #             --model: opus / sonnet / full-id (e.g. claude-opus-4-7).
-#             env: ANTHROPIC_API_KEY
+#             auth: Claude Code subscription (Max/Pro) via `claude` login, or
+#             ANTHROPIC_API_KEY for billable API.
 #   gemini  — Gemini CLI with AGENTS.md as context. Treatment:
 #             `agent-style enable agents-md` + `.gemini/settings.json` with
 #             `context.fileName = ["AGENTS.md","GEMINI.md"]`.
 #             --model: e.g. gemini-2.5-pro, gemini-2.5-flash.
-#             env: GEMINI_API_KEY
-#   openai  — OpenAI Agents SDK. Treatment loads
+#             auth: Google AI Studio / Gemini Advanced login, or GEMINI_API_KEY.
+#   codex   — Codex CLI (`codex exec`). Treatment: `agent-style enable agents-md`
+#             (Codex CLI reads workspace AGENTS.md by default).
+#             --model: e.g. gpt-5.4, gpt-5.4-mini.
+#             auth: ChatGPT Plus / Pro subscription via `codex login`, or
+#             OPENAI_API_KEY for billable API.
+#   copilot — GitHub Copilot CLI (`copilot -p -s --model <M> --allow-all-tools`).
+#             Treatment: `agent-style enable copilot` (repo-wide
+#             `.github/copilot-instructions.md`). The path-scoped
+#             `copilot-path` adapter is NOT used here because its
+#             `applyTo` glob only attaches when Copilot is working on a
+#             matching prose file; `-p "prompt"` mode has no file context
+#             and silently skips path-scoped instructions.
+#             --model: passed to Copilot CLI; e.g. gpt-5.4, claude-sonnet-4-6.
+#             auth: GitHub Copilot Pro/Business subscription via `copilot auth login`.
+#             `-s` suppresses the CLI stats footer so the scorer sees only the draft.
+#   openai  — OpenAI Agents SDK (programmatic, Python). Treatment loads
 #             `.agent-style/codex-system-prompt.md` into Agent(instructions=).
 #             --model: e.g. gpt-5.4, gpt-5.4-mini, gpt-5.4-nano.
-#             env: OPENAI_API_KEY
+#             auth: OPENAI_API_KEY (billable API; no subscription alternative).
 #
-# Cost estimates (40 calls = 10 tasks × 2 gens × 2 conditions):
-#   claude --model claude-opus-4-7:   ~$1.20
-#   claude --model claude-sonnet-4-6: ~$0.40
-#   gemini --model gemini-2.5-pro:    ~$0.10 (free tier may cover)
-#   openai --model gpt-5.4:           ~$0.17
+# Cost for 40 calls = 10 tasks × 2 gens × 2 conditions:
+#   claude / codex / copilot / gemini via subscription:   $0 (counts toward
+#                                                          monthly allotment)
+#   claude --model claude-opus-4-7 via API:               ~$1.20
+#   claude --model claude-sonnet-4-6 via API:             ~$0.40
+#   gemini --model gemini-2.5-pro via API:                ~$0.10
+#   openai --model gpt-5.4 (SDK, always billable):        ~$0.17
 
 set -euo pipefail
 
@@ -42,30 +70,32 @@ RUNNER=""
 MODEL=""
 OUTPUT=""
 GENS=2
+KEEP_SCRATCH="${KEEP_SCRATCH:-0}"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --runner) RUNNER="$2"; shift 2 ;;
     --model) MODEL="$2"; shift 2 ;;
     --output) OUTPUT="$2"; shift 2 ;;
     --generations) GENS="$2"; shift 2 ;;
-    --help|-h) sed -n '2,38p' "$0"; exit 0 ;;
+    --keep-scratch) KEEP_SCRATCH=1; shift ;;
+    --help|-h) awk 'NR > 1 && /^set -euo pipefail$/ { exit } NR > 1 { print }' "$0"; exit 0 ;;
     *) echo "error: unknown arg: $1" >&2; exit 2 ;;
   esac
 done
 
 case "${RUNNER:-}" in
-  claude|gemini|openai) ;;
-  "") echo "error: --runner required (claude|gemini|openai)" >&2; exit 2 ;;
-  *) echo "error: unknown runner '$RUNNER' (expected claude|gemini|openai)" >&2; exit 2 ;;
+  claude|gemini|openai|codex|copilot) ;;
+  "") echo "error: --runner required (claude|gemini|openai|codex|copilot)" >&2; exit 2 ;;
+  *) echo "error: unknown runner '$RUNNER' (expected claude|gemini|openai|codex|copilot)" >&2; exit 2 ;;
 esac
 [[ -n "$MODEL" ]] || { echo "error: --model required" >&2; exit 2; }
 
-# Hard cap on --generations. The workflow_dispatch cost estimates in
-# bench.yml (~$0.45 at cheap defaults, ~$2.20-$2.50 at flagship-tier
-# inputs) assume 2 generations. Anything higher multiplies cost
-# proportionally; a typo like "20" would 10x the bill. If a larger run
-# is ever warranted, bump this cap intentionally and update the cost
-# estimates in bench.yml's header comment in the same commit.
+# Hard cap on --generations. The published bench methodology and the
+# local runtime assumptions in RELEASING.md "Bench (Local Only)" assume
+# 2 generations. Anything higher multiplies calls proportionally; a typo
+# like "20" would 10x the runtime and can exhaust subscription rate
+# limits. If a larger run is ever warranted, bump this cap intentionally
+# and update RELEASING.md in the same commit.
 case "$GENS" in
   1|2) ;;
   *) echo "error: --generations must be 1 or 2 (got: $GENS); higher values multiply cost and are not budget-approved" >&2; exit 2 ;;
@@ -75,20 +105,33 @@ esac
 command -v agent-style >/dev/null 2>&1 || { echo "error: agent-style CLI not on PATH" >&2; exit 2; }
 command -v jq >/dev/null 2>&1 || { echo "error: jq is required" >&2; exit 2; }
 
-# Per-runner env + CLI presence checks.
+# Per-runner env + CLI presence checks. API keys are SOFT checks: the
+# subscription-backed CLIs (claude, codex, copilot, gemini) authenticate via
+# their own login flow, so missing env keys are a warning, not an error.
+# Only `openai` (SDK) hard-requires OPENAI_API_KEY because it talks to the
+# API directly without a CLI shim.
 case "$RUNNER" in
   claude)
-    [[ -n "${ANTHROPIC_API_KEY:-}" ]] || { echo "error: ANTHROPIC_API_KEY must be set for --runner claude" >&2; exit 2; }
-    command -v claude >/dev/null 2>&1 || { echo "error: claude CLI not on PATH (npm install -g @anthropic-ai/claude-code)" >&2; exit 2; }
+    command -v claude >/dev/null 2>&1 || { echo "error: claude CLI not on PATH (curl -fsSL https://claude.ai/install.sh | sh, or native installer)" >&2; exit 2; }
+    [[ -n "${ANTHROPIC_API_KEY:-}" ]] || echo "info: ANTHROPIC_API_KEY not set; using Claude Code subscription auth" >&2
     RUNNER_LABEL="Claude Code CLI ($MODEL)"
     ;;
   gemini)
-    [[ -n "${GEMINI_API_KEY:-}" ]] || { echo "error: GEMINI_API_KEY must be set for --runner gemini" >&2; exit 2; }
     command -v gemini >/dev/null 2>&1 || { echo "error: gemini CLI not on PATH (npm install -g @google/gemini-cli)" >&2; exit 2; }
+    [[ -n "${GEMINI_API_KEY:-}" ]] || echo "info: GEMINI_API_KEY not set; using Gemini CLI login (Google AI Studio / Gemini Advanced)" >&2
     RUNNER_LABEL="Gemini CLI ($MODEL)"
     ;;
+  codex)
+    command -v codex >/dev/null 2>&1 || { echo "error: codex CLI not on PATH (npm install -g @openai/codex)" >&2; exit 2; }
+    [[ -n "${OPENAI_API_KEY:-}" ]] || echo "info: OPENAI_API_KEY not set; using Codex CLI subscription auth (ChatGPT Plus/Pro)" >&2
+    RUNNER_LABEL="Codex CLI ($MODEL)"
+    ;;
+  copilot)
+    command -v copilot >/dev/null 2>&1 || { echo "error: copilot CLI not on PATH (winget install GitHub.Copilot on Windows, or see https://docs.github.com/copilot/how-tos/copilot-cli)" >&2; exit 2; }
+    RUNNER_LABEL="GitHub Copilot CLI ($MODEL)"
+    ;;
   openai)
-    [[ -n "${OPENAI_API_KEY:-}" ]] || { echo "error: OPENAI_API_KEY must be set for --runner openai" >&2; exit 2; }
+    [[ -n "${OPENAI_API_KEY:-}" ]] || { echo "error: OPENAI_API_KEY must be set for --runner openai (SDK has no subscription path; use --runner codex for ChatGPT Plus subscription)" >&2; exit 2; }
     PYTHON_BIN="${PYTHON_BIN:-}"
     if [[ -z "$PYTHON_BIN" ]]; then
       if command -v python3 >/dev/null 2>&1; then PYTHON_BIN="$(command -v python3)"
@@ -100,14 +143,34 @@ case "$RUNNER" in
     ;;
 esac
 
+# Force subscription-backed auth for the 4 CLI runners. If the
+# maintainer's shell has a provider API key set (ANTHROPIC_API_KEY,
+# OPENAI_API_KEY, GEMINI_API_KEY), the corresponding CLI may silently
+# bill it instead of using the subscription. Unsetting in THIS process
+# only (not the user's shell) guarantees subscription path. The `openai`
+# runner is the one intentional billable path and explicitly re-requires
+# OPENAI_API_KEY above.
+case "$RUNNER" in
+  claude)  unset ANTHROPIC_API_KEY ;;
+  gemini)  unset GEMINI_API_KEY ;;
+  codex)   unset OPENAI_API_KEY ;;
+  copilot) : ;; # Copilot CLI has no API-key auth path; nothing to unset.
+  openai)  : ;; # Intentional API use; OPENAI_API_KEY required.
+esac
+
 AS_VERSION="$(agent-style --version | awk '{print $2}')"
 if [[ -z "$OUTPUT" ]]; then
   OUTPUT="$ROOT/docs/bench-${AS_VERSION}-${RUNNER}.md"
 fi
 mkdir -p "$(dirname "$OUTPUT")"
 
-SCRATCH="$(mktemp -d -t as-bench-XXXXXX)"
-trap 'rm -rf "$SCRATCH"' EXIT
+if [[ "$KEEP_SCRATCH" == "1" ]]; then
+  SCRATCH="$(mktemp -d -t as-bench-keep-XXXXXX)"
+  echo "--keep-scratch enabled; drafts will persist at: $SCRATCH" >&2
+else
+  SCRATCH="$(mktemp -d -t as-bench-XXXXXX)"
+  trap 'rm -rf "$SCRATCH"' EXIT
+fi
 
 # Parse tasks.md: one $SCRATCH/prompt/<id>.txt per task; $SCRATCH/ids.txt in order.
 mkdir -p "$SCRATCH/prompt"
@@ -159,6 +222,24 @@ setup_workspace() {
         ( cd "$ws" && agent-style enable codex >/dev/null 2>&1 )
       fi
       ;;
+    codex)
+      if [[ "$cond" == "treatment" ]]; then
+        # Codex CLI reads workspace AGENTS.md by default.
+        ( cd "$ws" && agent-style enable agents-md >/dev/null )
+      fi
+      ;;
+    copilot)
+      if [[ "$cond" == "treatment" ]]; then
+        # Install the repo-wide adapter for parity with real Copilot
+        # surfaces. The v0.3.0 evidence shows Copilot CLI `-p`
+        # programmatic mode does not load either repo-wide or
+        # path-scoped instruction files, so this runner is kept as a
+        # caveated measurement rather than a valid treatment signal;
+        # see CHANGELOG Notes and TODO.md "Copilot instruction-loading
+        # verification".
+        ( cd "$ws" && agent-style enable copilot >/dev/null )
+      fi
+      ;;
   esac
 }
 
@@ -203,6 +284,33 @@ generate_draft() {
         --prompt-file "$prompt_file" \
         "${extra_args[@]}" \
         < /dev/null > "$out" 2> "$err" || rc=$?
+      ;;
+    codex)
+      local prompt
+      prompt="$(cat "$prompt_file")"
+      # `codex exec` is the non-interactive path. `--skip-git-repo-check`
+      # tolerates the tmp workspace not being a git repo.
+      ( cd "$ws" && codex exec --skip-git-repo-check --model "$MODEL" "$prompt" < /dev/null > "$out" 2> "$err" ) || rc=$?
+      ;;
+    copilot)
+      local prompt
+      prompt="$(cat "$prompt_file")"
+      # `-s` suppresses the stats/decoration footer (Changes / Requests /
+      # Tokens) so the scorer sees only the draft. `--model "$MODEL"`
+      # ensures the scorecard's model label matches what Copilot actually
+      # ran. `--allow-all-tools` skips confirmation prompts.
+      #
+      # We intentionally do NOT pass `--add-dir "$ws"`. Giving Copilot
+      # workspace file access triggers its agent-explore mode: it reads
+      # README.md, narrates "I'm checking the draft file...", then emits
+      # the narration as part of stdout, contaminating the draft with
+      # first-person Copilot talk that is not scored cleanly by
+      # agent-style. Without `--add-dir`, the output stays clean. The
+      # v0.3.0 caveat still applies: CLI `-p` has not been observed to
+      # load `.github/copilot-instructions.md`, so the copilot leg is
+      # retained for transparency and should not be cited as a treatment
+      # result. See CHANGELOG Notes + TODO.md.
+      ( cd "$ws" && copilot -p "$prompt" -s --model "$MODEL" --allow-all-tools < /dev/null > "$out" 2> "$err" ) || rc=$?
       ;;
   esac
   if [[ $rc -ne 0 ]]; then
@@ -337,3 +445,7 @@ jq -s '.[0] as $a | .[1] as $b | ($a * $b | keys_unsorted) | map({rule: ., a: ($
 } >> "$OUTPUT"
 
 echo "bench complete; scorecard at: $OUTPUT"
+if [[ "$KEEP_SCRATCH" == "1" ]]; then
+  echo "drafts preserved at: $SCRATCH"
+  echo "  per-task structure: $SCRATCH/<task-id>-{baseline,treatment}/draft-<gen>.md"
+fi

@@ -220,12 +220,13 @@ billable action.
 |---|---|---|---|
 | `validate.yml` | push + PR | $0 (no API calls) | — |
 | `real-agent-smoke.yml` | `release: published` + manual | ~$0.05 | Sonnet pin on Claude probes; handshake-only |
-| `bench.yml` (cheap default) | manual | ~$0.45 | `confirm="run"` + Sonnet 4.6 / Gemini Flash / GPT-5.4 Nano defaults |
-| `bench.yml` (flagship inputs) | manual | **~$2.20-$2.50** | requires explicit `claude_model=claude-opus-4-7` override |
-| `bench.yml` (single runner) | manual | $0-$2.00 | `runners=<one>` skips aggregation |
 | `adapter-aider-smoke.yml` | manual | ~$0.10 | Sonnet 4.6 via Aider |
 | `adapter-gemini-smoke.yml` | manual | $0 (Flash free tier) | — |
 | `adapter-agents-sdk-smoke.yml` | manual | ~$0.01 | GPT-5.4 Nano |
+
+Bench moved out of CI — see the "Bench (Local Only)" section below. No
+workflow dispatches bench anymore; the matrix runs on the maintainer's
+subscription-backed CLIs at $0 per dispatch.
 
 ### Dispatch-approval policy (for agents)
 
@@ -246,52 +247,172 @@ inside an approved task without per-run confirmation.
 | Category | Typical year |
 |---|---|
 | `real-agent-smoke` auto-triggered on ~5 releases | ~$0.25 |
-| `bench` on 2-3 major/minor releases (flagship tier) | ~$5-$7.50 |
 | Ad-hoc adapter smokes during debugging | ~$0-$5 |
-| **Total** | **~$5-$15** |
+| **Total** | **~$0.25-$5** |
 
-v0.2.0 dev-cycle reality check: ~$2.45 on bench work (one flagship matrix at
-$2.35 + one Gemini-only rerun at $0.10) plus ~$0.10-$0.20 on adapter-smoke
-validation. Total v0.2.0 CI spend: ~$2.55-$2.65.
+v0.2.0 dev-cycle (historical, before bench moved local): ~$2.45 on a
+now-removed `bench.yml` (one flagship matrix + one Gemini rerun) plus
+~$0.10-$0.20 on adapter-smoke validation. From v0.3.0 onward bench runs
+locally on subscription-backed CLIs, so future cycles drop the bench line
+entirely.
 
-## Bench (Major/Minor Releases Only)
+## Bench (Local Only)
 
-The 3-model matrix bench (`.github/workflows/bench.yml`) is **opt-in** and **expensive**. Dispatch only on major / minor releases (v0.3.0, v0.4.0, v1.0.0). **Do not** dispatch on patch releases (v0.2.1, v0.2.2). Per-release mechanical correctness is already covered by `real-agent-smoke.yml` (~$0.04 per release, auto-triggered on `release: published`); `bench.yml` exists to produce publication-quality behavioral data for the README figure and deserves human judgment each time.
-
-### Cost (measured on 2026-04-21 billing, 40 calls per model per matrix leg)
-
-| Dispatch mode | What you get | Approx cost |
-|---|---|---|
-| `runners=all`, default cheap-tier inputs | Sonnet 4.6 / Gemini Flash / GPT-5.4 Nano matrix — regression check | ~$0.45 |
-| `runners=all`, flagship override inputs | Opus 4.7 / Gemini Pro / GPT-5.4 matrix — **publication-quality data** | **~$2.20–$2.50** |
-| `runners=<one>`, any model | Single-leg rerun — for cheap targeted validation after a fix | $0–$2.00 |
+Bench runs on the maintainer's machine against locally-installed CLIs
+authenticated with subscriptions (Claude Max/Pro, GitHub Copilot Pro,
+ChatGPT Plus for Codex, Google One AI Pro for Gemini). **$0 per dispatch**;
+no CI workflow and no bench-specific GitHub Actions secrets (the other
+CI workflows such as `real-agent-smoke.yml` still use model-API secrets
+for their own lanes). This replaces the earlier
+`bench.yml` workflow removed in v0.3.0. Per-release mechanical correctness
+is still guarded by `real-agent-smoke.yml` (~$0.05 per release, auto-
+triggered on `release: published`); local bench adds behavioral data for
+the README figure when a major/minor release warrants it.
 
 ### Cadence
 
+Run before tagging a major or minor release (v0.3.0, v0.4.0, v1.0.0).
+Skip on patch releases (v0.2.1, v0.2.2) unless the patch touches bench
+code itself.
+
+### Maintainer machine prerequisites
+
+The bench expects the maintainer's workstation to hold all four
+subscription CLIs logged in. Setup is one-time per machine:
+
+| CLI | Install | Login |
+|---|---|---|
+| `claude` (Claude Code CLI) | `curl -fsSL https://claude.ai/install.sh \| sh` (macOS/Linux) or `irm https://claude.ai/install.ps1 \| iex` (Windows) | `claude login` via browser flow |
+| `copilot` (GitHub Copilot CLI) | `winget install GitHub.Copilot` (Windows) or see [docs.github.com/copilot/how-tos/copilot-cli](https://docs.github.com/copilot/how-tos/copilot-cli) | `copilot auth login` via browser flow; GitHub Education gives eligible faculty/students Copilot Pro for free |
+| `codex` (Codex CLI) | `npm install -g @openai/codex` | `codex login` via browser flow; bundled with ChatGPT Plus/Pro |
+| `gemini` (Gemini CLI) | `npm install -g @google/gemini-cli` | `gemini` interactive first time for Google OAuth; bundled with Google One AI Pro |
+
+Skip this table if the workstation is already set up (one-time per
+machine). Once logged in, every subsequent bench run is $0.
+
+### Parallel execution is the expected runtime
+
+Runners are independent by design (different CLIs, different
+subscriptions, different workspaces). Claude Code should dispatch all
+four runners **in parallel**, then wait on the aggregate step. Wall-clock
+drops from ~60 min serial to ~20 min parallel (bottleneck: slowest
+runner, typically Claude Opus). No subscription conflicts because each
+runner consumes its own account's quota.
+
+For agents driving the bench:
+
+- Launch `claude`, `copilot`, `codex`, `gemini` runners concurrently via
+  background jobs (`&` + `wait`) or the agent host's parallel-tool
+  mechanism.
+- The `aggregate.py` step must run **after** all four scorecards are on
+  disk. Do not parallelize aggregate with the runner launches.
+- On subscription rate-limit throttle (Claude Max enforces a ~5h rolling
+  window), fail-closed on that single runner and rerun it later; the
+  other three complete independently.
+
+### Runners supported (5 total: 4 subscription-backed + 1 billable)
+
+The default local release bench uses the **4-runner subscription matrix**
+(claude, copilot, codex, gemini). The `openai` runner is supported in
+`run.sh` for historical parity with the v0.2.0 bench methodology, but
+it talks to the API directly and burns money; prefer `codex` for the
+OpenAI family on local runs.
+
+| Runner | CLI | Treatment adapter | Auth | Cost |
+|---|---|---|---|---|
+| claude | `claude` (Claude Code CLI) | `agent-style enable claude-code` | Claude Code subscription via `claude` login | $0 |
+| copilot | `copilot` (GitHub Copilot CLI) | `agent-style enable copilot` (repo-wide; `-p` mode has no file context, so path-scoped is skipped) | Copilot Pro via `copilot auth login` | $0 |
+| codex | `codex` (Codex CLI) | `agent-style enable agents-md` | ChatGPT Plus/Pro via `codex login` | $0 |
+| gemini | `gemini` (Gemini CLI) | `agent-style enable agents-md` + `.gemini/settings.json` | Google AI Studio / Gemini Advanced login | $0 |
+| openai (optional) | OpenAI Agents SDK (Python) | `agent-style enable codex` | `OPENAI_API_KEY` | ~$0.17 at gpt-5.4 flagship; billable |
+
+### Copilot runner caveat (important)
+
+The `copilot` runner is kept for completeness, but the data it produces
+is narrow and specific. Empirically, GitHub Copilot CLI `-p` programmatic
+mode does not load `.github/copilot-instructions.md` or
+`.github/instructions/*.instructions.md` into the request context: the
+v0.3.0 bench shows baseline 61 → treatment 63 (+3% noise) on identical
+tasks where Codex on the same GPT-5.4 backend shows -45%. For GPT-5.4
+family measurement in a release scorecard, cite the `codex` runner
+result, not the `copilot` runner.
+
+The scope of the confirmed non-loading behavior is the `-p` programmatic
+path only. IDE Chat and inline completion are documented by GitHub to
+auto-load the instruction files, and the CLI interactive (TUI) mode is
+not yet tested. The shipped `agent-style enable copilot` (repo-wide)
+and `enable copilot-path` (path-scoped for `.md`/`.tex`/`.rst`/`.txt`)
+adapters target those loading paths, but we have not smoke-tested
+them end to end; a full verification matrix is pending and tracked in
+`TODO.md` at the repository root under "Copilot instruction-loading
+verification". Until that verification
+completes, do not overclaim in downstream
+docs (for example, an awesome-copilot PR description) that "IDE users
+are unaffected" — the accurate claim is "CLI `-p` mode is confirmed not
+to load; IDE and interactive CLI paths are documented by GitHub but not
+yet end-to-end smoke tested by us."
+
+### Gemini model selection (Pro quota warning)
+
+`--model pro` (Gemini 3.1 Pro) typically fails mid-run with
+`RetryableQuotaError: No capacity available for model
+gemini-3.1-pro-preview on the server` on a 40-call bench run
+(`--generations 2` × 10 tasks × 2 conditions). A 22-hour rolling quota
+window is enforced at the subscription level (Google One AI Pro) and
+agent-style's bench burns the remaining quota well before the 40th
+call. `--model flash` (Gemini 3 Flash) has a substantially higher limit
+and completes the 40-call matrix comfortably; it is the default and
+recommended Gemini leg for a v0.3.0+ release bench. A pro run can be
+spliced in after the quota window resets if flagship data is required,
+but plan for a 24-hour cooldown between attempts.
+
+### Invocation
+
 ```bash
-# One dispatch per major/minor release, flagship-tier inputs.
-# Expects: ANTHROPIC_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY as repo secrets.
-gh workflow run bench.yml \
-  --repo yzhao062/agent-style --ref main \
-  -f confirm=run \
-  -f runners=all \
-  -f install_from=branch \
-  -f claude_model=claude-opus-4-7 \
-  -f gemini_model=gemini-2.5-pro \
-  -f openai_model=gpt-5.4
+# Full 4-runner local matrix, publication-quality (--generations 2).
+# Adds --keep-scratch so drafts survive for eyeballs and evidence.
+mkdir -p /tmp/as-bench-drafts
+for runner_model in \
+    'claude:claude-opus-4-7' \
+    'copilot:gpt-5.4' \
+    'codex:gpt-5.4' \
+    'gemini:gemini-2.5-pro'; do
+  runner="${runner_model%%:*}"
+  model="${runner_model##*:}"
+  bash scripts/bench/run.sh \
+    --runner "$runner" \
+    --model "$model" \
+    --generations 2 \
+    --keep-scratch \
+    --output "docs/bench-<VERSION>-${runner}.md" &
+done
+wait
+
+# Aggregate 4-leg matrix into docs/bench-<VERSION>.md
+python scripts/bench/aggregate.py \
+  --version <VERSION> \
+  --output docs/bench-<VERSION>.md \
+  docs/bench-<VERSION>-claude.md \
+  docs/bench-<VERSION>-copilot.md \
+  docs/bench-<VERSION>-codex.md \
+  docs/bench-<VERSION>-gemini.md
 ```
 
-### After the dispatch completes
+`--generations 2` matches the published v0.2.0 methodology (10 tasks × 2 conditions × 2 generations = 40 calls per runner). `--generations 1` is a half-rate smoke for quick iteration on bench code changes.
 
-1. **Download artifacts** (per-runner scorecards + aggregated combined scorecard) from the workflow run.
-2. **Review per-model results honestly.** Not every model will show a strong reduction — publish what you actually observed. The v0.2.0 run showed Claude Opus at −47%, GPT-5.4 at −23%, and Gemini Pro at +13% (noise on a clean baseline). Archive uninformative legs under `docs/bench-<VERSION>-<runner>-archive.md` with a short note rather than dropping them from the tree.
-4. **Commit the combined scorecard** to `docs/bench-<VERSION>.md`. If you are regenerating the README bench figure, re-render `docs/bench.png` from `docs/hero-source/bench.html` at 3x DPI and commit.
+### After the local run completes
+
+1. **Collect scorecards**. Four `docs/bench-<VERSION>-{claude,copilot,codex,gemini}.md` files plus the aggregated `docs/bench-<VERSION>.md`.
+2. **Preserve drafts**. Each runner's `--keep-scratch` path is printed on completion (e.g., `/tmp/as-bench-keep-XXXXXX/`). Move them under `docs/bench-<VERSION>-drafts/<runner>/` and commit, so every published number has the exact prose behind it.
+3. **Review per-model results honestly.** Archive uninformative legs under `docs/bench-<VERSION>-<runner>-archive.md` with a short note rather than dropping them from the tree. The v0.2.0 pattern: Claude Opus baseline was AI-tell-heavy and dropped -47%; GPT-5.4 baseline was already clean and moved -23%; Gemini baseline was already clean and moved +13% (noise). Copilot (added in v0.3.0) patterns with the GPT-5.4 side.
+4. **Commit the aggregated scorecard** to `docs/bench-<VERSION>.md`. If regenerating the README bench figure, re-render `docs/bench.png` from `docs/hero-source/bench.html` at 3x DPI and commit.
 5. **Update README caption** to reflect which models are headlined.
 
-### When a bench dispatch fails mid-run
+### When a bench run fails mid-run
 
-- **Gemini-only rerun after a fix**: use `-f runners=gemini` — ~$0 on free Flash tier, ~$0.10 on Pro. Aggregation is skipped in single-runner mode.
-- **Splicing stale + fresh data**: `scripts/bench/aggregate.py` accepts N arbitrary `bench-<version>-<runner>.md` files as positional args. Download the still-valid artifacts from the prior run, the fresh ones from the rerun, and run aggregate locally — no need to redispatch a full matrix just to regenerate a combined scorecard.
+- **Single-runner rerun**: just rerun that one. Runners are independent; no aggregation dependency.
+- **Partial matrix aggregation**: `scripts/bench/aggregate.py` accepts any subset of per-runner scorecards as positional args — splice stale + fresh without redoing the whole matrix.
+- **Subscription rate limits**: Claude Max enforces a ~5h rolling window (~80 Opus calls). One runner at `--generations 2` = 40 calls, well under the cap; two back-to-back runs may queue briefly. Serialize if you hit throttling.
 
 ## Common Gotchas
 

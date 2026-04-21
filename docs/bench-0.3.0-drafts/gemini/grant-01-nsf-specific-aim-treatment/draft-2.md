@@ -1,0 +1,13 @@
+### Specific Aim 1: Dynamic Distribution Alignment for Non-Stationary Clinical Streams
+
+This aim addresses the fundamental research question: how can outlier detection algorithms autonomously adjust to physiological drift and sensor noise in high-velocity clinical streams without manual recalibration? Current clinical monitoring systems rely on static thresholds or periodic batch retraining. These methods fail during rapid patient deterioration or sensor displacement because they cannot distinguish between benign physiological shifts and clinically significant anomalies in real-time. We propose a streaming-native alignment mechanism that uses online kernel density estimation to maintain a continuous, evolving model of the normal patient state. This approach provides a significant novelty over prior work by eliminating the requirement for pre-labeled training data or stationary distribution assumptions.
+
+The investigators will execute this aim through three technical tasks:
+
+**Task 1.1: Online Feature Space Mapping.** We will develop a recursive sketching algorithm to maintain a low-rank representation of the streaming data distribution. *Milestone:* Achievement of less than 5% reconstruction error on the MIMIC-IV waveform dataset while maintaining a sub-100ms processing latency per sample.
+
+**Task 1.2: Adaptive Thresholding via Bayesian Updating.** The team will implement a temporal decay function that weights recent observations more heavily when updating the anomaly score threshold. *Milestone:* Reduction of false alarm rates by 30% compared to state-of-the-art static Z-score methods across ten heterogeneous patient cohorts.
+
+**Task 1.3: Noise-Signal Decoupling.** The investigators will design a spectral filter to identify high-frequency sensor artifacts independently of physiological trends. *Milestone:* Successful isolation of 95% of simulated lead-off artifacts without suppressing the detection of acute bradycardia events.
+
+This research aligns with NSF intellectual-merit criteria through its scientific rigor and focus on foundational computing challenges. The investigators apply rigorous mathematical proofs to guarantee convergence of the streaming sketching algorithm. The team possesses deep qualifications in clinical informatics and real-time stream processing, having published extensively on physiological signal analysis. The project maintains high feasibility; preliminary tests on the PhysioNet dataset demonstrate that the proposed recursive sketches maintain stable memory footprints even during high-throughput data bursts. This foundational work ensures the system remains robust under the unpredictable conditions of intensive care environments.

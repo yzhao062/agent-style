@@ -1,0 +1,12 @@
+### Specific Aim 1: Adaptive outlier detection under concept drift in clinical data streams
+
+**Research question.** Can an outlier detector sustain accurate, low-latency flags on bedside physiologic streams (ECG, SpO2, mean arterial pressure) when the underlying distribution shifts across patients, care phases, and device firmware revisions?
+
+**Novelty over prior approaches.** Existing streaming detectors take one of two forms. Static models such as one-class SVM or Isolation Forest, fit once and deployed, degrade without warning when data drifts. Sliding-window heuristics forget history on a fixed schedule and lump benign drift together with genuine anomalies. This aim pursues a third direction: a drift-aware ensemble that reweights its members using a martingale-based change-point test, yielding provable control over the false-alarm rate on piecewise-stationary streams. Published MIMIC and eICU benchmarks lack this guarantee.
+
+**Task plan.**
+1. *T1.1: Theory (months 1-9).* Derive the drift-adaptive ensemble and its coverage proof. Milestone: a theorem bounding type-I error at level α on any piecewise-stationary source, verified against synthetic drifting mixtures.
+2. *T1.2: Systems (months 6-18).* Implement the online inference engine as an extension of the PI's open-source outlier-detection toolkit. Milestone: per-sample latency below 5 ms and working-set memory below 50 MB on a 512-lead ICU simulator.
+3. *T1.3: Evaluation (months 15-24).* Run head-to-head trials on MIMIC-IV waveforms. Milestone: AUROC gain of at least 0.05 over the strongest fixed-window baseline across three drift regimes (patient handoff, sensor swap, seasonal shift), with pre-registered statistical tests.
+
+**Intellectual merit.** The aim meets the three NSF criteria. Scientific rigor: every milestone ties to a pre-registered benchmark, and all code, random seeds, and evaluation traces release under an OSI license for independent replication. Investigator qualifications: the PI maintains a widely adopted outlier-detection library and has published foundational work on ensemble anomaly scoring; the co-PI contributes clinical-informatics depth through prior federally funded waveform studies. Feasibility: twelve months of preliminary results already demonstrate the reweighting rule on synthetic drifting Gaussians, an executed data-use agreement covers MIMIC-IV, and host-institution GPU compute meets the training budget.
