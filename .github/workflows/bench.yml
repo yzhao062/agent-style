@@ -8,22 +8,40 @@ name: Sanity Benchmark (3-model matrix)
 # benchmarks and ad-hoc validation. A confirm input gate blocks accidental
 # clicks.
 #
+# Cost per dispatch (default models):
+#   runners=all    — full matrix              ~$1.47 (Claude $1.20 + Gemini $0.10 + OpenAI $0.17)
+#   runners=claude — Claude Opus leg only     ~$1.20
+#   runners=gemini — Gemini Pro leg only      ~$0.10 (free tier may cover)
+#   runners=openai — OpenAI leg only          ~$0.17
+# Single-runner mode is meant for cheap targeted reruns; aggregation is
+# skipped in that mode.
+#
 # Required repository secrets:
 #   ANTHROPIC_API_KEY  https://console.anthropic.com/settings/keys
 #   GEMINI_API_KEY     https://aistudio.google.com/apikey  (free tier OK)
 #   OPENAI_API_KEY     https://platform.openai.com/api-keys
 #
-# Output: docs/bench-<VERSION>.md (aggregated matrix) + per-runner scorecards
-# uploaded as artifacts. Maintainer commits the aggregated scorecard as part
-# of the release cycle.
+# Output: docs/bench-<VERSION>.md (aggregated matrix, runners=all only) +
+# per-runner scorecards uploaded as artifacts. Maintainer commits the
+# aggregated scorecard as part of the release cycle.
 
 on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: 'Type "run" to confirm you accept the ~$1.47 cost for this dispatch.'
+        description: 'Type "run" to confirm you accept the cost for this dispatch (full matrix ~$1.47; single runner $0.01-$1.20).'
         required: true
         type: string
+      runners:
+        description: 'Which runners to execute (all = full 3-model matrix; single name = just that leg, useful for debugging).'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - claude
+          - gemini
+          - openai
       generations:
         description: 'Generations per condition per task; must be 1 or 2 (higher multiplies cost)'
         required: false
@@ -60,6 +78,8 @@ jobs:
   confirm:
     name: Confirm dispatch intent
     runs-on: ubuntu-latest
+    outputs:
+      runners: ${{ steps.prep.outputs.runners }}
     steps:
       - name: Require confirm="run"
         run: |
@@ -70,6 +90,21 @@ jobs:
           fi
           echo "confirm input accepted"
 
+      - name: Build matrix from `runners` input
+        id: prep
+        # Emits a JSON array consumed by the matrix. `all` expands to the full
+        # 3-model run; a single runner name emits a 1-element array for
+        # cheap targeted reruns (e.g., verify a fix for one provider).
+        run: |
+          set -euo pipefail
+          case "${{ github.event.inputs.runners }}" in
+            all)    echo 'runners=["claude","gemini","openai"]' >> "$GITHUB_OUTPUT" ;;
+            claude) echo 'runners=["claude"]' >> "$GITHUB_OUTPUT" ;;
+            gemini) echo 'runners=["gemini"]' >> "$GITHUB_OUTPUT" ;;
+            openai) echo 'runners=["openai"]' >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::invalid runners input '${{ github.event.inputs.runners }}'"; exit 1 ;;
+          esac
+
   bench:
     name: Bench — ${{ matrix.runner }}
     needs: [confirm]
@@ -77,7 +112,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [claude, gemini, openai]
+        runner: ${{ fromJSON(needs.confirm.outputs.runners) }}
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -169,6 +204,9 @@ jobs:
 
   aggregate:
     name: Aggregate — 3-model scorecard
+    # Skip aggregation when the dispatch ran a single runner; aggregate.py
+    # expects all 3 per-runner artifacts for the cross-model table.
+    if: ${{ github.event.inputs.runners == 'all' }}
     needs: [bench]
     runs-on: ubuntu-latest
     steps:

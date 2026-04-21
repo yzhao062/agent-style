@@ -177,6 +177,12 @@ generate_draft() {
   local out="$ws/draft-${gen}.md"
   local err="$ws/draft-${gen}.err"
   local rc=0
+  # CRITICAL: every runner MUST redirect stdin (either to the prompt file or
+  # /dev/null). The outer task-id loop reads from $SCRATCH/ids.txt via
+  # `while IFS= read -r TASK_ID; do ... done < ids.txt`, so stdin inside the
+  # loop is the remaining ids stream. Runners that read stdin by default
+  # (gemini CLI is one) will drain the loop after iteration 1, silently
+  # producing a scorecard with only task 1 recorded. Always close stdin.
   case "$RUNNER" in
     claude)
       ( cd "$ws" && claude -p --model "$MODEL" < "$prompt_file" > "$out" 2> "$err" ) || rc=$?
@@ -184,7 +190,7 @@ generate_draft() {
     gemini)
       local prompt
       prompt="$(cat "$prompt_file")"
-      ( cd "$ws" && gemini --prompt "$prompt" --model "$MODEL" > "$out" 2> "$err" ) || rc=$?
+      ( cd "$ws" && gemini --prompt "$prompt" --model "$MODEL" < /dev/null > "$out" 2> "$err" ) || rc=$?
       ;;
     openai)
       local -a extra_args=()
@@ -195,7 +201,7 @@ generate_draft() {
         --model "$MODEL" \
         --prompt-file "$prompt_file" \
         "${extra_args[@]}" \
-        > "$out" 2> "$err" || rc=$?
+        < /dev/null > "$out" 2> "$err" || rc=$?
       ;;
   esac
   if [[ $rc -ne 0 ]]; then
@@ -233,6 +239,7 @@ generate_draft() {
 
 GRAND_A=0
 GRAND_B=0
+TASKS_PROCESSED=0
 PER_RULE_A_FILE="$SCRATCH/per-rule-a.json"
 PER_RULE_B_FILE="$SCRATCH/per-rule-b.json"
 echo "{}" > "$PER_RULE_A_FILE"
@@ -292,7 +299,18 @@ while IFS= read -r TASK_ID; do
     | jq -r '.per_rule_delta | to_entries | map(select(.value.delta != 0)) | sort_by(.value.delta) | .[0].key // "—"')"
 
   printf "| %s | %s | %s | %s | %s |\n" "$TASK_ID" "$TASK_A_TOTAL" "$TASK_B_TOTAL" "$DELTA" "$DOMINANT" >> "$OUTPUT"
+  TASKS_PROCESSED=$((TASKS_PROCESSED + 1))
 done < "$SCRATCH/ids.txt"
+
+# Defensive check: the loop must have visited every parsed task. A runner
+# that drains the parent's stdin (e.g., gemini without `< /dev/null`) would
+# short-circuit the `while read` loop after iteration 1 without tripping
+# any error handler, producing a scorecard with only 1 task. Fail closed
+# so such a bug can never silently land as "success" with partial data.
+if [[ "$TASKS_PROCESSED" -ne "$TASK_COUNT" ]]; then
+  echo "::error::bench loop processed $TASKS_PROCESSED of $TASK_COUNT tasks; the runner may be draining stdin — check generate_draft's stdin handling" >&2
+  exit 1
+fi
 
 {
   echo ""
