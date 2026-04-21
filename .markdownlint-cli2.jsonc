@@ -23,6 +23,14 @@
     "node_modules/**",
     "skills/**",
     "packages/pypi/agent_style/data/skills/**",
-    "packages/npm/data/skills/**"
+    "packages/npm/data/skills/**",
+    "docs/bench-*-drafts/**"
   ]
 }
+// The `docs/bench-*-drafts/**` entry covers every release's preserved
+// raw model outputs from `scripts/bench/run.sh --keep-scratch`. These
+// drafts are committed evidence of what the scored runners emitted, not
+// normative prose. Quirks like Copilot's double-blank-line endings,
+// Claude's unfenced code-style commit messages, and Gemini's bare
+// headings legitimately reflect real CLI output and should not be edited
+// for lint compliance.
