@@ -133,19 +133,22 @@ Set up agent-style in this project. Steps:
 (If `agent-style` is not on PATH, substitute `npx --yes agent-style`
 for `agent-style` in every command below.)
 
-1. Pick the adapter that matches this project:
+1. Pick the adapter. Check more specific signals before broader
+   directory signals, and when more than one row fits, ask me which
+   host I want to configure.
 
-   | Signal in project                  | Adapter            |
-   | ---------------------------------- | ------------------ |
-   | `CLAUDE.md` or `.claude/`          | `claude-code`      |
-   | `AGENTS.md`                        | `agents-md`        |
-   | `.github/copilot-instructions.md`  | `copilot`          |
-   | `.github/instructions/`            | `copilot-path`     |
-   | `.cursor/`                         | `cursor`           |
-   | `.aider.conf.yml`                  | `aider`            |
-   | `.kiro/`                           | `kiro`             |
-   | `.claude/skills/`                  | `anthropic-skill`  |
-   | (none of the above)                | run `agent-style list-tools` and ask me which to use |
+   | Signal in project or requested host                                | Adapter           |
+   | ------------------------------------------------------------------ | ----------------- |
+   | `.claude/skills/` (Anthropic Skills host)                          | `anthropic-skill` |
+   | `CLAUDE.md` or `.claude/` (Claude Code)                            | `claude-code`     |
+   | `AGENTS.md` (Codex CLI, Jules, Zed, Warp, Gemini CLI, VS Code, ...) | `agents-md`       |
+   | Codex API (manual system-prompt paste, no CLI host)                | `codex`           |
+   | `.github/copilot-instructions.md`                                  | `copilot`         |
+   | `.github/instructions/`                                            | `copilot-path`    |
+   | `.cursor/`                                                         | `cursor`          |
+   | `.aider.conf.yml`                                                  | `aider`           |
+   | `.kiro/`                                                           | `kiro`            |
+   | (none of the above)                                                | run `agent-style list-tools` and ask me which to use |
 
 2. Run `agent-style enable <adapter> --dry-run --json` first. Check the
    `actions` array, then run the real `agent-style enable <adapter>`
