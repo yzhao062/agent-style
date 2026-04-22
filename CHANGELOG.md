@@ -6,6 +6,8 @@ All notable changes to *The Elements of Agent Style* are documented here.
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versioning: [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 
+> **Version distribution (as of 2026-04-21).** PyPI and npm currently distribute **0.3.1**. Git tags **v0.3.2** and **v0.3.3** are *docs-only* additions (`docs/rule-pack.md` published as the `anywhere-agents` rule-pack pin target, and README Use option 3 cross-reference). They are intentionally NOT published to PyPI or npm. The package version files (`packages/pypi/pyproject.toml`, `packages/pypi/agent_style/__init__.py`, `packages/npm/package.json`) remain at `0.3.1` to reflect the last-published state. The next PyPI / npm release MUST bump to **v0.3.4 or later** — never reuse `v0.3.2` or `v0.3.3` as a registry publish target, or you would retroactively attach new package content to a git ref users have already pinned against as "docs-only". See `RELEASING.md` for the docs-only tag convention.
+
 ## [Unreleased]
 
 *No unreleased changes queued.*

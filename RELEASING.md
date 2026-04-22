@@ -57,6 +57,8 @@ bash scripts/verify-install.sh --cli-parity  # Python vs Node JSON diff across 5
 
 ## Version Bump Across the Three Files
 
+> **Docs-only git tag convention.** Some releases (for example `v0.3.2`, `v0.3.3`) are intentionally git-only — a stable ref for external pinning (e.g. `anywhere-agents` fetches `docs/rule-pack.md` at a pinned ref) without a PyPI / npm package bump. When publishing the next proper release, **skip over any docs-only tag numbers**. Do NOT publish `X.Y.Z` to PyPI / npm if a git tag `vX.Y.Z` already exists as a docs-only tag — the registry would retroactively advertise new package content under a ref consumers have already pinned as unchanging. Check `git tag --list --sort=-v:refname` and verify each recent tag against the CHANGELOG's "Docs-only tag" notes before choosing the next version. The CHANGELOG's top-of-file "Version distribution" block is the authoritative record of which git tags were published to PyPI / npm and which were git-only.
+
 Only **three files** hold the release version:
 
 1. `packages/pypi/pyproject.toml` -> `project.version`
