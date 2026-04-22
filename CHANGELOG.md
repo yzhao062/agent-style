@@ -10,6 +10,16 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 *No unreleased changes queued.*
 
+## [0.3.2] — 2026-04-21
+
+### Added
+
+- **`docs/rule-pack.md`: canonical rule-pack source for anywhere-agents composition.** Verbatim mirror of `RULES.md` at the repo root, with a short HTML-comment preamble explaining the dual role. anywhere-agents' rule-pack composer (forthcoming as a separate aa release) fetches this file at a pinned ref via `https://raw.githubusercontent.com/yzhao062/agent-style/{ref}/docs/rule-pack.md` when a consumer opts into rule-pack composition. agent-style's own installer continues to read `RULES.md` unchanged; both paths stay in sync and diverge only if a future change edits one without the other. No changes to rule content, adapter files, CLI behavior, or package contents in this release.
+
+### Notes
+
+- **Docs-only tag.** The v0.3.2 git tag exists as a stable ref that anywhere-agents can pin against (via the `{ref}` slot in its rule-pack manifest). Whether to also bump the package version files (`pyproject.toml`, `packages/pypi/agent_style/__init__.py`, `packages/npm/package.json`) and adapter handshake strings to v0.3.2, and whether to publish to PyPI / npm, is a separate decision at tag time. If the package version strings stay at v0.3.1, the git tag v0.3.2 still works as an anywhere-agents pin target because aa fetches via raw GitHub URL, not via package install.
+
 ## [0.3.1] — 2026-04-21
 
 ### Fixed
@@ -140,7 +150,8 @@ The v0.3.0 cycle turns the bench from a narrow, API-billable CI job into a full-
 
 ---
 
-[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.3.2...HEAD
+[0.3.2]: https://github.com/yzhao062/agent-style/compare/v0.3.1...v0.3.2
 [0.3.1]: https://github.com/yzhao062/agent-style/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/yzhao062/agent-style/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/yzhao062/agent-style/compare/v0.1.1...v0.2.0
