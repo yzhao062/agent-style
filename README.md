@@ -306,7 +306,7 @@ pipx run anywhere-agents   # Python path
 npx anywhere-agents        # Node.js path
 ```
 
-Opt out by adding `rule_packs: []` to `agent-config.yaml` at your project root; pin to a specific ref or swap for a fork via `rule_packs: - name: agent-style\n    ref: <tag>`. See [anywhere-agents rule-pack composition docs](https://anywhere-agents.readthedocs.io/en/latest/rule-pack-composition/) for the full contract.
+Opt out by adding `rule_packs: []` to `agent-config.yaml` at your project root; pin to a specific ref or swap for a fork via `rule_packs: - name: agent-style\n    ref: <tag>`. See [anywhere-agents rule-pack composition docs](https://github.com/yzhao062/anywhere-agents/blob/main/docs/rule-pack-composition.md) for the full contract.
 
 ### v0.3.0 Roadmap
 
