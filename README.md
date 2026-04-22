@@ -297,6 +297,17 @@ This repo is read at generation time. For a linter that runs over committed pros
 
 </details>
 
+### 3. Bundled via [anywhere-agents](https://github.com/yzhao062/anywhere-agents) (zero-config)
+
+If your project already uses [`anywhere-agents`](https://github.com/yzhao062/anywhere-agents) — a maintained agent configuration for Claude Code, Codex, and other AGENTS.md-compliant tools — `agent-style` is the default rule pack: no `enable` step needed. The `anywhere-agents` bootstrap fetches agent-style's canonical rules at a pinned git tag and composes them into your project's `AGENTS.md` automatically on every run.
+
+```bash
+pipx run anywhere-agents   # Python path
+npx anywhere-agents        # Node.js path
+```
+
+Opt out by adding `rule_packs: []` to `agent-config.yaml` at your project root; pin to a specific ref or swap for a fork via `rule_packs: - name: agent-style\n    ref: <tag>`. See [anywhere-agents rule-pack composition docs](https://anywhere-agents.readthedocs.io/en/latest/rule-pack-composition/) for the full contract.
+
 ### v0.3.0 Roadmap
 
 Planned CLI additions: `agent-style update` (refresh installed adapters to latest), `agent-style override <RULE-ID> disable` (per-rule opt-out), `agent-style clean` (one-command uninstall), `.agent-style/config.toml` (project-level config), RULE-02 / 07 / 09 / 10 structural detectors filled in, and filled adapters for the planned-adapter set above (v1.1). Track progress in [`CHANGELOG.md`](CHANGELOG.md).
