@@ -121,6 +121,53 @@ pip install agent-style                              # Python users
 
 ### 1. Soft Enforcement — rules at generation time
 
+<details>
+<summary><b>Set up via AI Agent</b></summary>
+<br>
+
+Once the CLI is installed (per the install block above), paste the block below into your AI agent — it picks the right adapter, runs `enable`, verifies, and offers `style-review` if your host supports skills. Works with any AI agent that can run shell commands: Claude Code, Codex, Cursor, Aider, Kiro, GitHub Copilot, etc.
+
+```text
+Set up agent-style in this project. Steps:
+
+(If `agent-style` is not on PATH, substitute `npx --yes agent-style`
+for `agent-style` in every command below.)
+
+1. Pick the adapter that matches this project:
+
+   | Signal in project                  | Adapter            |
+   | ---------------------------------- | ------------------ |
+   | `CLAUDE.md` or `.claude/`          | `claude-code`      |
+   | `AGENTS.md`                        | `agents-md`        |
+   | `.github/copilot-instructions.md`  | `copilot`          |
+   | `.github/instructions/`            | `copilot-path`     |
+   | `.cursor/`                         | `cursor`           |
+   | `.aider.conf.yml`                  | `aider`            |
+   | `.kiro/`                           | `kiro`             |
+   | `.claude/skills/`                  | `anthropic-skill`  |
+   | (none of the above)                | run `agent-style list-tools` and ask me which to use |
+
+2. Run `agent-style enable <adapter> --dry-run --json` first. Check the
+   `actions` array, then run the real `agent-style enable <adapter>`
+   and confirm each listed path was created.
+
+3. If the JSON has `manual_step_required: true` (Codex API, Aider),
+   surface the CLI's printed `manual step required:` line to me
+   verbatim. Do not claim setup is complete on my behalf.
+
+4. If any of `CLAUDE.md` / `.claude/` / `.claude/skills/` exists in
+   this project (skill-capable host available), also offer to run
+   `agent-style enable style-review` for the opt-in second-pass
+   review skill alongside soft enforcement.
+
+5. Report the adapter name and the created paths, then tell me to
+   restart my agent session and ask "Is agent-style active?".
+```
+
+</details>
+
+Or run it yourself:
+
 ```bash
 agent-style enable claude-code                       # wire up Claude Code
 # Inside a Claude Code session, your prose now follows agent-style's 21 rules.
