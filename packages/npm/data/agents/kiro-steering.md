@@ -1,5 +1,5 @@
 ---
-description: "agent-style v0.3.4 — literature-backed technical-prose writing rules for AI agents"
+description: "agent-style v0.3.5 — literature-backed technical-prose writing rules for AI agents"
 inclusion: auto
 ---
 <!-- SPDX-License-Identifier: CC-BY-4.0 -->
@@ -7,13 +7,13 @@ inclusion: auto
 <!-- Target path: .kiro/steering/agent-style.md -->
 <!-- Load class: single-file; install_mode: owned-file -->
 
-# agent-style v0.3.4 — Kiro Steering Adapter
+# agent-style v0.3.5 — Kiro Steering Adapter
 
 agent-style is a literature-backed English technical-prose writing ruleset for AI agents. This adapter is a Kiro steering file at `.kiro/steering/agent-style.md`. Kiro loads steering files with `inclusion: auto` into every agent interaction, so the 21 rules below reach context for all prose generation in this workspace.
 
 ## Self-Verification Handshake
 
-When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.3.4 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
+When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.3.5 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
 
 ## Load Statement
 
@@ -54,4 +54,4 @@ Field-observed rules (maintainer observation of LLM output, 2022-2026):
 
 ## Full Rule Bodies (Canonical)
 
-Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.3.4/RULES.md for the pinned canonical source.
+Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.3.5/RULES.md for the pinned canonical source.

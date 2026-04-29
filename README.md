@@ -116,7 +116,7 @@ Install the CLI once; then pick the paths you want.
 ```bash
 pip install agent-style                              # Python users
 # or: npm install -g agent-style                     # Node users
-# or: npx --yes agent-style@0.3.4 <subcommand>       # no install needed
+# or: npx --yes agent-style@0.3.5 <subcommand>       # no install needed
 ```
 
 ### 1. Soft Enforcement — rules at generation time
@@ -205,7 +205,7 @@ For `print-only` and `multi-file-required`, the JSON output carries `manual_step
 </details>
 
 <details>
-<summary><b>Per-surface install table (v0.3.4 primary set)</b></summary>
+<summary><b>Per-surface install table (v0.3.5 primary set)</b></summary>
 <br>
 
 | Tool | install_mode | Target path |
@@ -232,7 +232,7 @@ Amazon Q Developer, JetBrains AI Assistant, Windsurf, Ollama, Replit, OpenCode, 
 Skip the package install; pin to a specific release so adapters and `RULES.md` stay consistent:
 
 ```bash
-AGENT_STYLE_REF=v0.3.4
+AGENT_STYLE_REF=v0.3.5
 mkdir -p .agent-style
 curl -fsSLo .agent-style/RULES.md       "https://raw.githubusercontent.com/yzhao062/agent-style/${AGENT_STYLE_REF}/RULES.md"
 curl -fsSLo .agent-style/claude-code.md "https://raw.githubusercontent.com/yzhao062/agent-style/${AGENT_STYLE_REF}/agents/claude-code.md"
@@ -325,7 +325,7 @@ After running `agent-style enable <tool>`, ask your agent:
 
 Expected reply:
 
-> agent-style v0.3.4 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.
+> agent-style v0.3.5 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.
 
 For `style-review` specifically, ask:
 

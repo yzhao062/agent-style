@@ -5,6 +5,10 @@
       "pattern": "^https://github.com/yzhao062/agent-style"
     },
     {
+      "_comment": "Self-referencing raw URLs in adapter handshakes pin to the version-being-released; the tag does not exist on GitHub until we push it, so the URL would 404 in the pre-release link-check that runs before tag push. Same domain as the tagged-already cases is harmless because we own the path — only the version string is in flux.",
+      "pattern": "^https://raw\\.githubusercontent\\.com/yzhao062/agent-style"
+    },
+    {
       "pattern": "^https://www\\.npmjs\\.com/"
     },
     {

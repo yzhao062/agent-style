@@ -9,7 +9,7 @@ Install:
 ```bash
 npm install -g agent-style
 # or run without installing:
-npx --yes agent-style@0.3.4 <subcommand>
+npx --yes agent-style@0.3.5 <subcommand>
 ```
 
 Basic use:
@@ -33,7 +33,7 @@ console.log(agentStyle.listTools());
 agentStyle.enable('claude-code', { dryRun: true });
 ```
 
-Supported tools and install modes in v0.3.4:
+Supported tools and install modes in v0.3.5:
 
 | Tool | Install mode |
 | --- | --- |
@@ -54,4 +54,4 @@ Canonical repository: https://github.com/yzhao062/agent-style
 - Code: MIT (`LICENSES/MIT.txt`).
 - Bundled prose (`RULES.md`, `NOTICE.md`, adapters): CC BY 4.0 (`LICENSES/CC-BY-4.0.txt`).
 
-Roadmap (v0.3.4+): `agent-style update`, `agent-style override`, `agent-style clean`, and project-level config.
+Roadmap (v0.3.5+): `agent-style update`, `agent-style override`, `agent-style clean`, and project-level config.

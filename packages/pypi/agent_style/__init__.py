@@ -8,7 +8,7 @@ Programmatic entry points:
 See `agent-style --help` for the CLI.
 """
 
-__version__ = "0.3.4"
+__version__ = "0.3.5"
 
 
 def rules() -> str:

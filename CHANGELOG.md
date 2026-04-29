@@ -12,6 +12,22 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 *No unreleased changes queued.*
 
+## [0.3.5] — 2026-04-29
+
+### Fixed
+
+- **`docs/rule-pack-compact.md` cosmetic dead link removed.** v0.3.4's `COMPACT_INTRO` paragraph contained a relative markdown link `[rule-pack.md](rule-pack.md)`. The link resolved correctly in `docs/rule-pack-compact.md` (sibling file present) but became dead in the bundled mirrors at `packages/pypi/agent_style/data/rule-pack-compact.md` and `packages/npm/data/rule-pack-compact.md`, where no sibling `rule-pack.md` exists. The CI `Markdown link check` job caught it on the v0.3.4 commit, but only AFTER `twine upload` and `npm publish` had completed; the published v0.3.4 PyPI/npm artifacts retain the cosmetic bug. v0.3.5 ships the fix-forward content (markdown link replaced by inline-code text reference) for both `docs/rule-pack-compact.md` and the bundled mirrors. No runtime impact (rule directives, BAD/GOOD examples, hooks, agent behavior unaffected).
+
+### Changed
+
+- **`RELEASING.md` hardened: link-check + CI-green gate now mandatory.** Pre-release check #6 added: `markdown-link-check` over every tracked `.md` file using `.github/mlc-config.json`, exit non-zero on any dead link. The "Commit, Tag, Push" section reordered: `git push origin main` → wait for `validate.yml` to pass via `gh run watch --exit-status` → only then tag and `git push origin <tag>`. Both gates are required because PyPI and npm are immutable post-publish; v0.3.4's cosmetic dead-link bug exists in the registry artifact and cannot be revoked. The same procedural pattern lands in `anywhere-agents/RELEASING.md` so the cross-repo release flow has consistent gates.
+
+### Compatibility
+
+- **No content drift.** The compact rule-pack body — directive paragraphs, first BAD → GOOD pair per rule, the 21 rule headings — is unchanged from v0.3.4. Only the intro paragraph changed (1 markdown link → 1 inline-code text reference).
+- **`RULES.md` and `docs/rule-pack.md` unchanged from v0.3.4 / v0.3.3.** anywhere-agents consumers fetching either path at `ref: v0.3.5` see byte-identical full content.
+- **anywhere-agents pin path forward.** anywhere-agents v0.5.7 will pin `ref: v0.3.5` and flip `from: docs/rule-pack-compact.md` to deliver the size-budget benefit (~76% AGENTS.md reduction); see `anywhere-agents/CHANGELOG.md` for the matching entry.
+
 ## [0.3.4] — 2026-04-28
 
 ### Added

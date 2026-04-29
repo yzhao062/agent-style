@@ -14,7 +14,7 @@ import subprocess
 import sys
 import tempfile
 
-EXPECTED_VERSION = "0.3.4"
+EXPECTED_VERSION = "0.3.5"
 EXPECTED_TOOL_COUNT = 10  # v0.3.0 added Kiro to the 9 existing (8 primary + style-review skill)
 
 SCRATCH = tempfile.mkdtemp(prefix="as-final-")

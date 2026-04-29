@@ -89,7 +89,7 @@ The row was picked (over paper-01-abstract) because both drafts name the same th
 
 #### A — pick a crisper pair from a future bench run
 
-Wait for v0.3.4+ bench on `paper-04` to surface a pair with:
+Wait for v0.3.5+ bench on `paper-04` to surface a pair with:
 
 - Same three benchmark names in both drafts (prompt anchor still holds)
 - Baseline showing 2-3 clean AI-tells
@@ -128,7 +128,7 @@ Pick the new pair for the hero row and re-render.
 
 `paper-02-methods-contrastive` — same algorithm-naming concern as paper-01 unless both drafts happen to invent the same name.
 
-A new v0.3.4 task specifically designed to keep content invariant under paraphrase (survey-style summary of a canonical topic with explicit content anchors).
+A new v0.3.5 task specifically designed to keep content invariant under paraphrase (survey-style summary of a canonical topic with explicit content anchors).
 
 ### What NOT to do
 
@@ -141,7 +141,7 @@ A new v0.3.4 task specifically designed to keep content invariant under paraphra
 - [ ] Hero row 3 uses a pair with prose that reads natural in both draft and revised form
 - [ ] Row's delta label reflects a real per-task delta from a committed scorecard
 - [ ] `docs/hero.png` re-rendered and committed alongside the hero.html change
-- [ ] "FOLLOW-UP v0.3.4+" HTML comment in `docs/hero-source/hero.html` removed
+- [ ] "FOLLOW-UP v0.3.5+" HTML comment in `docs/hero-source/hero.html` removed
 - [ ] This entry moved out of `TODO.md`
 
 ### References
@@ -158,7 +158,7 @@ A new v0.3.4 task specifically designed to keep content invariant under paraphra
 
 ### The issue
 
-`python -m build` on the v0.3.4 sdist/wheel emits a setuptools deprecation warning: `project.license` as a TOML table (`license = { text = "MIT AND CC-BY-4.0" }`) is deprecated. Setuptools follows PEP 639, which requires `license = "<SPDX expression>"` (a string) and adds `license-files = ["LICENSES/*.txt"]` for the file list. The setuptools deprecation hard-deadline is **2027-02-18**.
+`python -m build` on the v0.3.5 sdist/wheel emits a setuptools deprecation warning: `project.license` as a TOML table (`license = { text = "MIT AND CC-BY-4.0" }`) is deprecated. Setuptools follows PEP 639, which requires `license = "<SPDX expression>"` (a string) and adds `license-files = ["LICENSES/*.txt"]` for the file list. The setuptools deprecation hard-deadline is **2027-02-18**.
 
 ### Fix sketch
 

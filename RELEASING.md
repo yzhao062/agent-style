@@ -40,6 +40,22 @@ grep -RniE "sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{20,}|AKIA[0-9A-Z]{16}|Bearer [A-
 
 # 5. AGENT_STYLE_REF in README matches the version-to-be-tagged.
 grep -nE "AGENT_STYLE_REF=v[0-9]+\.[0-9]+\.[0-9]+" README.md
+
+# 6. MANDATORY: markdown-link-check across every tracked .md file.
+#    The CI link-check job runs the same tool but only fires after `git push origin main`.
+#    Registries (PyPI, npm) are immutable post-publish, so a dead link merged into the
+#    published wheel/tarball cannot be revoked — only fix-forwarded in the next release.
+#    v0.3.4 shipped a cosmetic dead-link bug because this step was not part of the
+#    pre-release checklist; v0.3.5 fix-forwarded but the v0.3.4 registry artifact retains the
+#    bug. This check runs locally and exits non-zero on any dead link.
+fail=0
+for f in $(git ls-files '*.md'); do
+  if ! npx --yes markdown-link-check -q -c .github/mlc-config.json "$f" >/dev/null 2>&1; then
+    echo "DEAD-LINK: $f"
+    fail=1
+  fi
+done
+[ "$fail" -eq 0 ] || { echo "FAIL: dead links in tracked .md; fix before tagging" >&2; exit 1; }
 ```
 
 If any check fails, stop and fix before continuing.
@@ -146,11 +162,36 @@ If either namespace is taken, halt.
 
 ## Commit, Tag, Push
 
+**MANDATORY**: do not push the tag (and therefore do not run `twine upload` or `npm publish`) until the `Validate` workflow on `main` is green for the release commit. PyPI and npm are immutable post-publish; if CI fails after upload, the only remediation is a fix-forward release. v0.3.4 shipped a cosmetic dead-link bug because tag + publish ran before CI completed.
+
 ```bash
-git add packages/ CHANGELOG.md
+# Stage and review the entire release scope. The earlier "git add packages/
+# CHANGELOG.md" form repeatedly under-staged release content (e.g. v0.3.5 had
+# .github/mlc-config.json, RELEASING.md, TODO.md, README.md, agent-handshake
+# bumps in agents/* and packages/*/data/agents/*, hero.html, and
+# scripts/verify-fresh-install.py — all of which would have been missed by
+# the narrow form). Always status-review before committing a release.
+git status --short
+git add -A
+git diff --cached --name-only       # eyeball: every release file present?
 git commit -m "release: vX.Y.Z -- <short summary>"
-git tag -a vX.Y.Z -m "Release X.Y.Z"
 git push origin main
+
+# CI-green gate: block until validate.yml passes on THIS release commit.
+# `gh run watch` accepts no branch/commit filter; the no-id form may attach to a
+# different run or prompt interactively. Resolve the run id by commit first.
+release_sha="$(git rev-parse HEAD)"
+run_id=""
+for _ in {1..30}; do
+  run_id="$(gh run list --repo yzhao062/agent-style --workflow validate.yml --branch main --commit "$release_sha" --limit 1 --json databaseId --jq '.[0].databaseId // ""')"
+  [ -n "$run_id" ] && break
+  sleep 5
+done
+[ -n "$run_id" ] || { echo "FAIL: no validate.yml run found for $release_sha" >&2; exit 1; }
+gh run watch "$run_id" --repo yzhao062/agent-style --exit-status
+
+# Only after CI is green: tag and push the tag, then publish (next sections).
+git tag -a vX.Y.Z -m "Release X.Y.Z"
 git push origin vX.Y.Z
 ```
 
