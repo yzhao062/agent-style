@@ -49,8 +49,8 @@ COMPACT_INTRO = (
     "This is the compact render of the agent-style rule pack. Each rule "
     "shows the directive and one illustrative BAD → GOOD pair. The full "
     "reference (5+ BAD/GOOD pairs per rule, agent-instruction evidence, "
-    "severity classification, and rationale) lives in "
-    "[`rule-pack.md`](rule-pack.md) at the same release."
+    "severity classification, and rationale) lives in `rule-pack.md` "
+    "(alias of repo-root `RULES.md`) at the same release."
 )
 
 EXPECTED_RULE_COUNT = 21
