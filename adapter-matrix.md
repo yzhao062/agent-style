@@ -2,9 +2,9 @@
 
 # Adapter Matrix
 
-Every shipped adapter file in `agents/`, with its target path, install mode, and load class. v0.3.1 ships 9 primary adapters plus the `style-review` skill; 10 additional tool surfaces are on the v1.1 "Planned adapters" roadmap.
+Every shipped adapter file in `agents/`, with its target path, install mode, and load class. v0.3.4 ships 9 primary adapters plus the `style-review` skill; 10 additional tool surfaces are on the v1.1 "Planned adapters" roadmap.
 
-## Primary Adapters (v0.3.1, Shipped)
+## Primary Adapters (v0.3.4, Shipped)
 
 | Surface | Shipped file | Target path | install_mode | Load class |
 | --- | --- | --- | --- | --- |

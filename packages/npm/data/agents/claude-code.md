@@ -3,13 +3,13 @@
 <!-- Target path: <repo root>/CLAUDE.md, or referenced via @.agent-style/claude-code.md -->
 <!-- Load class: import-capable; install_mode: import-marker -->
 
-# agent-style v0.3.1 — Claude Code adapter
+# agent-style v0.3.4 — Claude Code adapter
 
 agent-style is a literature-backed English technical-prose writing ruleset for AI agents. This adapter is import-capable: Claude Code resolves `@.agent-style/RULES.md` at launch and loads the 21 full rule bodies into the active context. This file carries only the handshake, load statement, rule-name index, and escape hatch; the full rule text is expected to be imported.
 
 ## Self-Verification Handshake
 
-When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.3.1 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
+When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.3.4 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
 
 ## Load Statement
 
@@ -51,4 +51,4 @@ Field-observed (maintainer observation of LLM output, 2022-2026):
 ## Full Rule Bodies (Canonical)
 
 - Imported: `@.agent-style/RULES.md`
-- Pinned upstream: https://raw.githubusercontent.com/yzhao062/agent-style/v0.3.1/RULES.md
+- Pinned upstream: https://raw.githubusercontent.com/yzhao062/agent-style/v0.3.4/RULES.md

@@ -6,11 +6,32 @@ All notable changes to *The Elements of Agent Style* are documented here.
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versioning: [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 
-> **Version distribution (as of 2026-04-21).** PyPI and npm currently distribute **0.3.1**. Git tags **v0.3.2** and **v0.3.3** are *docs-only* additions (`docs/rule-pack.md` published as the `anywhere-agents` rule-pack pin target, and README Use option 3 cross-reference). They are intentionally NOT published to PyPI or npm. The package version files (`packages/pypi/pyproject.toml`, `packages/pypi/agent_style/__init__.py`, `packages/npm/package.json`) remain at `0.3.1` to reflect the last-published state. The next PyPI / npm release MUST bump to **v0.3.4 or later** — never reuse `v0.3.2` or `v0.3.3` as a registry publish target, or you would retroactively attach new package content to a git ref users have already pinned against as "docs-only". See `RELEASING.md` for the docs-only tag convention.
+> **Version distribution (as of 2026-04-28).** PyPI and npm now distribute **0.3.4**. Git tags **v0.3.2** and **v0.3.3** remain *docs-only* additions (`docs/rule-pack.md` published as the `anywhere-agents` rule-pack pin target, and README Use option 3 cross-reference); they are intentionally NOT a PyPI / npm publish target, and the package version files skipped them. v0.3.4 is the first registry publish since v0.3.1. Future docs-only tags should follow the same convention; the next package release should bump to v0.3.5 or later, never reuse a docs-only ref. See `RELEASING.md` for the docs-only tag convention.
 
 ## [Unreleased]
 
 *No unreleased changes queued.*
+
+## [0.3.4] — 2026-04-28
+
+### Added
+
+- **`docs/rule-pack-compact.md`: compact render of the agent-style rule pack** (issue [#6](https://github.com/yzhao062/agent-style/issues/6)). Each of the 21 rules ships with the directive paragraph and the first BAD → GOOD example pair only; per-rule metadata bullets, additional example pairs, and the `Rationale for AI Agent` subsection are dropped. Total size ~20.6 KB versus ~89 KB for `RULES.md` / `docs/rule-pack.md` — about a 77% reduction on the inlined-content axis. Companion file, not replacement: `RULES.md` and `docs/rule-pack.md` are unchanged. The compact file ships top-level and bundled in PyPI (`packages/pypi/agent_style/data/rule-pack-compact.md`) and npm (`packages/npm/data/rule-pack-compact.md`). anywhere-agents consumers that pin `from: docs/rule-pack.md` see no semantic change after `ref: v0.3.4`; anywhere-agents v0.6.0 will offer flipping `from:` to `docs/rule-pack-compact.md` for size-budget relief on consumer-side `AGENTS.md` / `CLAUDE.md`.
+
+- **`scripts/build-compact.py`: deterministic generator** for the compact render plus an idempotent refresh of `docs/rule-pack.md` (BC alias) and the bundled copies. Uses `markdown-it-py` for block boundaries only; output is sliced from the normalized source bytes (no AST round-trip), preserving comment formatting, fenced-code interiors, and blank-line counts. Step-8 invariants enforced: 21-rule order match against `RULES.md`, exactly one BAD bullet plus exactly one following GOOD bullet per rule, no metadata-bullet leakage, no rationale-section leakage, balanced fenced-code count, and title-onward byte-identical parity between `docs/rule-pack.md` and `RULES.md`. `--check` mode for CI returns non-zero on drift without writing.
+
+- **`.github/workflows/validate.yml` rule-pack parity job**: regenerates artifacts on every push and PR via `python scripts/build-compact.py`, then `git diff --exit-code` to fail when committed copies have drifted from the generator output. Pins `actions/checkout@v6` and `actions/setup-python@v6`; installs `markdown-it-py>=3,<5`.
+
+- **`packages/pypi/pyproject.toml`** package-data allowlist gains `data/rule-pack-compact.md` so the new file ships in the PyPI wheel. The npm `data/` files glob already covers it; no `package.json` `files` change beyond the version bump.
+
+### Changed
+
+- **Package version files bumped 0.3.1 → 0.3.4.** `scripts/bump-version.py` ran across 36 tracked files (adapter handshake strings in `agents/*.md`, READMEs, the CLI verifier `scripts/verify-fresh-install.py`, and the three package version files). The bump skipped `RULES.md`, `docs/rule-pack.md`, and the new `docs/rule-pack-compact.md` because they do not embed the version string.
+
+### Notes
+
+- v0.3.4 is a **superset** of every prior tag: `RULES.md` and `docs/rule-pack.md` content is unchanged from v0.3.3; `docs/rule-pack-compact.md` is purely additive. anywhere-agents consumers pinned to `v0.3.2` or `v0.3.3` see no semantic change after a `ref: v0.3.4` bump.
+- The compact render targets `anywhere-agents` consumer-side size budget. The aa-side flip from `from: docs/rule-pack.md` to `from: docs/rule-pack-compact.md` is tracked as a separate v0.6.0 task in the `anywhere-agents` repo; this release ships only the new file and the parity infrastructure.
 
 ## [0.3.2] — 2026-04-21
 
