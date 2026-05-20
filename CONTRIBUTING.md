@@ -106,7 +106,7 @@ python scripts/build-compact.py
 
 Then commit the changed files:
 
-```
+```text
 docs/rule-pack.md
 docs/rule-pack-compact.md
 packages/pypi/agent_style/data/RULES.md
@@ -138,7 +138,7 @@ The `validate.yml` CI workflow will fail if these are out of date.
 
 ### Examples
 
-```
+```text
 RULE-01: Do Not Assume the Reader Shares Your Tacit Knowledge
 RULE-06: Do Not Use Avoidable Jargon Where an Everyday English Word Exists
 RULE-H:  Cite Sources for Quantitative Claims and Specific Assertions
