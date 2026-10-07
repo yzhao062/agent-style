@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X reports the Rural-Net loss accurately (6% higher error than GraphWaveNet; 3.21 vs 3.02) and limits the gains to Metro-A and Metro-B.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "\"limited benefit on Coastal\" calls a 0.02 km/h difference a benefit, though the text has just said it is within seed variation"
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y states that Rural-Net error rises by 0.19 km/h and limits the clear gains to the two metropolitan networks; its Coastal wording leans slightly toward a gain but is already qualified as within seed variation.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both drafts are accurate and handle the Rural-Net trap correctly, but Y calls the Coastal tie a 'limited benefit' and X does not, so X makes no claim beyond the results.",
+  "q2": "X",
+  "q2_reason": "X ties the gains to 'the two largest networks' and uses relative magnitudes (about 11% better, 6% worse), which show the size-dependent pattern more directly than Y's absolute km/h differences, even though Y closes with a summary sentence.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

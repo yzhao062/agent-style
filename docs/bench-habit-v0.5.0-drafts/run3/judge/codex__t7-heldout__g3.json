@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X gives the 11.6% and 10.6% gains on Metro-A and Metro-B, treats the 0.02 km/h Coastal difference as within seed variability rather than a gain, reports the 0.19 km/h Rural-Net increase in error, and confines the gains to the two largest networks.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y limits the ~11% gain to the two metropolitan networks, calls the Coastal advantage small relative to seed variation, reports the 0.19 km/h Rural-Net increase in error, and says the gains depend on the network.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both texts are accurate and handle the trap correctly, but X is more precise: it gives per-network percentages and the 41% latency increase, and its conclusion ties the gains to the largest networks rather than the vaguer 'depend on the network'.",
+  "q2": "X",
+  "q2_reason": "X states that the gains are concentrated on the two largest networks, which conveys the sensor-count pattern more directly than Y's 'gains depend on the network, with the clearest benefits on the metropolitan datasets'.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports the Coastal tie and Rural-Net loss accurately and scopes the gains to the two largest networks.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "The opening claim that the accuracy margin 'falls with network size' reverses the observed relationship as written: the margin grows as network size increases."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the Coastal tie and the loss to both learned baselines on Rural-Net.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X accurately states the contribution and its scope, whereas Y opens with a directionally incorrect description despite reporting the individual results correctly.",
+  "q2": "X",
+  "q2_reason": "X explicitly states that the gain shrinks as sensor count falls and reverses on Rural-Net, avoiding Y's ambiguous opening direction.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

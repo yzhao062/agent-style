@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "\u201cA 20% poisoning fraction breaks plain averaging\u201d attributes FedAvg's failure specifically to poisoning without an unattacked control."
+      ],
+      "missing_material_qualifiers": [
+        "The claim that 20% poisoning breaks plain averaging needs restriction to the tested configuration."
+      ],
+      "trap": "correct",
+      "trap_note": "It accurately reports FedVerify's approximately 14% per-round overhead over FedAvg and Krum and lower communication than FL-Trust.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports FedVerify's approximately 14% per-round overhead over FedAvg and Krum and lower communication than FL-Trust.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y presents the gains with specific experimental limits, while X overstates what the pilot establishes about poisoning causing FedAvg's failure.",
+  "q2": "X",
+  "q2_reason": "X states the main pattern more directly by highlighting faster convergence, the highest final accuracy, and the communication tradeoff.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports the small Cora-OOD gaps relative to the stated standard-deviation upper bound without claiming a clear win.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "The phrase \"largest seed standard deviation of 0.006\" asserts an observed maximum, whereas the results specify only an upper bound."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports that GraphGuard matches SubgraphAnomaly on Cora-OOD.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X accurately preserves the standard-deviation upper bound, while Y presents it as an observed maximum.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern more clearly through compact improvement ranges and an explicit Cora-OOD tie.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

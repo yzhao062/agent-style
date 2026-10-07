@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X says FedVerify used 14.1 MB per round, 13.7% more than FedAvg and Krum and 22.5% less than FL-Trust, which states the overhead accurately.",
+      "reflexive_qualifiers": [
+        "Our pilot provides preliminary evidence",
+        "This measured tradeoff supports further investigation",
+        "Table 4 alone establishes neither statistical significance nor robustness across other attacks and deployment conditions."
+      ]
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y says each round sent about 14% more data than FedAvg or Krum and about 23% less than FL-Trust, which states the overhead accurately.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Neither text has an unsupported claim or a trap error, but Y states the contribution (half the time, highest accuracy, a stated communication cost that is still below FL-Trust) directly, while X spreads it across generic hedges like 'preliminary evidence' and 'supports further investigation'.",
+  "q2": "X",
+  "q2_reason": "X gives FedVerify's lead in rounds, time and final accuracy over both FL-Trust and Krum, while Y compares speed only with FL-Trust and leaves out Krum.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

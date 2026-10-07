@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X calls the glioma-core scores similar and says the +0.4 difference 'remains uncertain' (CI -0.8 to 1.6, p = 0.48), without claiming an improvement or equivalence.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y says glioma core showed 'no significant difference' and that the 0.4-point gap is 'within statistical uncertainty', which reports the trap accurately without asserting equivalence.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Neither text has an error, but Y opens with the contribution (significant gains on two organs, none on brain) and links those gains to the 87% parameter reduction; X gives fuller numbers but leaves the brain result for later.",
+  "q2": "Y",
+  "q2_reason": "Y's first sentence states the whole pattern (gains on cardiac and lung, no significant difference on brain), while X's first sentence covers only the two improved organs and reaches brain after several numeric sentences.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

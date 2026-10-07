@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "\u201cBoth gaps exceed seven times the largest seed standard deviation in those rows (0.05).\u201d The Metro-B gap of 0.35 is exactly seven times 0.05."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the Coastal tie and the Rural-Net loss against both learned baselines.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the Coastal difference as within seed variation and Rural-Net as worse than both learned baselines.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y clearly quantifies the contribution and its scope without X's inaccurate claim that both gaps exceed seven times 0.05.",
+  "q2": "Y",
+  "q2_reason": "Y clearly connects the approximately 11% gains on the largest networks, the Coastal tie, the Rural-Net loss, and the inference cost.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

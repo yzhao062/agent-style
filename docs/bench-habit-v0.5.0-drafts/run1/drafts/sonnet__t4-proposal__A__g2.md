@@ -1,0 +1,11 @@
+### Preliminary Results
+
+We ran a pilot study of FedVerify on a 100-node heterogeneous edge testbed. Twenty of the 100 nodes (20%) acted as Byzantine clients, meaning clients that submit poisoned model updates to corrupt the shared model. Every node held non-IID (non-independent and identically distributed) data. We drew each node's class mix from a Dirichlet distribution with alpha = 0.2; smaller alpha gives more skewed local data.
+
+We compared FedVerify with three baselines. FedAvg (McMahan et al., AISTATS 2017) averages all client updates without filtering. Krum (Blanchard et al., NeurIPS 2017) selects the single client update closest to its nearest neighbors. FL-Trust (Cao et al., NDSS 2021) weights each update by its similarity to one the server computes on a small trusted dataset. Table 4 reports rounds and wall-clock time to reach 80% accuracy, final accuracy, and communication per round. A round is one cycle of model broadcast, local training, and server aggregation.
+
+Without a defense, FedAvg never reached 80% accuracy and ended at 34.2%, which is 51.2 points below FedVerify. Krum reached 80% after 340 rounds (14.8 hours) and finished at 81.0%. FL-Trust needed 210 rounds (11.2 hours) and finished at 83.1%. FedVerify needed 115 rounds (5.6 hours) and finished at 85.4%. Relative to Krum, FedVerify used 66% fewer rounds and 62% less wall-clock time; relative to FL-Trust, it used 45% fewer rounds and 50% less. Its final accuracy exceeds Krum's by 4.4 points and FL-Trust's by 2.3 points.
+
+Communication per round is 14.1 MB for FedVerify, 1.7 MB (14%) above FedAvg and Krum (12.4 MB each) and 4.1 MB (23%) below FL-Trust (18.2 MB). Multiplying rounds to 80% accuracy by per-round communication gives cumulative totals of 1.62 GB for FedVerify, 4.22 GB for Krum, and 3.82 GB for FL-Trust. Average round time is 2.9 minutes for FedVerify, 2.6 for Krum, and 3.2 for FL-Trust, so the wall-clock gain comes from needing fewer rounds.
+
+The pilot covers a single operating point: one testbed, one Byzantine fraction (20%), and one heterogeneity level (alpha = 0.2). Table 4 reports point values without confidence intervals. These results leave open how FedVerify behaves at other Byzantine fractions, other degrees of heterogeneity, or adaptive attacks that target the defense itself. Testing those settings is part of the proposed research.

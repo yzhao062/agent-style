@@ -1,0 +1,1 @@
+1. **Clarity:** “FlashKV reduces KV-cache memory by 55% to 63%” repeats Table 2’s endpoints without stating the pattern. Suggested rewrite: “Across 4k to 32k contexts, FlashKV more than halves KV-cache memory, with savings increasing as context length grows.”

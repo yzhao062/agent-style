@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "The speedup is described only as increasing with context length and reaching 1.87\u00d7 at 32k, so a reader does not learn that the gain at 4k is just 1.10\u00d7."
+      ],
+      "trap": "correct",
+      "trap_note": "The speedup is tied to context length and capped at a scoped 1.87\u00d7 at 32k, so no unscoped headline speedup is given; the 2.35\u00d7 figure at 64k, where vLLM is out of memory, is left out without contradiction.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "The speedup is explicitly limited to 4k\u201332k contexts and given as the range 1.10x to 1.87x, so no unscoped speedup appears; 64k is handled correctly as the case where vLLM runs out of memory.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both texts are accurate and avoid the trap, but Y gives both ends of the speedup range (1.10x to 1.87x), so a reader sees that the gain is small at short contexts, while X gives only the high point of 1.87\u00d7.",
+  "q2": "X",
+  "q2_reason": "X states the main pattern outright ('speedup over vLLM increases with context length'), while Y leaves the reader to infer the trend from a range.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

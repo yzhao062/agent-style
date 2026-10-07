@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "\u201cThis pattern fits the hypothesis that online residual learning helps most where simulation deviates most from reality\u201d links gains to simulation mismatch that the trials did not measure."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly identifies transparent objects as the weakest category, with 68% success.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies transparent objects as the hardest category and reports their 32% failure rate.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y clearly quantifies the contribution and remaining failures without linking the gains to an unmeasured mechanism.",
+  "q2": "X",
+  "q2_reason": "X states the shared category ordering and explicitly describes the widening margin over DAgger and its slight narrowing on transparent objects.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

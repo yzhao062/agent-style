@@ -1,0 +1,7 @@
+## Conclusion
+
+We presented AdaptRL, a method for transferring grasping policies from simulation to a real robot. AdaptRL learns residual dynamics online: from real grasp attempts, it learns the difference between the motion the simulator predicts and the motion the robot observes. It then uses this correction to adapt the simulation-trained policy to the real hardware.
+
+In 100 real-robot trials per object category, AdaptRL achieved the highest grasp success of the three methods in all five categories (Table 5). Its advantage is largest on the objects the baselines handle worst. Both baselines lose success at each step from rigid to deformable, jointed, reflective, and transparent objects; DAgger, the stronger baseline, falls from 83% to 46%. Over the same sequence, AdaptRL's margin over DAgger widens from 11 points on rigid objects to between 21 and 24 points on jointed, reflective, and transparent objects. Against domain randomization, AdaptRL gains 23 to 44 points.
+
+Transparent objects remain the hardest category for every method. AdaptRL succeeds on 68% of them, so about one grasp in three still fails. Depth sensors are least reliable on transparent surfaces (Sajjan et al., 2020), so some of these failures may come from perception rather than dynamics. Our next step is to separate the two failure sources in these trials and to pair AdaptRL with depth completion for transparent objects.

@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies Churn-small as the only large benefit and explicitly reports the Covertype decline.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It locates the clear benefit on Churn-small and explicitly reports the Covertype decline.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both texts are supported, but X makes the contribution and its tested scope clearer with fewer details.",
+  "q2": "X",
+  "q2_reason": "X states the central pattern more directly: small differences on Adult and Credit-default, declines on Covertype, and one large benefit on Churn-small.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports the small Cora-OOD gaps accurately and places them below the stated upper bound on seed standard deviation.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly identifies Cora-OOD as a tie and reports both small metric gaps with the seed variability.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y explains the contrastive objective accessibly and makes the distinction between substantial gains and a tie explicit without unsupported claims.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern directly: substantial gains on three datasets and a tie on Cora-OOD.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

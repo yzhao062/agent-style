@@ -1,0 +1,1 @@
+TabMix yields its largest accuracy gain on Churn-small (2,000 rows), improving mean accuracy by 5.3 percentage points over no augmentation and 3.7 points over SMOTE (Table 6). On Adult, Credit-default, and Covertype, TabMix stays within 0.4 percentage points of no augmentation and 0.3 points of SMOTE, with no consistent advantage.

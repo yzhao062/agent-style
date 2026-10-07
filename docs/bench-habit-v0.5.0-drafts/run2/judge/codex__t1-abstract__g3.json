@@ -1,0 +1,34 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "\"GraphGuard achieves higher mean AUC and AP than both baselines on all four datasets\": this presents a 0.003 AUC / 0.004 AP difference on Cora-OOD as a win, but the difference is within the seed SD of at most 0.006",
+        "\"Improvements on Cora-OOD are modest: AUC rises from 0.888 to 0.891\": this calls a difference within seed noise an improvement"
+      ],
+      "missing_material_qualifiers": [
+        "X reports the seed SD of at most 0.006 but never says that the Cora-OOD gap falls within it, so a reader would think GraphGuard really beats SubgraphAnomaly there"
+      ],
+      "trap": "error",
+      "trap_note": "X says GraphGuard beats both baselines on all four datasets and calls the Cora-OOD gap an improvement, when the answer key says it is a tie within seed noise.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "X reports AUC/AP differences as \"percentage points\" without saying they are absolute differences on a 0-1 scale (a minor framing issue)"
+      ],
+      "trap": "correct",
+      "trap_note": "Y says the methods perform similarly on Cora-OOD, with differences of just 0.3 and 0.4 points, which reports the tie correctly.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y reports large gains on three datasets and parity on Cora-OOD with no unsupported claims, while X falls into the trap by claiming wins on all four datasets.",
+  "q2": "Y",
+  "q2_reason": "Y states the pattern directly: large gains (5.9-8.3 AUC points) on three datasets and similar performance on Cora-OOD. X's 'all four datasets' framing and per-dataset list of numbers blur that split.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

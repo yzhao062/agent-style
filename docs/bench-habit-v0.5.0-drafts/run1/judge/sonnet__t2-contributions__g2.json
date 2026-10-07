@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "omitted",
+      "trap_note": "The 2.35x speedup at 64k is omitted without any contradictory speedup claim.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "omitted",
+      "trap_note": "The 2.35x speedup at 64k is omitted, and the stated speedup range is explicitly scoped to 4k through 32k.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y identifies the runtime and its evaluation as contributions more directly, with supported claims and explicit experimental scope.",
+  "q2": "Y",
+  "q2_reason": "Y explicitly states that both memory reduction and decoding speedup grow through 32k and clearly reports the capacity advantage at 64k.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

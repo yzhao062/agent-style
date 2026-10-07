@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports roughly 14% higher per-round communication than FedAvg and Krum and 23% lower communication than FL-Trust.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the communication overhead relative to FedAvg and Krum and the savings relative to FL-Trust.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "tie",
+  "q1_reason": "Both clearly establish FedVerify's measured advantages and communication tradeoff while keeping their claims scoped to the pilot.",
+  "q2": "tie",
+  "q2_reason": "Both clearly report faster convergence, higher final accuracy, and intermediate per-round communication.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

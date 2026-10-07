@@ -1,0 +1,3 @@
+1. **Clarity:** The numerical detail in the Adult, Credit-default, and Covertype sentences obscures the main pattern: TabMix exceeds SMOTE in mean accuracy only on Churn-small. Suggested rewrite: “On the other datasets, TabMix provides no consistent advantage: Adult shows similar mean accuracy across methods, Credit-default shows modest gains from both augmentation methods, and Covertype favors no augmentation.”
+
+2. **Soundness:** “Churn-small is the only small dataset we tested” is not established by the supplied data, which omit the other datasets’ sizes. Keep the generalization limitation without this unsupported premise. Suggested rewrite: “The substantial gain on Churn-small does not establish that TabMix improves accuracy across low-data settings.”

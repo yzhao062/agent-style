@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "The claim that the confidence interval \"limits any deficit to 0.8 points\" treats an uncertain interval as an absolute bound."
+      ],
+      "missing_material_qualifiers": [
+        "The 0.8-point deficit bound is the endpoint of a 95% confidence interval, not a guaranteed limit on the true deficit."
+      ],
+      "trap": "correct",
+      "trap_note": "It explicitly reports that the brain MRI difference is not significant, without asserting proven equivalence.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports no detectable difference on brain MRI and gives the confidence interval spanning zero and p = 0.48.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y clearly presents the significant gains and parameter reduction without treating a confidence interval as an absolute bound; its Holm-Bonferroni statement follows from the supplied p-values.",
+  "q2": "Y",
+  "q2_reason": "Y states the two significant gains and the nonsignificant brain MRI result directly, with the numerical evidence for each.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

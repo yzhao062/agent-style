@@ -1,0 +1,32 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X says GraphGuard has the highest mean on every dataset, which is literally true, but it then calls Cora-OOD 'near parity' with sub-0.5-point differences, which matches the tie.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "'Across all four datasets, GraphGuard achieves higher AUC and AP than both baselines,' which presents Cora-OOD as a win even though the gap is within seed variation",
+        "'smaller gains of 0.003 and 0.004 over SubgraphAnomaly' presents differences within the \u22640.006 seed standard deviation as real gains"
+      ],
+      "missing_material_qualifiers": [
+        "Y does not say that the Cora-OOD differences (0.003 AUC, 0.004 AP) are within the seed standard deviation, and its line 'indicating low variability' suggests they are meaningful"
+      ],
+      "trap": "error",
+      "trap_note": "Y claims GraphGuard is higher on all four datasets and calls the Cora-OOD differences 'gains' without saying they amount to a tie, so it falls into the 'outperforms on all four' trap.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both drafts report accurate numbers, but X correctly calls Cora-OOD near parity while Y presents within-noise differences as gains across all four datasets, which is a trap error.",
+  "q2": "X",
+  "q2_reason": "X gives the main pattern directly: large gains (5.9\u20138.3 AUC points) on three datasets and parity on Cora-OOD; Y lists per-dataset numbers but describes the pattern as a uniform win.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

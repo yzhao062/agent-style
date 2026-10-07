@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X says the Mediterranean difference is statistically inconclusive because its interval spans zero, and it reports the 18% extreme underestimation as twice U-Net's 9%, framing it as a tradeoff.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y gives the Mediterranean interval [-0.19, 0.05] and calls the improvement uncertain; it reports 18% versus 9% underestimation and later names the larger extreme-intensity bias.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Neither text makes an unsupported claim or a trap error, but X gives relative CRPS reductions (about 11-20%) and an explicit 'twice' comparison, so the size of the contribution and its cost are easier to judge than Y's raw absolute differences.",
+  "q2": "X",
+  "q2_reason": "X sums up the pattern in one tradeoff sentence: gains in three regions, an inconclusive Mediterranean result, and worse extremes plus higher cost than U-Net, all with interpretable percentages; Y presents the same facts with less framing.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

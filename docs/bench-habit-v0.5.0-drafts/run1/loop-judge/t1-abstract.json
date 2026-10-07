@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It separates improvements on three datasets from the small Cora-OOD gap and explicitly avoids claiming significance for that gap.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Its highest-mean claim is numerically accurate, and it quantifies the small Cora-OOD differences while explicitly stating that their significance was not tested.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both texts are supported, but X makes the contribution clearer by distinguishing substantial improvements on three datasets from the small Cora-OOD difference.",
+  "q2": "X",
+  "q2_reason": "X foregrounds the main pattern of gains on three datasets and a much narrower margin on Cora-OOD.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

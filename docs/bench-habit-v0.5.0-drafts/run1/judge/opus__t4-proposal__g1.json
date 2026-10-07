@@ -1,0 +1,38 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "\u03b1 = 0.2 meant most clients held samples from only a few classes; the class distributions are not reported.",
+        "Honest updates differed widely, making poisoned updates harder to identify; update dispersion and detection difficulty were not measured.",
+        "\u201cPoisoning broke undefended training\u201d attributes the failure to poisoning without an unattacked comparison.",
+        "Total communication matters more than per-round size on metered or low-bandwidth links; this comparison was not tested."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports approximately 14% higher per-round communication than FedAvg and Krum and lower communication than FL-Trust.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "The pilot followed Hsu et al. (2019) and drew each client's class proportions from a Dirichlet distribution; that specific procedure and attribution were not supplied.",
+        "\u03b1 = 0.2 meant most clients' data concentrated in a few classes; the class distributions are not reported.",
+        "Non-IID data made defense harder through dissimilar honest updates and rejection of useful updates; these mechanisms were not evaluated.",
+        "FedAvg's result \u201cshows that the attack defeats an undefended model\u201d; there is no unattacked comparison establishing that attribution.",
+        "Section [X] will vary both parameters, test adaptive attackers, and report confidence intervals; those evaluation plans were not supplied."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports the per-round overhead over FedAvg and Krum and distinguishes that overhead from lower cumulative communication to the accuracy target.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both contain comparable unsupported explanations, but Y presents the contribution with more explicit measurements and specific limits on the accuracy evidence.",
+  "q2": "Y",
+  "q2_reason": "Y states the round counts, wall-clock times, final accuracies, and communication tradeoff together more clearly.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

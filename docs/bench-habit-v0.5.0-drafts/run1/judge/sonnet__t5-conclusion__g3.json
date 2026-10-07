@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "The claim that the benefit of online correction grows with the sim-to-real gap is unsupported: the results do not measure that gap or isolate the contribution of online correction."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies transparent objects as the weakest category at 68% success and states the remaining failure rate.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "The claim that online residual correction helps most where simulation-to-real mismatch is largest is unsupported: the results neither measure mismatch nor isolate the mechanism."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports 32 failures in 100 transparent-object trials and identifies these failures as a remaining priority.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both make comparable unsupported interpretations of simulation-to-real mismatch, but X conveys the contribution more directly.",
+  "q2": "X",
+  "q2_reason": "X more clearly connects the advantage in every category, larger margins in the harder categories, and transparent objects as the weakest category.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

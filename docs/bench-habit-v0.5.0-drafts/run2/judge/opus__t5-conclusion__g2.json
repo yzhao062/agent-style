@@ -1,0 +1,32 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "AdaptRL adapts only the dynamics model, so the residual cannot correct errors in estimated object pose or shape.",
+        "We suspect that perception errors cause many remaining failures on reflective and transparent objects."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies transparent objects as the hardest category and reports 32 failures in 100 trials.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "This pattern suggests that online residual learning helps most where simulated and real behavior differ most."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies transparent objects as the weakest category and explicitly reports their remaining failure rate.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both introduce unsupported explanations, but Y makes one tentative inference while X adds an unestablished architectural limitation and a speculative failure cause.",
+  "q2": "Y",
+  "q2_reason": "Y states the widening advantage over the stronger baseline clearly and quantifies the remaining transparent-object gap.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

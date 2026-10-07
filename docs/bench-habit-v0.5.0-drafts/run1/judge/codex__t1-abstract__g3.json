@@ -1,0 +1,32 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "\"GraphGuard achieves higher mean AUC and AP than both baselines on all four datasets\": this presents the Cora-OOD differences (0.891 vs 0.888 AUC, 0.835 vs 0.831 AP) as wins, but they are within the seed standard deviation of 0.006.",
+        "\"Improvements on Cora-OOD are modest\": calls a gap that is within noise an improvement."
+      ],
+      "missing_material_qualifiers": [
+        "The Cora-OOD gains are reported without saying they fall within the seed standard deviation. The text gives the standard deviation in the next sentence but never links it to these gains."
+      ],
+      "trap": "error",
+      "trap_note": "It says GraphGuard beats both baselines on all four datasets and frames Cora-OOD as a modest improvement instead of a tie within seed variance.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports gains on Reddit-B, Twitch-EN, and Elliptic, and says the methods perform comparably on Cora-OOD, with differences of 0.3 and 0.4 points.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y reports the three clear wins and the Cora-OOD tie accurately, while X claims GraphGuard beats both baselines on all four datasets, which is the trap error.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern directly (large gains on three datasets and parity on Cora-OOD), while X's 'all four datasets' framing hides the tie.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

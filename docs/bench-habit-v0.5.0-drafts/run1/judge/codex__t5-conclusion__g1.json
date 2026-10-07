@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "Calls online residual dynamics learning 'an effective approach ... across the tested object categories' without giving any absolute success rates or noting that transparent objects reach only 68%, so readers may assume uniformly strong performance."
+      ],
+      "trap": "omitted",
+      "trap_note": "X never says transparent objects remain the weakest category at 68%; its claim of effectiveness across categories is comparative and scoped to the tested categories, so it does not directly contradict the trap.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y says success 'still varies across categories, from 94% on rigid objects to 68% on transparent objects,' which identifies transparent objects as the remaining gap.",
+      "reflexive_qualifiers": [
+        "test transfer across additional robots and object sets"
+      ]
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both texts are free of unsupported claims, but Y handles the trap correctly by naming transparent objects (68%) as the weakest category and gives accurate means (82.2/46.0/63.0), while X leaves out the remaining gap and gives no absolute success levels.",
+  "q2": "Y",
+  "q2_reason": "Y gives the consistent win, the mean success rates, the 11\u201324 point margin over DAgger and the 94%-to-68% spread across categories, so the main pattern is clearer; X conveys only relative gains.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

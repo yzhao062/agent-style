@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports comparable performance on Cora-OOD and gives the small AUC and AP gaps.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly treats Cora-OOD as a tie given seed variability and limits outperformance to three benchmarks.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y states the contribution more directly through three benchmark wins and an explicitly justified tie, without unsupported performance claims.",
+  "q2": "Y",
+  "q2_reason": "Y foregrounds the main pattern against the stronger baseline and connects the Cora-OOD tie directly to seed variability.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

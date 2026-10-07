@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X says the Mediterranean difference is uncertain because its interval [-0.19, 0.05] crosses zero, and it reports the 18% vs 9% underestimation of extremes, calling it 'greater underestimation of extreme precipitation'.",
+      "reflexive_qualifiers": [
+        "motivating further work on extreme-intensity accuracy and computational efficiency"
+      ]
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y calls the Mediterranean reduction small and statistically inconclusive because its interval includes zero, and it says outright that performance on extremes is weaker (18% vs 9%).",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Neither text has an unsupported claim or a trap error, but Y states the contribution more clearly: it gives relative gains (about 11-20%), says plainly that extremes are weaker, and puts the training cost at about eight times U-Net, without X's generic closing line about further work.",
+  "q2": "Y",
+  "q2_reason": "Y sums up the pattern in readable terms (relative CRPS reduction in three regions, an inconclusive Mediterranean result, weaker extremes, roughly 8x compute), while X lists raw values and absolute differences that the reader has to interpret.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

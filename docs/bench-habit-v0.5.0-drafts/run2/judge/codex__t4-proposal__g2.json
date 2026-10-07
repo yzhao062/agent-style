@@ -1,0 +1,30 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X says FedVerify used about 14% more data per round than Krum and about 23% less than FL-Trust, so it states the overhead accurately and does not claim negligible or lowest communication.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y reports 14.1 MB per round, 13.7% more than FedAvg and Krum and 22.5% less than FL-Trust, which matches the answer key exactly.",
+      "reflexive_qualifiers": [
+        "Our pilot provides preliminary evidence that",
+        "The pilot supports FedVerify's feasibility under the tested conditions."
+      ]
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both drafts are accurate and handle the trap correctly, but X opens with the contribution and its communication tradeoff (halving FL-Trust's wall-clock time, 62% less than Krum), while Y opens and closes with generic hedges that add nothing.",
+  "q2": "Y",
+  "q2_reason": "Y puts the raw rounds, hours, accuracy margins and MB figures for all methods side by side, so the full ordering is explicit, while X mostly gives relative percentages and never states FedVerify's 115 rounds or Krum's rounds.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

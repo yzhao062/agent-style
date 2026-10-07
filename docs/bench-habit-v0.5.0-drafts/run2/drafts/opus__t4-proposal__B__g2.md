@@ -1,0 +1,13 @@
+### Preliminary Results
+
+On a 100-node heterogeneous edge testbed with 20% poisoning clients, FedVerify reaches 80% accuracy in half the wall-clock time of the strongest baseline. It also finishes with the highest final accuracy of the four methods tested and needs the least total communication to reach 80%.
+
+A Byzantine client may send the server arbitrary or malicious updates; our 20 Byzantine clients sent poisoned updates meant to degrade the global model. We split the training data with a Dirichlet label partition (alpha = 0.2; Hsu et al. 2019). At this low alpha, most clients hold data dominated by a few classes. This non-IID skew spreads honest updates far apart, which makes poisoned updates harder to distinguish from honest ones (Karimireddy et al. 2022). We compared FedVerify with three baselines (Table 4). FedAvg (McMahan et al. 2017) averages all client updates and has no defense. Krum (Blanchard et al. 2017) keeps the single update closest to its nearest neighbors. FL-Trust (Cao et al. 2021) weights each update by its cosine similarity to an update the server computes on a small clean dataset.
+
+The poisoning defeats an undefended system: FedAvg never reaches 80% accuracy and ends at 34.2%. All three defenses clear 80%, at very different speeds. FedVerify gets there in just over half the rounds FL-Trust needs and about a third of the rounds Krum needs. Its wall-clock time to 80% is 5.6 hours, half of FL-Trust's 11.2 hours and 38% of Krum's 14.8 hours. The wall-clock and round ratios differ because average round time differs: about 2.9 minutes for FedVerify, 3.2 for FL-Trust, and 2.6 for Krum. FedVerify's rounds run about 12% longer than Krum's, a cost that its threefold cut in rounds more than repays.
+
+The threshold sits close to Krum's ceiling: Krum finishes at 81.0%, one point above 80%. Its 340-round figure may therefore include a long, slow approach to that ceiling, which would inflate FedVerify's apparent speedup over Krum. FL-Trust finishes 3.1 points above 80%, so it gives the fairer speed comparison.
+
+Final accuracy separates the methods less than speed does. FedVerify finishes at 85.4%, 2.3 points above FL-Trust and 4.4 points above Krum.
+
+For edge deployment, the communication cost that matters is the total needed to reach a target accuracy, since every upload costs the device bandwidth and energy. Per round, FedVerify sends 14.1 MB: 14% more than FedAvg and Krum, and 23% less than FL-Trust. Because it needs far fewer rounds, FedVerify reaches 80% with about 1.6 GB of total communication (per-round communication times rounds). FL-Trust and Krum need 3.8 GB and 4.2 GB, more than twice as much.

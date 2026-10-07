@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X correctly names transparent objects as the lowest category at 68% and contrasts this with 94% for rigid objects, describing performance as category dependent.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y says transparent objects remain challenging at 68% success and does not claim uniformly reliable success.",
+      "reflexive_qualifiers": [
+        "Future work should assess whether the gains persist across additional objects, other robots, and longer deployments."
+      ]
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Neither text has an unsupported claim, but Y says outright that AdaptRL improves in every category and quantifies the margin over DAgger as 11 to 24 points, which conveys the contribution more fully than X's aggregate means, though Y also adds a generic future-work line.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern more directly: AdaptRL wins in every category by 11 to 24 points over DAgger, and transparent objects remain the gap, whereas X relies mainly on mean differences.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports that the brain MRI difference is not distinguishable from zero and gives its confidence interval and p-value.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly states that there is no evidence of a gain on brain MRI.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y presents the supported gains and parameter reduction more concisely, making the contribution easier to identify.",
+  "q2": "Y",
+  "q2_reason": "Y states the central pattern more directly: gains on cardiac MRI and lung CT, with no evidence of a gain on brain MRI.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

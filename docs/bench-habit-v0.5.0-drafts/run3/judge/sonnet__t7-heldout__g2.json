@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the Coastal tie and Rural-Net loss without claiming general superiority.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports that Coastal is within seed variation and TrafficCast loses to both learned baselines on Rural-Net.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X presents the supported contribution and inference cost more concisely while preserving all material qualifications.",
+  "q2": "X",
+  "q2_reason": "X explicitly states that the accuracy advantage narrows as sensor count falls and reverses on the smallest network.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

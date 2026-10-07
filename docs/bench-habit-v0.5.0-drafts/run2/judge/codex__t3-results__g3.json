@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X reports the brain MRI difference (+0.4, CI [-0.8, 1.6], p = 0.48) as inconclusive and says neither superiority nor equivalence is established.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y calls the 0.4-point glioma-core increase statistically uncertain because its CI spans zero, and does not claim an improvement on brain MRI.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "tie",
+  "q1_reason": "Neither text has an error, and both report the significant cardiac and lung gains, the non-significant brain result, the untested SwinUNETR comparison and the parameter reduction; X gives fuller statistics, while Y gives the same facts more briefly.",
+  "q2": "X",
+  "q2_reason": "X opens with a clear summary (gains on cardiac and lung, no conclusive brain improvement) before the details, while Y conveys the same pattern without a unifying summary sentence.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "No vLLM baseline exists to compute the reported 64k speedup; the supplied results do not establish how that baseline was measured."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "The note explicitly ties the reported 2.35x speedup to 64k.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "A speedup over vLLM at 64k has no defined baseline; the supplied results do not establish how that baseline was measured."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "omitted",
+      "trap_note": "The 2.35x result is not reported as a speedup, and no unscoped speedup claim contradicts it.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both make comparable unsupported baseline claims, but X preserves all reported measurements, including the scoped 64k speedup.",
+  "q2": "X",
+  "q2_reason": "X gives the complete memory-reduction pattern and explicitly reports the 64k peak speedup in its note.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

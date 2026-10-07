@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports Cora-OOD as a tie and limits the gains over SubgraphAnomaly to three benchmarks.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies Cora-OOD as an exception and describes its small margins as comparable to seed variability.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X explains the contrastive objective and explicitly states that GraphGuard trains without anomaly labels while accurately scoping its gains.",
+  "q2": "Y",
+  "q2_reason": "Y presents precise improvement ranges and clearly distinguishes the three substantial gains from the negligible Cora-OOD margin.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

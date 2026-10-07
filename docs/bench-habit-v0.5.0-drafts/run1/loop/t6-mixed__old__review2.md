@@ -1,0 +1,3 @@
+1. **Clarity and statistical precision:** On Adult, the maximum difference is 0.2 percentage points, while standard deviations range from 0.2 to 0.3. “The same size” is imprecise; standard deviations also do not establish statistical significance. Suggested rewrite: “On Adult, mean accuracies differ by at most 0.2 percentage points, with standard deviations of 0.2 to 0.3 percentage points.”
+
+2. **Unsupported scope claim:** The task data identify Churn-small as having 2,000 rows but do not establish that it is the only small dataset tested. Retain the generalization limitation without that assertion. Suggested rewrite: “The gain on Churn-small does not establish that TabMix provides similar benefits across other low-data settings.”

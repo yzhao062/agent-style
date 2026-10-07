@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies the Mediterranean difference as inconclusive and explicitly reports worse extreme-precipitation bias than U-Net.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It distinguishes the Mediterranean point estimate from a supported improvement and explicitly reports worse extreme-precipitation bias than U-Net.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both are supported, but X makes the contribution's magnitude clearer through percentage improvements and the relative training cost.",
+  "q2": "Y",
+  "q2_reason": "Y explicitly synthesizes the main pattern: improved probabilistic skill over BCSD in three regions, an inconclusive Mediterranean difference, and worse extremes.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

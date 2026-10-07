@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X limits the gains to Metro-A and Metro-B. It describes the Coastal difference as small relative to seed variability and states that TrafficCast is 0.19 km/h worse on Rural-Net.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y gives exact gains for Metro-A and Metro-B, calls the Coastal difference small relative to seed variability, and reports the 0.19 km/h increase on Rural-Net.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Neither text makes an unsupported claim and both handle the trap correctly, but Y gives the exact gains for each network (11.6% and 10.6%), while X's '11% to 12%' range slightly overstates the Metro-B gain of 10.6%.",
+  "q2": "tie",
+  "q2_reason": "Both texts say the gains are concentrated on the two largest networks, with a near-tie on Coastal, a loss on Rural-Net, and slower inference; X adds an explicit summary sentence and Y ties the accuracy and latency trade-off together, so they are about equally clear.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

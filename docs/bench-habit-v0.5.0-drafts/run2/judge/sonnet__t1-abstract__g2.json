@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports gains on three datasets and a tie with SubgraphAnomaly on Cora-OOD in both AUC and AP.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports gains on three datasets and a tie with SubgraphAnomaly on Cora-OOD, citing the small AUC gap relative to seed variability.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "tie",
+  "q1_reason": "Both clearly describe the unsupervised method and its contrastive objective while keeping performance claims within the supplied evidence.",
+  "q2": "tie",
+  "q2_reason": "Both clearly state the main pattern: substantial gains over SubgraphAnomaly on three datasets and a tie on Cora-OOD.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

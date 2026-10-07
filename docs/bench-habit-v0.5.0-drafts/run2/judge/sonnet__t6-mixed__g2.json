@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies the clear gain on Churn-small, small differences on Adult and Credit-default, and a decline relative to no augmentation on Covertype.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It confines the clear benefit to Churn-small and accurately reports the limited differences elsewhere.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y makes the contribution clearer by contrasting the Churn-small gain with the small differences elsewhere and explaining the specific limit on extrapolating to other low-data settings.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern directly by grouping the three larger datasets before detailing their results.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

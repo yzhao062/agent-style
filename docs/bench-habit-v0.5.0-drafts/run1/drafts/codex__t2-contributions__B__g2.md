@@ -1,0 +1,1 @@
+We introduce FlashKV, a runtime that pages and compresses the key-value (KV) cache for long-context LLM serving. On Llama-3-70B on one 8xH100 node, FlashKV reduces KV-cache memory by 55% to 63% relative to vLLM (Table 2). Decoding speedup grows with context length, reaching 1.87x at 32k tokens. FlashKV also serves 64k-token contexts, where vLLM runs out of memory.

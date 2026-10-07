@@ -1,0 +1,9 @@
+## Conclusion
+
+This paper presented AdaptRL, which transfers grasping policies from simulation to a real robot by learning residual dynamics online. Its residual dynamics model captures the gap between the transitions the simulator predicts and those the real robot produces. The model keeps updating as real-robot data arrives.
+
+On the real robot (Table 5, 100 trials per object category), AdaptRL achieves the highest grasp success in all five categories. Averaged across categories, success is 46.0% for domain randomization, 63.0% for DAgger, and 82.2% for AdaptRL. The margin over DAgger is smallest on rigid objects (94% versus 83%), the category on which all three methods perform best. On deformable, jointed, reflective, and transparent objects, that margin grows to between 18 and 24 points. AdaptRL also degrades least from the easiest category to the hardest. From rigid to transparent objects, its success falls 26 points, against 37 for DAgger and 43 for domain randomization.
+
+Transparent objects remain the hardest case, with AdaptRL failing 32 of 100 grasps. Reflective objects follow with 21 failures. Table 5 does not separate perception failures from control failures, so we cannot yet attribute these misses. Perception is one plausible source. Commodity depth cameras return missing or distorted depth on transparent surfaces (Sajjan et al., 2020), and a residual dynamics model corrects predicted transitions, not sensor readings.
+
+Two extensions follow. Learning a perception correction online, alongside the residual dynamics model, would target the remaining failures on transparent and reflective objects. Applying AdaptRL to contact-rich tasks beyond grasping, such as peg insertion or in-hand reorientation, would test whether the gains in Table 5 hold when contact dynamics dominate the sim-to-real gap.

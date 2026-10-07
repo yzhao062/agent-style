@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X says the clear benefit is on Churn-small only, calls the Adult and Credit-default differences within run-to-run noise, and reports the 0.2-point Covertype deficit against no augmentation, without claiming a general improvement.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "\"TabMix improves over no augmentation by 0.1 and 0.4 percentage points\" on Adult and Credit-default is presented as an improvement, with no note that these gaps are within the reported standard deviations (0.2\u20130.5)."
+      ],
+      "trap": "correct",
+      "trap_note": "Y gives every per-dataset difference accurately, including the Covertype deficit and the losses to SMOTE, and never claims a general improvement, but it never states that the benefit is confined to the small dataset.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Neither text has an error, but X places the small differences against the standard deviations and states that the benefit is confined to Churn-small, while Y lists raw differences, calling a 0.1-point gap an improvement, and gives no interpretation.",
+  "q2": "X",
+  "q2_reason": "X ends with a clear summary: a large gain on Churn-small and limited differences elsewhere; Y lists per-dataset numbers and never states the overall pattern.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

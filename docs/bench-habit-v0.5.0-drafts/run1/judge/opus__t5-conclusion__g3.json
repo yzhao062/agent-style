@@ -1,0 +1,37 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "The claim about commodity depth cameras returning missing or distorted depth is external to the supplied evidence.",
+        "Learning a perception correction online would target the remaining transparent- and reflective-object failures, although their causes are unknown."
+      ],
+      "missing_material_qualifiers": [
+        "The proposed perception correction would address the observed failures only if perception errors contribute to them."
+      ],
+      "trap": "correct",
+      "trap_note": "It explicitly identifies transparent objects as the hardest category and reports 32 failures in 100 trials.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "Category differences in real-robot success are described as differences in the sim-to-real gap, although no simulation success rates are provided.",
+        "AdaptRL gains most where the sim-to-real gap is largest, although the table does not measure that gap."
+      ],
+      "missing_material_qualifiers": [
+        "Lower real-robot success may reflect category difficulty; simulation performance is needed to establish category-specific transfer gaps."
+      ],
+      "trap": "correct",
+      "trap_note": "It identifies transparent objects as the weakest category and accurately quantifies the remaining failures.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both overinterpret some evidence, but Y presents the measured contribution more directly, while X adds an unverified explanation and proposed remedy for the failures.",
+  "q2": "Y",
+  "q2_reason": "Y clearly connects the overall improvement, larger margins on the hardest categories, and the remaining weakness on transparent objects.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

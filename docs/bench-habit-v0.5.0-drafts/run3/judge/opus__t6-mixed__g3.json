@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly identifies Churn-small as the only clear gain and reports the decrease on Covertype.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the Churn-small gains, small differences elsewhere, and decrease on Covertype.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both texts are supported, but X makes the contribution clearer by stating immediately that TabMix gives its only clear gain on Churn-small.",
+  "q2": "X",
+  "q2_reason": "X foregrounds the central pattern of a clear benefit confined to the small dataset, while Y places it after several detailed comparisons.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "At 64k, no direct comparison is available, despite Table 2 reporting memory reduction and decoding speedup at that length."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "error",
+      "trap_note": "It omits the reported 2.35x speedup at 64k while claiming that no comparison is available there.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "omitted",
+      "trap_note": "It omits the 2.35x speedup at 64k without contradicting it and scopes its reported speedups to 4k through 32k.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y describes the supported contribution without X's unsupported claim that no comparison is available at 64k.",
+  "q2": "tie",
+  "q2_reason": "Both clearly describe substantial memory savings, increasing decoding speedup through 32k, and FlashKV running at 64k where vLLM runs out of memory.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

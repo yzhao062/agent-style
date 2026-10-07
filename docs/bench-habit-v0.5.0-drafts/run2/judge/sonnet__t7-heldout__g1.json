@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the dense-network gains, Coastal tie, and loss to both learned baselines on Rural-Net.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the dense-network gains, Coastal tie, and loss to both learned baselines on Rural-Net.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both texts are supported, but Y presents the contribution more concisely and explicitly identifies the 60-minute forecast setting.",
+  "q2": "Y",
+  "q2_reason": "Y foregrounds the main pattern of larger gains on larger networks, a Coastal tie, and a reversal on the smallest network.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

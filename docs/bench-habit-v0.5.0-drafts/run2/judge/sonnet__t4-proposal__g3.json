@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "FL-Trust sends 4.1 MB (23%) more than FedVerify; the increase relative to FedVerify is approximately 29%, not 23%."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports FedVerify's approximately 14% communication overhead relative to FedAvg and Krum.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It correctly reports higher per-round communication than FedAvg and Krum and lower communication than FL-Trust.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y presents the contribution accurately, whereas X uses the wrong denominator for FL-Trust's percentage communication increase.",
+  "q2": "tie",
+  "q2_reason": "Both clearly report faster convergence, higher final accuracy, and the communication tradeoff in the tested setting.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

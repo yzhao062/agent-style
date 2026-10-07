@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "\"We treat the two networks as tied on glioma core\" suggests equivalence; the nonsignificant difference does not establish equivalence."
+      ],
+      "trap": "correct",
+      "trap_note": "It reports the nonsignificant brain MRI difference without claiming improvement.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately distinguishes the highest brain MRI point estimate from evidence of improvement.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y presents the accuracy and parameter advantages clearly without suggesting that a nonsignificant difference establishes equivalence.",
+  "q2": "Y",
+  "q2_reason": "Y explicitly distinguishes the highest point estimates across all tasks from supported gains on cardiac MRI and lung CT only.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

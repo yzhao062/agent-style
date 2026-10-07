@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X ties the speedup to a context range ('1.10x to 1.87x at contexts of 4k to 32k tokens'), so it is scoped. It leaves out the 2.35x figure at 64k, but nothing in the text contradicts it.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "Y gives no speedup figure below 32k, so the reader never learns that the gain is only 1.10x at 4k. 'Grows with context length' only partly conveys this."
+      ],
+      "trap": "correct",
+      "trap_note": "Y ties the speedup to context length ('grows with context length, reaching 1.87x at 32k tokens'), so it is scoped. It leaves out 2.35x at 64k without contradicting it.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "tie",
+  "q1_reason": "Neither text has an unsupported claim or a trap error. X gives the full speedup range, including the weak 4k result, while Y frames the long-context benefit, so they are about equally clear and accurate.",
+  "q2": "Y",
+  "q2_reason": "Y says outright that the decoding speedup grows with context length, which is the main pattern. X gives a numeric range and leaves the trend for the reader to infer.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

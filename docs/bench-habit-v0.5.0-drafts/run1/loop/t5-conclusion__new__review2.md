@@ -1,0 +1,3 @@
+1. “Corrects the policy for it” implies a specific policy-update mechanism that the task data do not establish. Suggested rewrite: “AdaptRL learns residual dynamics during deployment to support the transfer of grasping policies from simulation.”
+
+2. The category-specific margins and success rates repeat numerical details available in Table 5. Preserve the supported patterns while reducing numerical clutter. Suggested rewrite: “AdaptRL’s advantage over DAgger is smallest on rigid objects and larger in the other four categories. Its largest gain over domain randomization occurs on reflective objects. Reflective and transparent objects nevertheless remain its hardest tested categories.”

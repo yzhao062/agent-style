@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the Coastal tie, the Rural-Net loss to both neural baselines, and the higher inference cost.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the Coastal tie, the Rural-Net loss to both neural baselines, and the higher inference cost.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "tie",
+  "q1_reason": "Both clearly quantify the dense-network gains and accurately state the limits and inference tradeoff without unsupported claims.",
+  "q2": "tie",
+  "q2_reason": "Both clearly describe the same pattern: substantial gains on the largest networks, a Coastal tie, and a reversal on Rural-Net.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

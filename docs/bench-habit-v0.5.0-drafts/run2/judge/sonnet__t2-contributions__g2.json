@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "omitted",
+      "trap_note": "The 2.35x speedup at 64k is omitted, without a contradictory speedup claim.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "omitted",
+      "trap_note": "The 2.35x speedup at 64k is omitted, without a contradictory speedup claim.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X states the contribution more directly and includes the 63% memory reduction at 64k, with no unsupported claims.",
+  "q2": "X",
+  "q2_reason": "X more explicitly highlights the smallest decoding gain at 4k and the sustained memory reduction at 64k, although both omit the largest speedup.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

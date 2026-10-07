@@ -50,24 +50,24 @@ for arg in "$@"; do
 done
 
 read_pyproject_version() {
-  grep -E '^version\s*=\s*"' "$PYPI_DIR/pyproject.toml" \
+  grep -E '^version[[:space:]]*=[[:space:]]*"' "$PYPI_DIR/pyproject.toml" \
     | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/'
 }
 read_python_init_version() {
-  grep -E '^__version__\s*=\s*"' "$PYPI_DIR/agent_style/__init__.py" \
+  grep -E '^__version__[[:space:]]*=[[:space:]]*"' "$PYPI_DIR/agent_style/__init__.py" \
     | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/'
 }
 read_npm_version() {
-  grep -E '"version"\s*:' "$NPM_DIR/package.json" \
-    | head -n 1 | sed -E 's/.*"version"\s*:\s*"([^"]+)".*/\1/'
+  grep -E '"version"[[:space:]]*:' "$NPM_DIR/package.json" \
+    | head -n 1 | sed -E 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/'
 }
 
 # The two bundled tools.json mirrors. Prints nothing when the key is absent,
 # which then fails the equality check below rather than passing as an empty
 # match on both sides.
 read_tools_json_version() {
-  grep -E '"agent_style_version"\s*:' "$1" \
-    | head -n 1 | sed -E 's/.*"agent_style_version"\s*:\s*"([^"]+)".*/\1/'
+  grep -E '"agent_style_version"[[:space:]]*:' "$1" \
+    | head -n 1 | sed -E 's/.*"agent_style_version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/'
 }
 
 mode_version_only() {

@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "For studies of extreme rainfall, the U-Net remains the more accurate choice."
+      ],
+      "missing_material_qualifiers": [
+        "The recommendation for extreme-rainfall studies extends beyond the measured average intensity bias at the 99th percentile in the tested settings."
+      ],
+      "trap": "correct",
+      "trap_note": "It reports the Mediterranean uncertainty and the larger 99th-percentile intensity underestimate.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports the Mediterranean interval crossing zero and the worse 99th-percentile intensity bias.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y presents the contribution and tradeoffs without X's broad claim about U-Net accuracy for extreme-rainfall studies.",
+  "q2": "X",
+  "q2_reason": "X makes the scale of the CRPS improvements and training-cost increase clearer through percentages and a cost ratio.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

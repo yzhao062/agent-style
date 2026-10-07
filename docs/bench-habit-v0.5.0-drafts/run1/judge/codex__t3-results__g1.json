@@ -1,0 +1,32 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "States that MedNeXt-Lite 'achieves higher Dice scores than both baselines' for LV and lung, but no significance test against SwinUNETR is reported, and on lung CT the confidence intervals overlap."
+      ],
+      "trap": "correct",
+      "trap_note": "Gives the glioma-core difference as uncertain (+0.4, CI -0.8 to 1.6, p = 0.48) and calls the scores similar, without claiming improvement or equivalence.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "'achieves higher mean Dice than SwinUNETR across all three tasks' gives no significance test, and on brain MRI the gap is only 0.2 points with heavily overlapping CIs, so readers may infer a gain that the results do not show.",
+        "Calls the glioma gain 'small' without giving the estimate or p-value, and gives no p-values for the significant tasks."
+      ],
+      "trap": "correct",
+      "trap_note": "Says the glioma confidence interval includes zero, giving no clear evidence of improvement over nnU-Net.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both handle the trap correctly, but X reports the full numbers, CIs, p-values and parameter reduction, while Y adds an unqualified 'across all three tasks' claim against SwinUNETR that overstates the brain MRI result.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern more directly: significant gains on cardiac and lung because the CIs exclude zero, and no evidence of gain on glioma, without the table-restating detail that spreads X's pattern across many numbers.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

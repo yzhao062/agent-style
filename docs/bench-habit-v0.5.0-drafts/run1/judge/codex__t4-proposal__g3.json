@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X reports that per-round communication is about 14% above FedAvg and Krum and about 23% below FL-Trust, which matches 14.1 vs 12.4 and 18.2 MB.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y gives 14.1 MB per round, about 14% more than FedAvg and Krum and 23% less than FL-Trust, and correctly adds that cumulative communication to the target is lower than both defenses (about 1.6 GB vs 3.8 and 4.2 GB).",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both texts are accurate and handle the trap correctly, but Y shows the contribution more concretely: it gives the actual rounds and hours for every defense, and it backs up the communication tradeoff with a correct cumulative-cost point, while X relies mostly on relative percentages and leaves out Krum's raw numbers.",
+  "q2": "Y",
+  "q2_reason": "Y sets out the full ranking on rounds, time, accuracy and communication with explicit numbers, then states the tradeoff, so the main pattern is easier to check than in X's mostly relative summary.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

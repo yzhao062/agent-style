@@ -1,0 +1,5 @@
+1. **Soundness:** “Across these lengths” includes the 64k memory comparison, whose baseline is unclear because vLLM runs out of memory. Omitting the 2.35x speedup is justified, but the same baseline ambiguity affects the 63% memory reduction. Suggested rewrite: “At 4k to 32k contexts, where both systems run, FlashKV reduces KV-cache memory by 55% to 63%.” Define the 64k comparison baseline in Table 2 before including that memory result.
+
+2. **Clarity:** The speedup sentence transcribes three table entries. State the observed trend and retain the strongest supported comparison. Suggested rewrite: “Across the tested 4k to 32k contexts, FlashKV’s decoding speedup over vLLM increases with context length, reaching 1.87x at 32k.”
+
+3. **Presentation and significance:** The appended note is an editorial exchange, unsuitable for the Introduction. Resolve its valid baseline questions in the table caption or evaluation section. The paragraph should end by stating the supported capacity contribution directly. Suggested rewrite: “On the tested 8xH100 node, FlashKV enables decoding at 64k context, where vLLM runs out of memory.”

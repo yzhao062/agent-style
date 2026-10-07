@@ -1,0 +1,30 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "\"TabMix improves over no augmentation by 0.1 and 0.4 percentage points\" on Adult and Credit-default is presented as an improvement without noting that these differences fall within the standard deviations (0.2\u20130.5).",
+        "\"achieves its largest gain on Churn-small\" implies real gains on other datasets, when the only clear gain is on Churn-small."
+      ],
+      "trap": "omitted",
+      "trap_note": "X reports every number accurately, including the Covertype drop, but never says the benefit is limited to the small dataset; it calls the within-noise Adult/Credit differences improvements, though it makes no explicit general-improvement claim.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y separates the clear Churn-small gain from Adult/Credit-default differences that it says are within the standard deviations, and it reports the Covertype drop below no augmentation, so the benefit is shown as confined to the small dataset.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both texts give correct numbers, but Y correctly says the Adult/Credit-default differences are within noise, while X calls them improvements and frames Churn-small as only the 'largest' gain, which overstates TabMix's benefit.",
+  "q2": "Y",
+  "q2_reason": "Y separates the clear small-dataset gain from the noise-level differences and the Covertype drop in fewer words, while X lists every per-dataset difference without saying which ones matter.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

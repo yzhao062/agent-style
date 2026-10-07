@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "The claim that the residual dynamics model does not change how the robot perceives objects is not established by the supplied task or results.",
+        "The claim about inaccurate depth on transparent surfaces introduces external evidence not supplied here, and attributing some observed failures to perception is unsupported by the reported results.",
+        "Separating perception failures from dynamics failures would not by itself establish whether adding depth completion raises grasp success."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies transparent objects as the hardest category and reports 32 failures in 100 trials.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports the remaining failures on reflective and transparent objects, with transparent objects having the highest failure rate.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y clearly describes the contribution and supported improvements, whereas X adds unsupported claims about perception and diagnosing the benefit of depth completion.",
+  "q2": "Y",
+  "q2_reason": "Y states the central pattern more directly: AdaptRL leads across all categories, has larger advantages on harder categories, and retains substantial failures on reflective and transparent objects.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

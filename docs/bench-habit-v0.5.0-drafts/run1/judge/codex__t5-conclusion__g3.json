@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X says transparent objects remain the weakest category, at 68% compared with 94% for rigid objects, which matches the answer key's remaining gap.",
+      "reflexive_qualifiers": [
+        "Evaluation on additional robots and grasping settings would test the scope of the observed gains."
+      ]
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "The 82.2% mean and the claim that AdaptRL outperforms on all categories hide that transparent-object success is only 68%; a reader could assume success is high on every category."
+      ],
+      "trap": "omitted",
+      "trap_note": "Y never says transparent objects remain weakest, but it also never claims uniformly high success or that the problem is solved, so nothing in it contradicts the trap.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both texts report the numbers correctly, but X also states that transparent objects remain a gap at 68%, while Y leaves that out and lets the mean suggest success is high everywhere.",
+  "q2": "tie",
+  "q2_reason": "Y states more directly that the margin over DAgger grows on the hardest categories, while X gives the 11-to-24-point range and names the remaining weak category, so each conveys a different part of the main pattern about equally well.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

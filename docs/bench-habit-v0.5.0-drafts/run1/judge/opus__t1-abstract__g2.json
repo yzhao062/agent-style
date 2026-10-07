@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports gains over SubgraphAnomaly on three datasets and identifies Cora-OOD as comparable within seed variation.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports comparable AUC and AP on Cora-OOD, with gaps comparable to seed variation.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both are supported, but Y gives precise gains and explicitly establishes comparability on both Cora-OOD metrics.",
+  "q2": "tie",
+  "q2_reason": "Both clearly state the main pattern: substantial gains over SubgraphAnomaly on three datasets and comparable performance on Cora-OOD.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

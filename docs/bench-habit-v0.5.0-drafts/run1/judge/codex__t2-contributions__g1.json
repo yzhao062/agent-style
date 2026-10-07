@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X ties the speedup to 4k-32k contexts (1.10x to 1.87x) and never gives an unscoped speedup figure.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "The 55% to 63% memory reduction has no stated baseline; Y never says it is relative to vLLM."
+      ],
+      "trap": "correct",
+      "trap_note": "Y limits the speedup to contexts where vLLM runs and gives it as increasing with context up to 1.87x at 32k, with no unscoped speedup figure.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Neither text has an unsupported claim, but X names vLLM as the memory baseline and gives the full speedup range, including the small 1.10x at 4k, so readers see the contribution with its limits; Y leaves out the baseline and the low end.",
+  "q2": "Y",
+  "q2_reason": "Y says outright that the speedup grows with context length, while X gives only a 1.10x to 1.87x range and leaves the reader to infer the trend.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

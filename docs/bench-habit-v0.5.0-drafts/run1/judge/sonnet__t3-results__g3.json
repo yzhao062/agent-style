@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the nonsignificant brain MRI difference and explicitly avoids claiming parity.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports that the brain MRI difference is not significant.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y presents the supported Dice gains and parameter reduction more directly while retaining the specific uncertainty on brain MRI.",
+  "q2": "Y",
+  "q2_reason": "Y makes the main pattern clearer: gains on cardiac MRI and lung CT, no significant difference on brain MRI, and substantially fewer parameters.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

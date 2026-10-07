@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "This skew makes defense harder; the pilot does not compare levels of skew or measure their effect on defense difficulty."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports the 14% per-round overhead over FedAvg and Krum and distinguishes this from lower cumulative traffic to 80% accuracy.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "Strong skew makes defense harder because honest updates differ from the majority; the pilot does not establish this causal explanation."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports higher per-round communication than FedAvg and Krum and limits its lowest-total-communication claim to the three defenses reaching 80%.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both contain a comparable unsupported claim about skew, but X makes the measured contribution immediately visible and presents a complete subsection.",
+  "q2": "X",
+  "q2_reason": "X foregrounds the time and cumulative-communication gains and clearly organizes convergence, final accuracy, and per-round overhead.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

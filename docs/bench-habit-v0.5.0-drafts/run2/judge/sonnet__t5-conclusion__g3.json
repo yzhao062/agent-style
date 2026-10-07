@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly identifies transparent objects as the weakest category, with 68% success.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "The larger gains on harder categories suggest that online residual correction helps most where the simulation-to-real mismatch is largest; the results do not measure mismatch or isolate the contribution of residual correction."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the remaining 32 failures in 100 trials on transparent objects.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X clearly reports the contribution and remaining gap without Y's unsupported mechanistic inference.",
+  "q2": "Y",
+  "q2_reason": "Y states the overall success rates, superiority in every category, and larger gains beyond rigid objects more explicitly.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

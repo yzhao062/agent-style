@@ -1,0 +1,39 @@
+{
+  "tasks_sha256": "3607f479dce80ed0731330e83fabf9436310f2d3247550208d1b5815c41a07f7",
+  "rubric_sha256": "f3a35723d0d2885b4bbd8a1615e29f1ddab19dbc3dcacd0bee968835cd21bc85",
+  "pack_a": {
+    "path": "packs/A.md",
+    "sha256": "45bd5e852d4ff62ce8949ff437849c80e24106c0c55631739eb059b6e9e60c1d"
+  },
+  "pack_b": {
+    "path": "packs/B.md",
+    "sha256": "5d7fda1d5238e2c769d494fe572f69318e7ea75940e2c6d6a6284dc04b7eaf2c"
+  },
+  "writers": {
+    "sonnet": [
+      "claude",
+      "claude-sonnet-5-5"
+    ],
+    "opus": [
+      "claude",
+      "claude-opus-5-5"
+    ],
+    "codex": [
+      "codex",
+      "gpt-6.1-sol"
+    ]
+  },
+  "judges": {
+    "claude": [
+      "codex",
+      "gpt-6.1-sol"
+    ],
+    "codex": [
+      "claude",
+      "claude-opus-5-5"
+    ]
+  },
+  "codex_effort": "high",
+  "generations": 3,
+  "seed": 20261006
+}

@@ -1,0 +1,7 @@
+1. **Statistical interpretation:** Comparing the Cora-OOD gains with an upper bound on seed standard deviations does not establish statistical significance. Dataset-specific variability and paired differences are needed. Suggested rewrite: “On Cora-OOD, GraphGuard improves mean AUC by 0.003 and mean AP by 0.004; the statistical significance of these gains remains unestablished.”
+
+2. **Literature positioning:** “Existing approaches face two challenges” obscures the task data’s distinction between methods requiring labels and methods degrading under dense community structure. Suggested rewrite: “Existing methods either require manual anomaly labels or lose accuracy on graphs with dense community structure.”
+
+3. **Evidence for the motivation:** Table 1 supports benchmark improvements, but it does not establish robustness to dense communities or attribute gains to cross-community contrasting. Suggested rewrite: “Across four benchmarks, GraphGuard achieves higher mean AUC and AP than both evaluated baselines, with larger gains over SubgraphAnomaly on Reddit-B, Twitch-EN, and Elliptic than on Cora-OOD.”
+
+4. **Method clarity:** The method description explains encoder pretraining but omits how representations become anomaly scores, leaving the detector underspecified. Suggested rewrite, completed with the actual scoring rule: “GraphGuard pretrains an encoder by contrasting subgraphs across community boundaries, then computes anomaly scores using [specify the scoring rule].”

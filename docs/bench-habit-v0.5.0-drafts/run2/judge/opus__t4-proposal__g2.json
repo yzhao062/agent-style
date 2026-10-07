@@ -1,0 +1,36 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "At alpha = 0.2, most clients hold data dominated by a few classes; the results do not report client label distributions.",
+        "Non-IID skew spreads honest updates apart and makes poisoned updates harder to distinguish; this mechanism is not demonstrated.",
+        "The poisoning defeats undefended training; the results show failure under attack but provide no unattacked comparison establishing causation.",
+        "Krum's final accuracy is its ceiling, its threshold time may reflect a slow approach that inflates FedVerify's apparent speedup, and FL-Trust therefore provides a fairer comparison; the results do not establish these interpretations."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the approximately 14% per-round overhead over FedAvg and Krum and lower communication than FL-Trust.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "At alpha = 0.2, most clients hold data concentrated on a few labels; the results do not report client label distributions.",
+        "Strong skew makes defense harder because honest updates differ from the majority; this mechanism is not demonstrated.",
+        "The attack breaks undefended training; the results show failure under attack but provide no unattacked comparison establishing causation."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the approximately 14% per-round overhead and limits its lowest-total-communication claim to the three defenses.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both include unsupported background and causal claims, but Y avoids X's additional unsupported interpretation of Krum's ceiling and the fairness of the speed comparison.",
+  "q2": "Y",
+  "q2_reason": "Y states the convergence, accuracy, and communication comparisons directly with explicit numbers, without interrupting the main pattern with speculative interpretations.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

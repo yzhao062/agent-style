@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It correctly reports gains on three datasets and a tie with SubgraphAnomaly on Cora-OOD, while separately reporting gains over GCN.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly identifies Cora-OOD as a tie within seed noise and limits gains over SubgraphAnomaly to the other three datasets.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y presents the method and its supported gains more directly, with less explanatory clutter.",
+  "q2": "Y",
+  "q2_reason": "Y makes the main pattern clearer by grouping the substantial gains on three datasets and explicitly contrasting them with the Cora-OOD tie.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

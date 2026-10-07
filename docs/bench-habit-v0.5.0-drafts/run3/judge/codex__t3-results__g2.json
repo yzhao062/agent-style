@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X reports the brain MRI difference as 'small and uncertain' (+0.4, CI -0.8 to 1.6, p = 0.48) and says this 'establishes neither superiority nor equivalence', so it claims neither an improvement nor equivalence; its opening claim of 'highest mean Dice' refers only to point estimates, which are accurate.",
+      "reflexive_qualifiers": [
+        "inference speed and clinical benefit require separate evaluation"
+      ]
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y calls the brain MRI difference 'small and statistically inconclusive' and gives the CI and p-value, and it limits the efficiency claim to the cardiac and lung tasks.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both texts are accurate and handle the trap correctly, but Y conveys the contribution (two significant gains, an inconclusive brain result, 87% fewer parameters) more concisely and without X's generic closing caveat.",
+  "q2": "tie",
+  "q2_reason": "X's opening sentence and Y's first two sentences both clearly state the same pattern: significant gains on cardiac and lung, no evidence of a gain on brain, and a much smaller model.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

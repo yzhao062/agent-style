@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies transparent objects as weakest and quantifies their remaining failure rate at 32%.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It places transparent objects last in the success ordering and identifies reflective and transparent objects as the hardest tested categories.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X makes the supported contribution clearer by quantifying the gains over both baselines and the remaining failure rates.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern more directly: AdaptRL leads across categories, its advantage over DAgger is larger beyond rigid objects, and transparent objects remain weakest.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

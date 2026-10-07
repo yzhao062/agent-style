@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X calls the 0.02 km/h Coastal reduction smaller than the seed standard deviation, states that Rural-Net error rises by 0.19 km/h, and limits the accuracy claim to the two largest networks.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y calls the Coastal difference small relative to seed variability, reports the 0.19 km/h Rural-Net increase, and limits the gains to the two largest networks.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "tie",
+  "q1_reason": "Both texts are accurate and handle the trap correctly: X gives exact absolute reductions and the 41% latency cost, while Y gives the 11\u201312% relative gains, so each conveys the contribution about equally clearly without overclaiming.",
+  "q2": "X",
+  "q2_reason": "X's closing sentence covers the whole pattern (an advantage on the large networks, uneven results on the smaller ones, and a higher inference cost), while Y's summary sentence mentions only the gains and the latency.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

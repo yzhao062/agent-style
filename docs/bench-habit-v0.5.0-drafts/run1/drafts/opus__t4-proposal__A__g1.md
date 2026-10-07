@@ -1,0 +1,15 @@
+### Preliminary Results
+
+Our pilot on a 100-node heterogeneous edge testbed finds that FedVerify reaches 80% accuracy with fewer rounds, less wall-clock time, and less total communication than two published Byzantine-robust defenses. In federated learning, clients such as edge devices train a shared model on their local data and send only model updates to a central server. A Byzantine client may send arbitrary or malicious updates. In the pilot, each node acts as one client, and 20 of the 100 clients are Byzantine: they send poisoned updates meant to degrade the global model.
+
+We trained [model] on [dataset]. Following Hsu et al. (2019), we split the training data across clients by drawing each client's class proportions from a Dirichlet distribution with α = 0.2. Smaller α yields more skewed splits; at 0.2, most clients' data concentrate in a few classes. Such skewed data are called non-IID (not independent and identically distributed). Non-IID data make defense harder because honest clients already submit dissimilar updates, so a defense that rejects outlying updates can also discard useful honest ones.
+
+We compare FedVerify with three baselines. FedAvg (McMahan et al., 2017) averages all client updates and has no defense. Krum (Blanchard et al., 2017) selects the single update with the smallest summed distance to its nearest neighbors. FL-Trust (Cao et al., 2021) weights each update by its cosine similarity to an update the server computes on a small clean dataset.
+
+Table 4 reports the results. Without a defense, FedAvg never reaches 80% accuracy and finishes at 34.2%, which shows that the attack defeats an undefended model. All three defenses reach the target. FedVerify ends with the highest final accuracy, 85.4%, which is 2.3 points above FL-Trust (83.1%) and 4.4 points above Krum (81.0%).
+
+Convergence speed separates the methods more sharply. FedVerify reaches 80% accuracy in 115 rounds, 45% fewer than FL-Trust (210) and 66% fewer than Krum (340). Its wall-clock time to 80% is 5.6 hours, 50% less than FL-Trust (11.2 hours) and 62% less than Krum (14.8 hours). The lower round count accounts for most of these savings. Wall-clock time divided by rounds gives 175 seconds per FedVerify round, 12% more than Krum (157 seconds) and 9% less than FL-Trust (192 seconds).
+
+Per round, FedVerify transmits 14.1 MB: 1.7 MB (14%) more than FedAvg and Krum, and 4.1 MB (23%) less than FL-Trust. Because FedVerify needs fewer rounds, it transmits the least total data before reaching 80% accuracy. Multiplying rounds by per-round communication gives 1.6 GB for FedVerify, against 3.8 GB for FL-Trust and 4.2 GB for Krum, reductions of 58% and 62%. For edge clients on metered links, this cumulative traffic sets the data cost of training.
+
+These results come from a single operating point, with the Byzantine fraction fixed at 20% and α fixed at 0.2. Table 4 also reports no run-to-run variance, so we treat the 2.3-point accuracy margin over FL-Trust as preliminary. Section [X] extends the evaluation to vary both parameters, test adaptive attackers that know FedVerify's design, and report confidence intervals over repeated runs.

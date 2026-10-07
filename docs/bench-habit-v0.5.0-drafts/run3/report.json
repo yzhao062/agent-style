@@ -1,0 +1,371 @@
+{
+  "coverage": {
+    "drafts": [
+      72,
+      72
+    ],
+    "pairs": [
+      36,
+      36
+    ],
+    "partial": false
+  },
+  "density": {
+    "codex/A": {
+      "sentences": 74,
+      "words": 1415,
+      "numbers": 187
+    },
+    "codex/B": {
+      "sentences": 62,
+      "words": 1179,
+      "numbers": 97
+    },
+    "opus/A": {
+      "sentences": 116,
+      "words": 2084,
+      "numbers": 224
+    },
+    "opus/B": {
+      "sentences": 101,
+      "words": 1812,
+      "numbers": 177
+    },
+    "sonnet/A": {
+      "sentences": 105,
+      "words": 1923,
+      "numbers": 275
+    },
+    "sonnet/B": {
+      "sentences": 91,
+      "words": 1672,
+      "numbers": 240
+    }
+  },
+  "judge": {
+    "codex__t3-results": {
+      "A": {
+        "unsupported": 0,
+        "missing": 1,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 1
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 0,
+        "B": 2,
+        "tie": 1
+      },
+      "q2": {
+        "A": 0,
+        "B": 2,
+        "tie": 1
+      },
+      "pairs": 3
+    },
+    "codex__t6-mixed": {
+      "A": {
+        "unsupported": 0,
+        "missing": 5,
+        "trap_error": 0,
+        "trap_omitted": 1,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "codex__t7-heldout": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 1,
+        "tie": 1
+      },
+      "q2": {
+        "A": 2,
+        "B": 1,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "codex__t8-heldout": {
+      "A": {
+        "unsupported": 1,
+        "missing": 1,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 2
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 1,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "opus__t3-results": {
+      "A": {
+        "unsupported": 1,
+        "missing": 1,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "q2": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "opus__t6-mixed": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "opus__t7-heldout": {
+      "A": {
+        "unsupported": 3,
+        "missing": 2,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 3,
+        "missing": 2,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 2,
+        "B": 1,
+        "tie": 0
+      },
+      "q2": {
+        "A": 2,
+        "B": 1,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "opus__t8-heldout": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 3,
+        "missing": 2,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 2,
+        "B": 1,
+        "tie": 0
+      },
+      "q2": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "sonnet__t3-results": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 2,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 3,
+        "B": 0,
+        "tie": 0
+      },
+      "q2": {
+        "A": 3,
+        "B": 0,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "sonnet__t6-mixed": {
+      "A": {
+        "unsupported": 1,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 1,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 1,
+        "tie": 1
+      },
+      "q2": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "sonnet__t7-heldout": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 1,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "q2": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "sonnet__t8-heldout": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 1,
+        "tie": 1
+      },
+      "q2": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "pairs": 3
+    }
+  }
+}

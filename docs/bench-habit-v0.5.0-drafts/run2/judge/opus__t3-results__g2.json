@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports no detectable brain MRI gain and a confidence interval spanning zero.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "That interval rules out a MedNeXt-Lite deficit larger than 0.8 points."
+      ],
+      "missing_material_qualifiers": [
+        "The claimed exclusion of deficits larger than 0.8 points needs qualification as a 95% confidence bound, not an absolute exclusion."
+      ],
+      "trap": "correct",
+      "trap_note": "It reports the brain difference with its zero-spanning confidence interval and p = 0.48 without asserting a demonstrated improvement or equivalence.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X clearly presents the segmentation gains and parameter reduction without Y's overstatement of what the brain confidence interval excludes.",
+  "q2": "X",
+  "q2_reason": "X states the cardiac and lung gains and explicitly distinguishes the absence of a detectable brain gain, making the main pattern clearer.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

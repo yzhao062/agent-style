@@ -1,0 +1,3 @@
+1. **Reporting clarity:** The paragraph does not identify the accuracies as means over 10 runs or explain what the reported standard deviations summarize. Suggested rewrite: “Table 6 reports mean accuracy (%) and standard deviation over 10 runs for no augmentation, SMOTE, and TabMix on four datasets.”
+
+2. **Uncertainty interpretation:** Comparing gaps with individual methods’ standard deviations describes their scale but does not establish statistical significance. Suggested rewrite: “On Churn-small, TabMix improves mean accuracy by 5.3 percentage points over no augmentation and 3.7 over SMOTE; the respective standard deviations are 0.9, 1.1, and 1.0 percentage points.”

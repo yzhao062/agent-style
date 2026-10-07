@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "\u201cWe tested one robot\u201d: the supplied results do not specify the number of robots tested."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies transparent objects as the weakest category and reports their 32% failure rate.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "\u201cThe gain is therefore largest where the baselines succeed least\u201d: both baselines succeed least on transparent objects, but AdaptRL's largest gains occur on reflective objects."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly identifies transparent objects as the hardest category and reports 68% success.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X accurately describes the comparative gains, while Y misstates their relationship to baseline performance; X's unsupported robot count is a narrower error.",
+  "q2": "X",
+  "q2_reason": "X clearly reports the stronger gains beyond rigid objects and the shared decline toward transparent objects without implying that the largest gains occur on the weakest category.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

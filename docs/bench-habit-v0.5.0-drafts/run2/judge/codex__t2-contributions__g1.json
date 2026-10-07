@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X limits the speedup to 4k\u201332k (1.10x to 1.87x) and never states an unscoped 2.35x, though it leaves out the 2.35x result at 64k.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y ties the speedup to context length, rising from 1.10\u00d7 at 4k to 1.87\u00d7 at 32k, and never states an unscoped figure, though it also leaves out the 2.35x result at 64k.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Neither text has an error, but Y shows the contribution more clearly because it says the speedup grows with context length; X gives only a range, which hides that the gain is small at short contexts and larger at long ones.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern directly: speedups increase with context length. X's range of 1.10x to 1.87x leaves the reader to infer that trend.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

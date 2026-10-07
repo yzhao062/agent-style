@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X says transparent objects remain the weakest category (68% vs 94% for rigid) and does not claim uniformly high success.",
+      "reflexive_qualifiers": [
+        "Evaluation on additional robots and grasping settings would test the scope of the observed gains."
+      ]
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y says transparent objects remain the weakest category at 68% and calls transparent-object grasping a remaining challenge.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "tie",
+  "q1_reason": "Neither text has an unsupported claim or a trap error; X's correct mean figures make the contribution more concrete, but its generic future-work line offsets that advantage against Y's tighter, equally accurate text.",
+  "q2": "X",
+  "q2_reason": "X ties the margin endpoints to categories (+11 rigid, +24 reflective) and gives the mean success rates, so the larger gains on harder categories are easier to see than in Y's unanchored '11 to 24 points' range.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X says the brain MRI difference is 'small and uncertain' (+0.4, CI -0.8 to 1.6, p = 0.48), says it 'establishes neither superiority nor equivalence', and limits significant gains to cardiac and lung.",
+      "reflexive_qualifiers": [
+        "inference speed and clinical benefit require separate evaluation"
+      ]
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y calls the glioma-core gain 'small and statistically uncertain, with the confidence interval spanning zero', and claims improvement only for left ventricle and lung lesions.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both texts are accurate and handle the trap correctly, but X gives the specific evidence (Dice values, CIs, p-values, the brain estimate and the SwinUNETR differences) and rules out an equivalence claim, while Y leaves the brain size and the p-values unstated.",
+  "q2": "Y",
+  "q2_reason": "Y states the pattern in four short sentences: significant gains on two organs, an uncertain result on brain, and about 87% fewer parameters, with no extra detail in the way.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

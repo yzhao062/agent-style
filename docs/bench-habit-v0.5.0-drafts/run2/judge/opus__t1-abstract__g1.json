@@ -1,0 +1,30 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports wins on three benchmarks and treats the small Cora-OOD differences as a tie given seed variation.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "Tightly connected groups of normal nodes can mask anomalous ones.",
+        "Sampling across community boundaries makes pretraining focus on the structure that degrades current detectors."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly identifies Cora-OOD as a tie and reports wins on the other three benchmarks.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X clearly describes the contribution and supported results, while Y adds mechanistic explanations that the supplied evidence does not establish.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern more compactly by grouping the three wins and then identifying Cora-OOD as the exception.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

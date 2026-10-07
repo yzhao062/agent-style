@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X reports the brain MRI difference as small and uncertain (+0.4, CI -0.8 to 1.6, p = 0.48) and says it establishes neither superiority nor equivalence.",
+      "reflexive_qualifiers": [
+        "inference speed and clinical benefit require separate evaluation"
+      ]
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "Y says MedNeXt-Lite scored higher than both baselines and that the results 'support improved segmentation' on the cardiac and lung tasks, but never says that significance against SwinUNETR was not tested."
+      ],
+      "trap": "correct",
+      "trap_note": "Y calls the glioma difference statistically inconclusive and notes that its CI spans zero, without claiming improvement or equivalence.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both texts handle the brain MRI trap correctly, but X gives exact effect sizes and says that significance against SwinUNETR was not assessed, while Y implies improvement over both baselines without that qualifier.",
+  "q2": "Y",
+  "q2_reason": "Y's first sentence gives the pattern cleanly (gains on cardiac and lung, inconclusive on brain), while X opens by saying MedNeXt-Lite had the highest mean Dice on all three tasks and only then separates the significant from the non-significant results.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

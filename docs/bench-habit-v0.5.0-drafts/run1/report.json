@@ -1,0 +1,697 @@
+{
+  "coverage": {
+    "drafts": [
+      108,
+      108
+    ],
+    "pairs": [
+      54,
+      54
+    ],
+    "partial": false
+  },
+  "density": {
+    "codex/A": {
+      "sentences": 135,
+      "words": 2340,
+      "numbers": 257
+    },
+    "codex/B": {
+      "sentences": 105,
+      "words": 1836,
+      "numbers": 122
+    },
+    "opus/A": {
+      "sentences": 233,
+      "words": 4041,
+      "numbers": 366
+    },
+    "opus/B": {
+      "sentences": 184,
+      "words": 3248,
+      "numbers": 247
+    },
+    "sonnet/A": {
+      "sentences": 199,
+      "words": 3444,
+      "numbers": 395
+    },
+    "sonnet/B": {
+      "sentences": 167,
+      "words": 2793,
+      "numbers": 295
+    }
+  },
+  "judge": {
+    "codex__t1-abstract": {
+      "A": {
+        "unsupported": 5,
+        "missing": 3,
+        "trap_error": 3,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 1,
+        "missing": 1,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "codex__t2-contributions": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 3,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 2,
+        "B": 0,
+        "tie": 1
+      },
+      "q2": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "codex__t3-results": {
+      "A": {
+        "unsupported": 0,
+        "missing": 1,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 1
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 2,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 2,
+        "B": 0,
+        "tie": 1
+      },
+      "q2": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "codex__t4-proposal": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 3
+      },
+      "B": {
+        "unsupported": 1,
+        "missing": 3,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 3,
+        "B": 0,
+        "tie": 0
+      },
+      "q2": {
+        "A": 2,
+        "B": 1,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "codex__t5-conclusion": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 3
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 3,
+        "trap_error": 0,
+        "trap_omitted": 3,
+        "reflexive": 1
+      },
+      "q1": {
+        "A": 3,
+        "B": 0,
+        "tie": 0
+      },
+      "q2": {
+        "A": 2,
+        "B": 0,
+        "tie": 1
+      },
+      "pairs": 3
+    },
+    "codex__t6-mixed": {
+      "A": {
+        "unsupported": 0,
+        "missing": 5,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 1,
+        "missing": 4,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "opus__t1-abstract": {
+      "A": {
+        "unsupported": 1,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 2,
+        "B": 1,
+        "tie": 0
+      },
+      "q2": {
+        "A": 1,
+        "B": 0,
+        "tie": 2
+      },
+      "pairs": 3
+    },
+    "opus__t2-contributions": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 3,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 3,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 1,
+        "tie": 1
+      },
+      "q2": {
+        "A": 1,
+        "B": 0,
+        "tie": 2
+      },
+      "pairs": 3
+    },
+    "opus__t3-results": {
+      "A": {
+        "unsupported": 1,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 1,
+        "missing": 1,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "q2": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "opus__t4-proposal": {
+      "A": {
+        "unsupported": 8,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 6,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "q2": {
+        "A": 2,
+        "B": 1,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "opus__t5-conclusion": {
+      "A": {
+        "unsupported": 7,
+        "missing": 1,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 2,
+        "missing": 1,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 2,
+        "tie": 1
+      },
+      "pairs": 3
+    },
+    "opus__t6-mixed": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 1,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "sonnet__t1-abstract": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 1,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 2,
+        "B": 1,
+        "tie": 0
+      },
+      "q2": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "sonnet__t2-contributions": {
+      "A": {
+        "unsupported": 2,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 1,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 2,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 2,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 3,
+        "B": 0,
+        "tie": 0
+      },
+      "q2": {
+        "A": 3,
+        "B": 0,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "sonnet__t3-results": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 3,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "sonnet__t4-proposal": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 1,
+        "missing": 1,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 1,
+        "tie": 1
+      },
+      "q2": {
+        "A": 0,
+        "B": 2,
+        "tie": 1
+      },
+      "pairs": 3
+    },
+    "sonnet__t5-conclusion": {
+      "A": {
+        "unsupported": 4,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 3,
+        "missing": 1,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "q2": {
+        "A": 2,
+        "B": 1,
+        "tie": 0
+      },
+      "pairs": 3
+    },
+    "sonnet__t6-mixed": {
+      "A": {
+        "unsupported": 2,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 2,
+        "tie": 0
+      },
+      "q2": {
+        "A": 2,
+        "B": 1,
+        "tie": 0
+      },
+      "pairs": 3
+    }
+  },
+  "loop": {
+    "t1-abstract": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 0,
+        "B": 1,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 1,
+        "tie": 0
+      },
+      "pairs": 1
+    },
+    "t2-contributions": {
+      "A": {
+        "unsupported": 1,
+        "missing": 0,
+        "trap_error": 1,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 1,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 0,
+        "B": 1,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 0,
+        "tie": 1
+      },
+      "pairs": 1
+    },
+    "t3-results": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 1
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 0,
+        "B": 1,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 1,
+        "tie": 0
+      },
+      "pairs": 1
+    },
+    "t4-proposal": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 0,
+        "B": 1,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 1,
+        "tie": 0
+      },
+      "pairs": 1
+    },
+    "t5-conclusion": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 1,
+        "B": 0,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 1,
+        "tie": 0
+      },
+      "pairs": 1
+    },
+    "t6-mixed": {
+      "A": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "B": {
+        "unsupported": 0,
+        "missing": 0,
+        "trap_error": 0,
+        "trap_omitted": 0,
+        "reflexive": 0
+      },
+      "q1": {
+        "A": 0,
+        "B": 1,
+        "tie": 0
+      },
+      "q2": {
+        "A": 0,
+        "B": 1,
+        "tie": 0
+      },
+      "pairs": 1
+    }
+  }
+}

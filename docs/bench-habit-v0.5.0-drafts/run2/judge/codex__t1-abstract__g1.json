@@ -1,0 +1,34 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "Cora-OOD differences are called improvements of 0.3 and 0.4 points, and the text does not say these gaps fall within the seed standard deviation (at most 0.006), although 'nearly tied' partly covers this"
+      ],
+      "trap": "correct",
+      "trap_note": "X says the methods are 'nearly tied on Cora-OOD' and that the clearest gains are on three of four benchmarks, which reports the trap accurately even though it also says GraphGuard has the 'highest mean' on all four.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "'Across all four datasets, GraphGuard achieves higher AUC and AP than both baselines' presents Cora-OOD as a win, but that gap is within seed noise",
+        "Calls the Cora-OOD differences 'smaller gains of 0.003 and 0.004', treating differences within the standard deviation as real improvements"
+      ],
+      "missing_material_qualifiers": [
+        "Does not say the Cora-OOD gap over SubgraphAnomaly is within the seed standard deviation, and uses the std statement only to suggest reliability ('indicating low variability')"
+      ],
+      "trap": "error",
+      "trap_note": "Y claims GraphGuard beats both baselines on all four datasets and calls the 0.003/0.004 Cora-OOD differences gains instead of a tie within noise.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X reports the exact margins and correctly calls Cora-OOD a near tie, while Y says GraphGuard wins on all four datasets and calls differences within noise 'gains', which is a trap error.",
+  "q2": "X",
+  "q2_reason": "X states the main pattern directly (large gains on three datasets, near tie on Cora-OOD), while Y lists the per-dataset numbers but frames the result as a uniform win on all four.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

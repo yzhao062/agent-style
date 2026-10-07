@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "A speedup over vLLM is undefined when vLLM runs out of memory."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "The note explicitly ties the reported 2.35x speedup to 64k, although the paragraph omits it.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "A speedup needs a baseline that ran."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "The note explicitly ties the reported 2.35x speedup to 64k, although the paragraph omits it.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "tie",
+  "q1_reason": "Both clearly identify the runtime and evaluation contributions but make comparable unsupported assertions about the baseline requirements for the supplied 64k speedup.",
+  "q2": "X",
+  "q2_reason": "X more clearly summarizes the memory reduction across all tested lengths and explicitly states that decoding speedup grows with context.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

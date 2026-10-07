@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "\"GraphGuard achieves higher mean AUC and AP than both baselines on all four datasets\": this presents the Cora-OOD difference (0.891 vs 0.888 AUC, 0.835 vs 0.831 AP), which falls within the seed standard deviation, as outperformance"
+      ],
+      "missing_material_qualifiers": [
+        "The Cora-OOD \"gains\" (AUC 0.888 to 0.891, AP 0.831 to 0.835) are not described as within seed variability, even though the text reports a standard deviation of up to 0.006 elsewhere"
+      ],
+      "trap": "error",
+      "trap_note": "X claims higher scores than both baselines on all four datasets and calls the Cora-OOD differences gains, instead of reporting a tie with SubgraphAnomaly within seed noise.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y limits the clear gains over SubgraphAnomaly to Reddit-B, Twitch-EN, and Elliptic, says the methods perform comparably on Cora-OOD (+0.003 AUC, +0.004 AP), and limits the all-four-datasets claim to GCN, which is accurate.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y reports the Cora-OOD result as a tie, while X makes the trap error of claiming GraphGuard beats both baselines on all four datasets.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern directly, with gains of 0.059 to 0.083 AUC on three datasets and comparable results on Cora-OOD, while X lists the deltas one by one and calls the Cora-OOD difference a gain.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

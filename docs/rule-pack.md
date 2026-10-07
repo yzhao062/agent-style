@@ -117,16 +117,18 @@ LLMs trained on formal technical prose (abstracts, RFCs, corporate documentation
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: high. Recurring clarity failure; generic nouns (`factors`, `aspects`, `considerations`, `issues`, `elements`) are an AI-tell because the model names a category without naming what the category contains.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
-- **enforcement**: Tier-2 partial (claim-without-number heuristic for "improved", "enhanced", "optimized") + Tier-3 agent self-check + Tier-4 Codex review as primary gate.
+- **enforcement**: Tier-3 agent self-check + Tier-4 Codex review as primary gate. No mechanical detector: deciding whether a word names the specific thing, or a number carries the finding, requires judgment.
 
 ##### Directive
 
 Do not use abstract nouns when concrete ones exist. "The system has performance issues" says nothing; "the checkout endpoint p95 latency rose from 120ms to 450ms at 14:00 UTC" names what, when, and how much. Replace category words ("factors", "aspects", "considerations", "issues", "elements") with the specific items they refer to. If you reach for a category word, ask: what exactly? If the answer takes longer than one clause to give, the sentence was hiding the work.
 
+Concrete means naming the specific finding, and a table transcribed into a sentence buries it. When a table or figure holds the results, state the pattern with the magnitude a reader needs to interpret it ("halves latency at batch size 1"). Point to the display for per-item scores, intervals, and p-values. When uncertainty changes the interpretation, state it beside the estimate ("within noise", "no statistically significant speedup at batch size 32"), and do not call an inconclusive difference a gain. Keep numbers that change the claim, that the reader acts on, or that no display holds.
+
 ##### BAD → GOOD
 
 - BAD: `The model shows improvements across various metrics.`
-- GOOD: `The model improves F1 by 3.2 points (0.812 to 0.844) on FEVER and cuts hallucination rate from 11.3% to 6.8% on TruthfulQA.`
+- GOOD: `The model improves FEVER F1 by 3.2 points and cuts the TruthfulQA hallucination rate by 4.5 points (Table 2).`
 
 - BAD: `Several architectural considerations influenced our design decisions.`
 - GOOD: `We chose a two-tower retrieval architecture over cross-encoding because (1) the query-side embedding is cached across sessions, and (2) the document-side index is updated nightly without re-running inference on the query side.`
@@ -140,9 +142,20 @@ Do not use abstract nouns when concrete ones exist. "The system has performance 
 - BAD (runbook): `Scale up the backend if traffic is high.`
 - GOOD (runbook): ``If p95 latency on `/search` exceeds 300ms for more than 2 minutes, scale the search worker pool from 8 to 16 replicas via `kubectl scale deployment/search-worker --replicas=16`.``
 
+- BAD (paper results): `Latency drops from 142 ms (SD 4.1) to 71 ms (SD 3.8) at batch size 1, from 410 ms to 230 ms at batch size 8, and from 1,210 ms to 1,150 ms at batch size 32 (p = 0.21), averaged over five seeds.`
+- GOOD (paper results): `The kernel halves latency at batch size 1. At batch size 32, the observed reduction is about 5%, with no statistically significant speedup (Table 4).`
+
+- BAD (paper results): `Table 2 shows that method A achieves 71.2, method B achieves 73.5, and our method achieves 78.9.`
+- GOOD (paper results): `Our method beats the best listed baseline by 5.4 points (Table 2).`
+
+- BAD (paper results): `Energy drops by 18.2% on Task A, 22.4% on Task B, 15.1% on Task C, and 29.0% on Task D.`
+- GOOD (paper results): `The optimization cuts energy on all four workloads, by 15% to 29% (Table 3).`
+
 ##### Rationale for AI Agent
 
 LLMs absorb abstract prose from grant abstracts, executive summaries, and position-paper genres where specifics are hidden for competitive or rhetorical reasons. The default output carries that register: "improvements across metrics", "multiple factors", "various considerations". A careful reader processes these phrases, notices nothing has been said, and discounts the rest of the document. The operational test before any factual-claim sentence: can I point at the exact number, file, commit, user action, or mechanism behind each phrase in this sentence? If not, the phrase is filler, and the LLM has hidden the absence of substance behind pleasant-sounding abstraction. Strunk & White §II.16 gives the rule; Pinker 2014 Ch. 3 identifies abstraction as one primary vector of the curse of knowledge (the writer knows the specifics, so "factors" reads as a pointer to them, but the reader has no pointer and cannot resolve it).
+
+The same instruction produces the opposite failure. An agent told to be concrete transcribes tables: every score, interval, and p-value goes into the sentence, and the reader has to compute the pattern the author should have stated. In agent-assisted paper drafts I measured in 2026, prose carried about twice as many numeric tokens per sentence as a human-written comparison set. The sample is small and genre-confounded, so the direction is the finding. Style guidance divides the work the other way. The APA Publication Manual advises discussing only a table's highlights, because a text that covers every item makes the table unnecessary. Mensh and Kording 2017 (PLOS Computational Biology) recommend delivering results "as a sequence of statements, supported by figures". Concrete therefore means the specific finding: the pattern, the magnitude that interprets it, and a pointer to the display that holds the rest. Venues differ on what must stay in the main text; ICML asks for material critical to the evaluation in the main body. Numbers and test outcomes that change the claim therefore stay in the prose.
 
 #### RULE-04: Do Not Include Needless Words
 
@@ -305,7 +318,7 @@ The clause-level form of this rule targets antithesis ("X, not Y", "not just X, 
 
 #### RULE-08: Do Not Linguistically Overstate or Understate Claims Relative to the Evidence
 
-- **source**: Pinker 2014 Ch. 6 (calibrated claims; hedge calibration treated as a skill with verbs matched to evidence strength). Gopen & Swan 1990 (scientific attribution: the source of a claim should be visible in the sentence, and the verb should match the evidence).
+- **source**: Pinker 2014 Ch. 6 (calibrated claims; hedge calibration treated as a skill with verbs matched to evidence strength). Gopen & Swan 1990 (scientific attribution: the source of a claim should be visible in the sentence, and the verb should match the evidence). NeurIPS Paper Checklist and ACL Rolling Review call for papers (a dedicated Limitations section; NeurIPS instructs reviewers not to penalize honesty about limitations). My observation of agent-assisted paper and proposal drafts, 2025–2026, for the structural form of underclaiming (negative result framing, caveat tails).
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files (does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: high. Externally visible AI-tell; overclaim patterns ("revolutionary", "transforms", "dramatic") and reflexive weasel ("it might be worth considering") are both recognized by technical readers as filler register, each eroding trust differently.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
@@ -313,21 +326,23 @@ The clause-level form of this rule targets antithesis ("X, not Y", "not just X, 
 
 ##### Directive
 
-Do not overclaim (saying "proves X" when the evidence is "suggests X"). Do not underclaim via reflexive weasel (saying "it might be worth considering" when you mean "we should do X"). Calibrate verbs to evidence: experimental results "suggest" or "show"; theoretical derivations "imply" or "prove"; user reports "indicate" (pending verification); benchmarks "measure". Use "best" only when you have compared against the strongest alternative; use "only" only when you have ruled out alternatives. When the evidence is uncertain, say so in one clause; do not weaken the main verb beyond what the evidence supports.
+Do not overclaim (saying "proves X" when the evidence is "suggests X") or underclaim. Underclaiming takes two forms. One is reflexive weasel (saying "it might be worth considering" when you mean "we should do X"). The other is the caveat tail: a "however", a future-work aside, or a note on what the work does not establish, attached to a result by habit. Calibrate verbs to evidence: experimental results "suggest" or "show"; theoretical derivations "imply" or "prove"; user reports "indicate"; benchmarks "measure". Use "best" only when you have compared against the strongest alternative; use "only" only when you have ruled out alternatives.
+
+Keep a qualifier when it changes what the evidence supports or what the reader should conclude. Put that scope or uncertainty inside the claim. A tie, a loss, a difference within noise, or the weakest case is a finding. Report it next to the claim it bounds, in the results and in any summary of them. Cut a qualifier that adds no information. Collect general limitations of the study design (one language, one annotator pool, a fixed compute budget) in the venue's Limitations section (Risks and Alternatives in a proposal).
 
 ##### BAD → GOOD
 
-- BAD: `Our method revolutionizes language model alignment.`
-- GOOD: `Our method reduces harmful-completion rate on HarmBench from 14.1% to 3.2% without degrading MMLU accuracy. (Generalization to other alignment benchmarks is future work.)`
+- BAD: `Our method revolutionizes language model alignment, although further work is needed to confirm that it generalizes beyond HarmBench.`
+- GOOD: `Our method reduces harmful-completion rate on HarmBench from 14.1% to 3.2% without degrading MMLU accuracy.`
 
 - BAD: `Dramatic improvement in inference speed was observed.`
-- GOOD: `Inference latency at batch size 1 drops from 142ms to 118ms (17% faster) on A100. Batch size 32 and larger show no measurable speedup.`
+- GOOD: `On A100, latency falls by about 17% at batch size 1. We detect no speedup at batch sizes of 32 or larger.`
 
 - BAD: `It might be worth considering whether some form of input validation could be beneficial.`
 - GOOD: ``Add input validation at `/users`: the endpoint crashes on non-UTF-8 query parameters (observed twice last week).``
 
 - BAD (paper abstract): `Our model proves the superiority of attention-based retrieval over sparse methods.`
-- GOOD (paper abstract): `Our attention-based retriever reaches MRR@10 = 0.412 on MS MARCO Dev, compared to 0.395 for BM25 and 0.398 for ColBERT. The improvement is within one standard deviation on out-of-domain queries (BEIR).`
+- GOOD (paper abstract): `Our attention-based retriever improves MS MARCO Dev MRR@10 by 1.4 points over ColBERT, the stronger baseline. On out-of-domain BEIR queries, its observed gain falls within one standard deviation.`
 
 - BAD (issue report): `Everything is broken; nothing works.`
 - GOOD (issue report): ``/auth/login returns 500 for all requests after the 2026-04-18 deploy. /auth/logout and /auth/refresh unaffected. Logs show a KeyError on `iat` in token parsing.``
@@ -335,9 +350,20 @@ Do not overclaim (saying "proves X" when the evidence is "suggests X"). Do not u
 - BAD (grant proposal): `This research will transform our understanding of neural network interpretability.`
 - GOOD (grant proposal): `This research tests whether attention-probing generalizes beyond the 12 factual-recall circuits reported in Meng et al. 2022. If yes, the method applies to a class of interpretability questions currently intractable; if no, we localize the method's scope.`
 
+- BAD (paper, negative framing): `The audit does not establish causal harm; it only checks whether the implementation matches its specification.`
+- GOOD (paper, negative framing): `The audit checks whether the implementation matches its specification.` (The Limitations section notes that the audit does not test causal harm.)
+
+- BAD (paper, mixed result): `The adapter improves source-domain accuracy, but it should be noted that this may not hold elsewhere, and target-domain results are less clear.`
+- GOOD (paper, mixed result): `The adapter improves source-domain accuracy; target-domain gains fall within the reported standard deviation (Table 2).`
+
+- BAD (grant proposal, preliminary results): `Our pilot cache reduces planner latency by 45%, though we caution that these preliminary results use synthetic workloads and may not reflect real deployments.`
+- GOOD (grant proposal, preliminary results): `On synthetic planning workloads, our pilot cache reduces planner latency by 45%; Aim 2 tests whether the gain holds on production traces.`
+
 ##### Rationale for AI Agent
 
 LLMs trained on mixed-register corpora (research abstracts, press releases, grant introductions, marketing copy) absorb both overclaiming and reflexive hedging from the genre patterns. Each fails predictably: overclaim trips the reader's calibration alarm (technical readers scan abstracts for unwarranted "proves" or "best" and discount the rest of the paper accordingly); reflexive under-hedging inflates trivially-true claims to sound important; over-hedging delays the main point across two clauses of pro-forma caution. The operational test before writing any result sentence: (a) what evidence supports this, and (b) does the verb match? "We observed" is weaker than "we showed" is weaker than "we proved." Pick the verb that matches your evidence exactly. Pinker 2014 Ch. 6 gives the calibration vocabulary; Gopen & Swan 1990 frame scientific attribution as a structural writing concern (the source of a claim should be visible, and the verb should match the evidence).
+
+Underclaiming also has a structural form that a count of hedge words misses. In agent-assisted paper drafts I measured in 2026, the strongest difference from a human-written comparison set was negative result framing. Over half of the result sentences said what does not hold ("does not establish", "only checks"), against almost none in the human set. Caveat tails appeared on 15.6% of positive claims. The sample is small and genre-confounded, so the direction is the finding. Two costs follow. A trailing caveat takes the stress position at the end of the sentence, so the reader carries away the weakness (Gopen & Swan 1990; RULE-11). When every result carries a qualifier, the contribution reads as fragile, and the paper reads as incremental. Venues already give general limitations their own place. The NeurIPS checklist encourages a separate Limitations section and instructs reviewers not to penalize honesty about limitations, and ACL Rolling Review requires one. Ask of any qualifier: does it change what the evidence supports or what the reader should conclude? If yes, keep it inside the claim; if no, cut it or move it to the Limitations section. In a proposal, a limit of the preliminary data often motivates an aim, which turns the caveat into the plan.
 
 ### Sentence Structure
 
@@ -763,24 +789,24 @@ LLMs default to sentence case for Markdown and LaTeX headings because their trai
 
 ##### Directive
 
-When a sentence asserts a factual claim that warrants attribution (empirical result, published method, community consensus, comparative benchmark, historical fact), provide a verifiable citation, or name the specific source (a paper by author and year, a benchmark, a dataset, an observed experiment). Do not write handwavy attributions ("prior work shows", "it is well known that", "recent studies suggest", "many researchers believe") without naming the specific work. When the claim is the author's own observation, state the concrete evidence (number, dataset, experiment, condition). Never invent a citation; if the cited paper cannot be verified, remove the claim, soften it to the author's own observation, or mark `[UNVERIFIED]` and flag for review.
+When a sentence asserts a factual claim that warrants attribution (empirical result, published method, community consensus, comparative benchmark, historical fact), provide a verifiable citation, or name the specific source (a paper by author and year, a benchmark, a dataset, an observed experiment). Do not write handwavy attributions ("prior work shows", "it is well known that", "recent studies suggest", "many researchers believe") without naming the specific work. When the claim is the author's own observation, state the concrete evidence (dataset, experiment, condition, and the magnitude or a table pointer). Never invent a citation; if the cited paper cannot be verified, remove the claim, soften it to the author's own observation, or mark `[UNVERIFIED]` and flag for review.
 
 ##### BAD → GOOD
 
 - BAD (paper): `Prior work has shown that late-interaction retrieval improves over lexical retrieval.`
-- GOOD (paper): `Khattab and Zaharia 2020 (ColBERT) report MS MARCO passage-ranking MRR@10 of 0.360 for ColBERT versus 0.187 for BM25-Anserini, using contextualized late interaction over BERT token embeddings.`
+- GOOD (paper): `Khattab and Zaharia 2020 (ColBERT) report that late interaction over BERT token embeddings nearly doubles the MRR@10 of BM25 (Anserini) on the MS MARCO passage-ranking Dev set.`
 
 - BAD: `It is widely accepted that longer context improves RAG performance.`
 - GOOD: `Liu et al. 2023/2024 (TACL, "Lost in the Middle") show that models answer less accurately when the relevant evidence is in the middle of a long context than near the beginning or end; Dsouza et al. 2024 report the same lost-in-the-middle pattern for GPT-4 and Claude 3 Opus.`
 
 - BAD (paper): `Several studies have demonstrated the effectiveness of this approach.`
-- GOOD (paper): `In our reproduced evaluation, the model improves GSM8K exact-match accuracy from 92.1% to 95.2% and MATH exact-match accuracy from 48.0% to 51.4% under the same decoding settings.`
+- GOOD (paper): `In our reproduced evaluation under the same decoding settings, the model gains about 3 points of exact-match accuracy on both GSM8K and MATH (Table 2).`
 
 - BAD (grant proposal): `Our pilot results look promising.`
-- GOOD (grant proposal): `Our pilot (N=30 cohort, 3-month follow-up) shows AUROC 0.84 for the primary endpoint versus 0.72 for the standard-of-care baseline (p=0.012).`
+- GOOD (grant proposal): `In our 30-patient pilot with three-month follow-up, the model exceeds the standard-of-care score by 0.12 AUROC for the primary endpoint (Table 1).`
 
 - BAD (blog post): `Many researchers believe that contrastive learning produces better embeddings.`
-- GOOD (blog post): `Chen et al. 2020 (SimCLR) report 76.5% ImageNet top-1 linear-evaluation accuracy for a self-supervised ResNet-50, a 7% relative gain over prior self-supervised methods and comparable to a supervised ResNet-50 baseline in their setup.`
+- GOOD (blog post): `Chen et al. 2020 (SimCLR) report 76.5% ImageNet top-1 under linear evaluation with a four-times-wider ResNet-50, matching a supervised ResNet-50.`
 
 - BAD (commit message): `Fix based on user feedback.`
 - GOOD (commit message): `Fix null-pointer crash reported in issue #1847 (reproducible with empty cart).`

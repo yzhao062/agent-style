@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X reports the Rural-Net error as 0.19 km/h higher than GraphWaveNet and treats the 0.02 km/h Coastal reduction as small relative to seed variation, so it makes no general claim of superiority.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y says the Coastal improvement is smaller than the seed variation and reports a 6.3% error increase on Rural-Net, then limits its conclusion to the larger networks tested.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both drafts are accurate and handle the trap correctly, but Y gives the contribution's size in relative terms (about 11%), while X's phrase 'limited benefit on Coastal' slightly suggests a real gain that is within seed noise.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern directly ('gains concentrated in the larger networks tested'), while X lists results network by network and does not name the size or density trend.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

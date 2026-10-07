@@ -1,0 +1,5 @@
+1. **Results presentation and undersell:** The gain ranges transcribe Table 1 and obscure the main pattern: GraphGuard improves both metrics over both baselines on three datasets, with a narrower advantage on Cora-OOD. Suggested rewrite: “GraphGuard improves AUC and AP over both baselines on Reddit-B, Twitch-EN, and Elliptic. On Cora-OOD, it improves substantially over GCN but only marginally over SubgraphAnomaly.”
+
+2. **Unsupported uncertainty comparison:** The largest standard deviation across all cells does not establish uncertainty for the Cora-OOD comparison. The supplied upper bound also does not establish that its gains fall below the relevant standard deviations. Suggested rewrite: “The mean improvements over SubgraphAnomaly on Cora-OOD are small; their statistical significance has not been established.”
+
+3. **Ambiguous community definition:** “Groups of nodes ... link far more tightly to each other” can suggest strong connections between communities, reversing the intended meaning. Suggested rewrite: “In these graphs, nodes connect more densely within communities than across community boundaries.”

@@ -1,0 +1,32 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "The pattern is consistent with a larger simulation-to-real dynamics gap on the harder categories, although the results do not measure that gap.",
+        "Perception error accounts for part of the failures on transparent and reflective objects, even though this is framed as a suspicion."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies transparent objects as the weakest category and reports 32 failures in 100 trials.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "The results suggest that online residual correction matters most when the simulator mispredicts real object behavior, although simulator prediction errors were not measured."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports 68% success on transparent objects and identifies them as the weakest category for all three methods.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both offer unsupported mechanistic interpretations, but Y explains the contribution clearly with fewer speculative claims than X.",
+  "q2": "Y",
+  "q2_reason": "Y clearly connects category-wide superiority, larger gains on harder categories, and the remaining transparent-object gap.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports no significant difference on brain MRI.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "\u201cThat interval rules out a MedNeXt-Lite deficit larger than 0.8 points\u201d requires qualification that this exclusion is at the 95% confidence level, rather than definitive."
+      ],
+      "trap": "correct",
+      "trap_note": "It reports the small observed brain difference with its confidence interval and nonsignificant p-value without claiming statistically established improvement.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X clearly states the contribution and the nonsignificant brain result, while Y overstates the certainty of the brain deficit bound.",
+  "q2": "X",
+  "q2_reason": "X leads with the main pattern: gains on cardiac and lung tasks, with no significant difference on brain MRI.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

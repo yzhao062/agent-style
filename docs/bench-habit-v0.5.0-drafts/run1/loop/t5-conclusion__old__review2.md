@@ -1,0 +1,1 @@
+1. **Unsupported experimental scope.** “We tested one robot” specifies a robot count that the supplied task data do not establish. Retain the limitation without adding an unverified setup detail. Suggested rewrite: “The reported evaluation covers grasping across five object categories. Transfer to other robot platforms and manipulation skills remains unverified.”

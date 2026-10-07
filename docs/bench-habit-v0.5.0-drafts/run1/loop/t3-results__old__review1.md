@@ -1,0 +1,7 @@
+1. **Claim calibration:** “Improves Dice ... on two” conflates numerical gains with statistical evidence; all three point estimates increase. Suggested rewrite: “MedNeXt-Lite achieves higher mean Dice than nnU-Net on all three tasks, with statistically significant differences on cardiac MRI and lung CT (Table 3).”
+
+2. **Statistical interpretation and sentence length:** “Indistinguishable from zero” and “cannot separate the two models” risk implying equivalence. The following sentence has 31 words, and “a deficit of up to 0.8 points” treats the confidence limit as a firm bound. Suggested rewrite: “On brain MRI, the estimated gain is 0.4 percentage points (95% bootstrap CI -0.8 to 1.6, p = 0.48). The interval includes both negative and positive differences; these results do not establish equivalence. Mean Dice scores across the three networks range from 87.7% to 88.1%.”
+
+3. **Ambiguous comparator:** “Exceeds it” could refer to either SwinUNETR or nnU-Net. The stated differences are against SwinUNETR. Suggested rewrite: “SwinUNETR’s mean Dice is within 0.6 percentage points of nnU-Net’s on every task. MedNeXt-Lite exceeds SwinUNETR by 3.2 percentage points on cardiac MRI and 3.3 on lung CT.”
+
+4. **Ambiguous parameter ratio:** “7.6 times fewer” is imprecise. Parameter count also does not establish runtime or memory efficiency. Suggested rewrite: “MedNeXt-Lite achieves these scores with 4.1M parameters versus nnU-Net’s 31M, a reduction of approximately 86.8%.”

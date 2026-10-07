@@ -1,0 +1,33 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "The 82.2% mean is given without noting that per-category success ranges from 94% (rigid) down to 68% (transparent), so a reader could take the mean as uniform performance."
+      ],
+      "trap": "omitted",
+      "trap_note": "X never mentions that transparent objects remain weakest at 68%, but it makes no claim of uniformly high success; its 'higher than both baselines across all five categories' is accurate.",
+      "reflexive_qualifiers": [
+        "under the tested conditions"
+      ]
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y explicitly notes that transparent objects remain challenging at 68% success.",
+      "reflexive_qualifiers": [
+        "Future work should assess whether the gains persist across additional objects, other robots, and longer deployments."
+      ]
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both texts report accurate numbers (82.2% vs 63.0% vs 46.0%; +11 to +24 over DAgger), but only Y names the remaining gap on transparent objects, which scopes the contribution honestly where X leaves it out.",
+  "q2": "Y",
+  "q2_reason": "Y gives all three means, the per-category gain over DAgger and the weakest category, so the overall pattern and its limit are clearer; neither text says that the margin grows on harder categories.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

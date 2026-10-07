@@ -24,7 +24,8 @@
     "skills/**",
     "packages/pypi/agent_style/data/skills/**",
     "packages/npm/data/skills/**",
-    "docs/bench-*-drafts/**"
+    "docs/bench-*-drafts/**",
+    "scripts/bench/habit/tasks/**"
   ]
 }
 // The `docs/bench-*-drafts/**` entry covers every release's preserved
@@ -34,3 +35,6 @@
 // Claude's unfenced code-style commit messages, and Gemini's bare
 // headings legitimately reflect real CLI output and should not be edited
 // for lint compliance.
+// The `scripts/bench/habit/tasks/**` entry covers the habit bench's task
+// file. Prompt tables are model input and stay in the compact pipe style the
+// committed runs froze; each run's own copy lives under docs/bench-*-drafts/.

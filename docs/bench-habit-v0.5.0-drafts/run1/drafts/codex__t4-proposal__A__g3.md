@@ -1,0 +1,7 @@
+### Preliminary Results
+
+Our pilot supports the feasibility of FedVerify for accurate, timely federated learning under client poisoning on heterogeneous edge devices. We evaluated the protocol on a 100-node testbed with 20% Byzantine clients that attempted to corrupt training through poisoning. Client data followed different distributions across devices (non-IID), using a Dirichlet distribution with α = 0.2. Table 4 reports convergence, final accuracy, and communication costs under these conditions.
+
+FedVerify reached 80% accuracy in 115 rounds and 5.6 hours, compared with 210 rounds and 11.2 hours for FL-Trust. Krum required 340 rounds and 14.8 hours. Relative to these defenses, FedVerify reduced time to the target accuracy by 50% and 62%, respectively. Its final accuracy reached 85.4%, exceeding FL-Trust by 2.3 percentage points and Krum by 4.4 percentage points. Undefended FedAvg finished at 34.2% and never reached the 80% target during the pilot.
+
+These gains carry a measurable communication tradeoff. FedVerify transmitted 14.1 MB per round, approximately 14% more than FedAvg and Krum, but 23% less than FL-Trust. Fewer training rounds also reduced cumulative communication to the target accuracy relative to both defenses. The pilot provides empirical support for pursuing FedVerify under the tested poisoning and data conditions. Further evaluation will measure variability across repeated runs and test sensitivity to attack strategies, Byzantine client fractions, and data heterogeneity.

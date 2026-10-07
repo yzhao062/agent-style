@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "The Rural-Net increase of 0.19 km/h is not marked as larger than the seed standard deviation, and the text does not say it is a loss to DCRNN as well."
+      ],
+      "trap": "correct",
+      "trap_note": "X calls the Coastal difference small relative to seed variability and reports the 0.19 km/h Rural-Net increase, so it makes no general claim of superiority.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "The Rural-Net increase is not marked as larger than the seed standard deviation, and 'uneven performance across smaller networks' does not say that the result is a tie on one network and a loss on the other."
+      ],
+      "trap": "correct",
+      "trap_note": "Y gives the 0.02 km/h Coastal reduction as smaller than the seed standard deviation and the 0.19 km/h Rural-Net increase, and it limits the advantage to the two largest networks.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Neither text has an unsupported claim or a trap error, but Y gives the gain on each network, puts a number on the 41% latency cost, and ends by stating where the advantage holds; X leaves the reader to put the pieces together.",
+  "q2": "Y",
+  "q2_reason": "Y ties the pattern to network size directly (an advantage on the two largest networks, uneven results on the smaller ones), while X only says 'metropolitan' and never draws the density trend.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

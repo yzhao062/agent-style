@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X calls the brain MRI difference small and statistically inconclusive (+0.4, CI -0.8 to 1.6, p = 0.48) and says it gives insufficient evidence of improvement; it limits the claimed improvement to cardiac and lung.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "\"achieves higher Dice scores than both baselines\" for LV and lung lesions does not say that no test was run against SwinUNETR, and on lung CT the confidence intervals overlap (MedNeXt-Lite [85.4, 89.0] vs SwinUNETR [82.0, 85.8])."
+      ],
+      "trap": "correct",
+      "trap_note": "Y says glioma-core scores are similar and the difference from nnU-Net remains uncertain (0.4, CI -0.8 to 1.6, p = 0.48); it limits the gains to cardiac and lung and does not claim equivalence.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both handle the brain MRI trap correctly and get the numbers right, but X explicitly says the SwinUNETR comparison is about point estimates only and ends with a clear one-sentence statement of the contribution, while Y's 'higher than both baselines' leaves the untested SwinUNETR comparison unqualified.",
+  "q2": "X",
+  "q2_reason": "X states the pattern compactly (significant gains on cardiac and lung, inconclusive on brain, about 87% fewer parameters), while Y repeats every table value, which buries the pattern until its final 'task-dependent' summary.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

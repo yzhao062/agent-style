@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X ties the speedup to the context range (1.10x to 1.87x at 4k to 32k) and never states an unscoped speedup, though it leaves out the 2.35x figure at 64k.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "'decoding speedups increasing to 1.87x at 32k' gives no lower end, so a reader does not learn that the speedup is only 1.10x at 4k."
+      ],
+      "trap": "correct",
+      "trap_note": "Y ties the speedup to context ('increasing to 1.87x at 32k') with no unscoped speedup claim, though it leaves out the 2.35x figure at 64k.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Neither text makes an unsupported claim, but X gives the full speedup range including the small 1.10x at 4k and the memory reduction across all lengths, so a reader is less likely to overestimate the gain at short contexts.",
+  "q2": "Y",
+  "q2_reason": "Y says outright that the speedup increases with context, while X only gives a range that a reader has to interpret as a trend.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

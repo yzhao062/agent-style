@@ -56,10 +56,12 @@ Do not write "X was done by Y" when "Y did X" fits. Active voice names the agent
 
 Do not use abstract nouns when concrete ones exist. "The system has performance issues" says nothing; "the checkout endpoint p95 latency rose from 120ms to 450ms at 14:00 UTC" names what, when, and how much. Replace category words ("factors", "aspects", "considerations", "issues", "elements") with the specific items they refer to. If you reach for a category word, ask: what exactly? If the answer takes longer than one clause to give, the sentence was hiding the work.
 
+Concrete means naming the specific finding, and a table transcribed into a sentence buries it. When a table or figure holds the results, state the pattern with the magnitude a reader needs to interpret it ("halves latency at batch size 1"). Point to the display for per-item scores, intervals, and p-values. When uncertainty changes the interpretation, state it beside the estimate ("within noise", "no statistically significant speedup at batch size 32"), and do not call an inconclusive difference a gain. Keep numbers that change the claim, that the reader acts on, or that no display holds.
+
 ##### BAD → GOOD
 
 - BAD: `The model shows improvements across various metrics.`
-- GOOD: `The model improves F1 by 3.2 points (0.812 to 0.844) on FEVER and cuts hallucination rate from 11.3% to 6.8% on TruthfulQA.`
+- GOOD: `The model improves FEVER F1 by 3.2 points and cuts the TruthfulQA hallucination rate by 4.5 points (Table 2).`
 
 #### RULE-04: Do Not Include Needless Words
 
@@ -113,12 +115,14 @@ The same principle applies at the clause level. Do not stage a claim as a contra
 
 ##### Directive
 
-Do not overclaim (saying "proves X" when the evidence is "suggests X"). Do not underclaim via reflexive weasel (saying "it might be worth considering" when you mean "we should do X"). Calibrate verbs to evidence: experimental results "suggest" or "show"; theoretical derivations "imply" or "prove"; user reports "indicate" (pending verification); benchmarks "measure". Use "best" only when you have compared against the strongest alternative; use "only" only when you have ruled out alternatives. When the evidence is uncertain, say so in one clause; do not weaken the main verb beyond what the evidence supports.
+Do not overclaim (saying "proves X" when the evidence is "suggests X") or underclaim. Underclaiming takes two forms. One is reflexive weasel (saying "it might be worth considering" when you mean "we should do X"). The other is the caveat tail: a "however", a future-work aside, or a note on what the work does not establish, attached to a result by habit. Calibrate verbs to evidence: experimental results "suggest" or "show"; theoretical derivations "imply" or "prove"; user reports "indicate"; benchmarks "measure". Use "best" only when you have compared against the strongest alternative; use "only" only when you have ruled out alternatives.
+
+Keep a qualifier when it changes what the evidence supports or what the reader should conclude. Put that scope or uncertainty inside the claim. A tie, a loss, a difference within noise, or the weakest case is a finding. Report it next to the claim it bounds, in the results and in any summary of them. Cut a qualifier that adds no information. Collect general limitations of the study design (one language, one annotator pool, a fixed compute budget) in the venue's Limitations section (Risks and Alternatives in a proposal).
 
 ##### BAD → GOOD
 
-- BAD: `Our method revolutionizes language model alignment.`
-- GOOD: `Our method reduces harmful-completion rate on HarmBench from 14.1% to 3.2% without degrading MMLU accuracy. (Generalization to other alignment benchmarks is future work.)`
+- BAD: `Our method revolutionizes language model alignment, although further work is needed to confirm that it generalizes beyond HarmBench.`
+- GOOD: `Our method reduces harmful-completion rate on HarmBench from 14.1% to 3.2% without degrading MMLU accuracy.`
 
 ### Sentence Structure
 
@@ -262,12 +266,12 @@ Capitalize the first word, the last word, and all major words (nouns, verbs, adj
 
 ##### Directive
 
-When a sentence asserts a factual claim that warrants attribution (empirical result, published method, community consensus, comparative benchmark, historical fact), provide a verifiable citation, or name the specific source (a paper by author and year, a benchmark, a dataset, an observed experiment). Do not write handwavy attributions ("prior work shows", "it is well known that", "recent studies suggest", "many researchers believe") without naming the specific work. When the claim is the author's own observation, state the concrete evidence (number, dataset, experiment, condition). Never invent a citation; if the cited paper cannot be verified, remove the claim, soften it to the author's own observation, or mark `[UNVERIFIED]` and flag for review.
+When a sentence asserts a factual claim that warrants attribution (empirical result, published method, community consensus, comparative benchmark, historical fact), provide a verifiable citation, or name the specific source (a paper by author and year, a benchmark, a dataset, an observed experiment). Do not write handwavy attributions ("prior work shows", "it is well known that", "recent studies suggest", "many researchers believe") without naming the specific work. When the claim is the author's own observation, state the concrete evidence (dataset, experiment, condition, and the magnitude or a table pointer). Never invent a citation; if the cited paper cannot be verified, remove the claim, soften it to the author's own observation, or mark `[UNVERIFIED]` and flag for review.
 
 ##### BAD → GOOD
 
 - BAD (paper): `Prior work has shown that late-interaction retrieval improves over lexical retrieval.`
-- GOOD (paper): `Khattab and Zaharia 2020 (ColBERT) report MS MARCO passage-ranking MRR@10 of 0.360 for ColBERT versus 0.187 for BM25-Anserini, using contextualized late interaction over BERT token embeddings.`
+- GOOD (paper): `Khattab and Zaharia 2020 (ColBERT) report that late interaction over BERT token embeddings nearly doubles the MRR@10 of BM25 (Anserini) on the MS MARCO passage-ranking Dev set.`
 
 #### RULE-I: Prefer Full Forms over Contractions in Technical Prose
 

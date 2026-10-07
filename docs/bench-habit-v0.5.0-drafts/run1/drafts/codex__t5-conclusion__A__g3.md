@@ -1,0 +1,5 @@
+## Conclusion
+
+We introduced AdaptRL to transfer grasping policies from simulation to a real robot through online learning of residual dynamics, which model discrepancies between simulated and real dynamics. In Table 5, AdaptRL achieves higher grasp success than domain randomization and DAgger across all five object categories, with 100 trials per category. Mean success reaches 82.2%, compared with 46.0% for domain randomization and 63.0% for DAgger. Gains over DAgger range from 11 percentage points for rigid objects to 24 percentage points for reflective objects. These results support online residual dynamics learning as an approach to improving grasping policy transfer under the evaluated conditions.
+
+Transparent objects remain the weakest category, with 68% success compared with 94% for rigid objects. Future work should examine the causes of these failures and measure the contribution of residual dynamics learning through controlled ablations. Evaluation on additional robots and grasping settings would test the scope of the observed gains.

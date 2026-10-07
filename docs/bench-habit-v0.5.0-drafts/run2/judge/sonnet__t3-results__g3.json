@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "MedNeXt-Lite 'ties' nnU-Net on brain MRI; equivalence is not established."
+      ],
+      "missing_material_qualifiers": [
+        "The brain result shows no statistically significant difference, but calling it a tie requires an equivalence criterion and supporting analysis."
+      ],
+      "trap": "correct",
+      "trap_note": "It reports the nonsignificant brain difference without claiming improvement, although it overstates equivalence.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports the nonsignificant brain difference and explains why parity is not established.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y reports the gains and parameter reduction without X's unsupported assertion of brain equivalence.",
+  "q2": "X",
+  "q2_reason": "X presents the cross-organ pattern immediately and directly, although its description of the brain result as a tie is too strong.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

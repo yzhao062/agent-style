@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly limits the clear gain to Churn-small and reports the lower accuracy on Covertype.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It distinguishes the clear Churn-small gain from small differences on larger datasets and scopes the scarcity inference to one benchmark.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both texts are supported, but X makes the contribution clearer by stating directly that only one dataset shows a clear gain.",
+  "q2": "X",
+  "q2_reason": "X foregrounds the central pattern of a clear benefit only on Churn-small, whereas Y introduces that pattern later.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

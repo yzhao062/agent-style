@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X ties the speedup to context length (1.10x at 4k up to 1.87x at 32k) and never gives an unscoped figure; it leaves out the 2.35x at 64k, where vLLM cannot run.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y limits the speedup explicitly to 4k\u201332k contexts (1.10x\u20131.87x) and makes no unscoped speedup claim; it leaves out the 2.35x at 64k, where vLLM runs out of memory.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Both texts are fully supported, but Y gives the exact 55%\u201363% memory reduction across 4k\u201364k and states the speedup's scope explicitly, while X's 'more than halves' is vaguer.",
+  "q2": "X",
+  "q2_reason": "X says outright that the decoding speedup grows with context length, which is the central pattern; Y gives only a 1.10x\u20131.87x range and leaves the reader to infer the trend.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

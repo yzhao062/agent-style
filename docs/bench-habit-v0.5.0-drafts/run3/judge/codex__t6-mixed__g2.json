@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "Says TabMix's 'largest gain' is on Churn-small, which implies gains on the other datasets. It never says that the differences of 0.4 points or less on Adult, Credit-default and Covertype are within the run-to-run standard deviations, or that TabMix is below no augmentation on Covertype."
+      ],
+      "trap": "correct",
+      "trap_note": "X makes no general-improvement claim, gives the Churn-small gains correctly, and bounds every other difference at 0.4 points or less, so the reader can see the benefit is confined to the small dataset, although X never says so outright.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y says the benefit is supported on Churn-small, says the Adult and Credit-default differences are comparable to the standard deviations, notes that TabMix trails no augmentation on Covertype, and states there is no consistent advantage on the other three datasets.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Neither text has an unsupported claim, but Y ties the small differences to the reported standard deviations and says plainly that the benefit is limited to Churn-small, so a reader is less likely to over-read the gains than with X's bare 'at most 0.4 points'.",
+  "q2": "Y",
+  "q2_reason": "Y ends with an explicit summary (a benefit on Churn-small, no consistent advantage elsewhere), while X lists the differences and leaves the reader to infer the pattern.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

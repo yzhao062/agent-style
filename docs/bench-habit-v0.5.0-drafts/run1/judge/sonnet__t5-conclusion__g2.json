@@ -1,0 +1,34 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "Improving transparent-object grasping is the main open problem for AdaptRL."
+      ],
+      "missing_material_qualifiers": [
+        "The claim about the main open problem needs to be scoped to the tested object categories."
+      ],
+      "trap": "correct",
+      "trap_note": "It identifies transparent objects as the weakest category at 68% success and explicitly notes remaining failures.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "The gain pattern suggests a larger simulation-to-real dynamics gap on harder categories.",
+        "Perception error accounts for part of the transparent and reflective failures because residual dynamics cannot correct what the policy fails to see."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports transparent objects as the weakest category, with 32 failures in 100 trials.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X explains the contribution with accurate comparisons and only a scope overstatement, whereas Y adds unsupported explanations about dynamics gaps and perception errors.",
+  "q2": "Y",
+  "q2_reason": "Y states the overall averages, superiority across every category, and smallest and largest gains more explicitly.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

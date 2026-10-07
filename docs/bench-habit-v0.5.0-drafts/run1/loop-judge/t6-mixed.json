@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It confines the large gain to Churn-small and accurately reports the small differences elsewhere and the decline on Covertype.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It identifies Churn-small as the clear benefit, describes Adult and Credit-default as inconclusive, and reports lower accuracy on Covertype.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y presents the supported contribution more concisely and explicitly distinguishes the clear Churn-small gain from differences comparable to run-to-run variation.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern more directly by grouping Adult and Credit-default as showing no clear advantage and contrasting them with Churn-small and Covertype.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "gpt-6.1-sol"
+}

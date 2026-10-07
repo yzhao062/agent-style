@@ -3,13 +3,13 @@
 <!-- Target path: <repo root>/.github/copilot-instructions.md -->
 <!-- Load class: single-file; install_mode: append-block -->
 
-# agent-style v0.4.2 — GitHub Copilot repo-wide adapter
+# agent-style v0.5.0 — GitHub Copilot repo-wide adapter
 
 agent-style is a literature-backed English technical-prose writing ruleset for AI agents. This adapter is appended to your existing `.github/copilot-instructions.md` inside a marker block so that future agent-style updates replace only the marker region and leave your other repo-level instructions intact. For a path-scoped variant (only attaches to prose files), use `agents/copilot-path-instructions.md` instead.
 
 ## Self-Verification Handshake
 
-When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.4.2 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
+When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.5.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
 
 ## Load Statement
 
@@ -21,12 +21,12 @@ Canonical rules (from Strunk & White 1959, Orwell 1946, Pinker 2014, Gopen & Swa
 
 - **RULE-01 Curse of knowledge**: Name your intended reader; do not assume they share your tacit knowledge.
 - **RULE-02 Passive voice**: Prefer active voice when the agent is known and worth naming.
-- **RULE-03 Concrete language**: Prefer concrete, specific terms over abstract category words like "factors" or "aspects".
+- **RULE-03 Concrete language**: Prefer concrete, specific terms over abstract category words like "factors" or "aspects"; state a result's pattern and key magnitude, and leave full numbers to tables.
 - **RULE-04 Needless words**: Cut filler phrases like "in order to", "due to the fact that", "may potentially".
 - **RULE-05 Dying metaphors**: Delete clichés like "pushes the boundaries", "paradigm shift", or "state of the art".
 - **RULE-06 Plain English**: Prefer "use" over "leverage", "method" over "methodology", "feature" over "functionality".
 - **RULE-07 Positive form**: Prefer "trivial" to "not important", "forgot" to "did not remember"; do not stage "X, not Y" antithesis ("not just X, but Y") for emphasis.
-- **RULE-08 Claim calibration**: Calibrate verbs to evidence; do not write "proves" when the evidence is "suggests".
+- **RULE-08 Claim calibration**: Calibrate verbs to evidence; do not write "proves" when the evidence is "suggests"; keep qualifiers that change the claim, and cut caveat tails that add nothing.
 - **RULE-09 Parallel structure**: Express coordinate ideas in the same grammatical form.
 - **RULE-10 Related words together**: Keep subject close to verb and modifier close to modified; split long parentheticals.
 - **RULE-11 Stress position**: Place new or important information at the end of the sentence.
@@ -50,4 +50,4 @@ Field-observed rules (maintainer observation of LLM output, 2022-2026):
 
 ## Full Rule Bodies (Canonical)
 
-Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.4.2/RULES.md for the pinned canonical source.
+Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.5.0/RULES.md for the pinned canonical source.

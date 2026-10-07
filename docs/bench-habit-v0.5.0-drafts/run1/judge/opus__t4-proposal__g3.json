@@ -1,0 +1,32 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "\u201cOn bandwidth-limited edge links, total traffic matters more than per-round size\u201d asserts a general priority that the pilot does not establish."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports approximately 14% communication overhead relative to FedAvg and Krum and 23% less communication than FL-Trust.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "\u201cSkewed data makes honest updates disagree with one another, so poisoned updates are harder to single out\u201d asserts a mechanism and detection difficulty that the reported results do not establish.",
+        "\u201cFor devices on metered or low-bandwidth links, the relevant budget is total traffic\u201d generalizes beyond the measured communication costs."
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports 14.1 MB per round, including the overhead relative to FedAvg and Krum and the reduction relative to FL-Trust.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both report the numerical contribution accurately, but X avoids Y's additional unsupported explanation of poisoning detection under skewed data.",
+  "q2": "Y",
+  "q2_reason": "Y explicitly identifies convergence speed as the largest gain and presents the absolute rounds and times alongside accuracy and communication tradeoffs.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

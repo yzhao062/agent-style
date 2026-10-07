@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports the nonsignificant brain MRI difference and explicitly states that there is no evidence of a gain.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It accurately reports no detectable difference on brain MRI without asserting equivalence.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y more clearly connects significant gains, the nonsignificant brain result, comparisons with SwinUNETR, and parameter savings; its Holm-Bonferroni statement is supported by the supplied p-values.",
+  "q2": "Y",
+  "q2_reason": "Y states the main pattern directly at the outset: improvement on two tasks and no detectable difference on the third.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

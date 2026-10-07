@@ -1,0 +1,35 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "Frames the Cora-OOD difference as a real improvement: \"gains are smaller: AUC increases from 0.888 to 0.891, and AP increases from 0.831 to 0.835\", although the gap is within seed noise"
+      ],
+      "missing_material_qualifiers": [
+        "\"higher mean AUC and AP than both baselines on all four datasets\" does not say that the Cora-OOD margin (0.003 AUC, 0.004 AP) is within the seed standard deviation of up to 0.006. The standard deviation is given but never tied to that comparison."
+      ],
+      "trap": "error",
+      "trap_note": "X claims higher scores on all four datasets and calls Cora-OOD 'gains' and 'increases' instead of a tie, even though it reports a standard deviation that makes the gap negligible.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [
+        "Opening framing that anomaly detection 'requires distinguishing unusual patterns from the community structure that organizes normal graph behavior' is a motivating assertion, not something the results show (minor)"
+      ],
+      "missing_material_qualifiers": [
+        "\"highest mean AUC and AP on all four datasets\" is only partly offset by the later 'perform similarly'. Y still calls the Cora-OOD differences 'gains' without saying they are within the seed standard deviation."
+      ],
+      "trap": "correct",
+      "trap_note": "Y says the methods 'perform similarly' on Cora-OOD and gives the small 0.3/0.4-point differences, which effectively reports a tie.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y presents Cora-OOD as similar performance, while X presents it as gains and increases, which overstates a difference within noise.",
+  "q2": "Y",
+  "q2_reason": "Y summarizes the pattern compactly as 5.9\u20138.3 AUC points of improvement on three datasets and parity on Cora-OOD, while X lists each number without stating the overall pattern.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

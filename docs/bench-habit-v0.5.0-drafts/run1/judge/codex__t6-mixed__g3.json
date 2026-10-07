@@ -1,0 +1,33 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "The 3.7-point gain over SMOTE on Churn-small is not compared with the run-to-run spread (\u00b10.9 to \u00b11.1), so the reader is not told that it is well outside noise.",
+        "\"Largest accuracy gain\" suggests TabMix also gains elsewhere, and the text does not say outright that TabMix is below no augmentation on Covertype (92.4 vs 92.6). \"Within 0.4 points\" does partly cover this."
+      ],
+      "trap": "correct",
+      "trap_note": "X puts the clear gain on Churn-small and says that on Adult, Credit-default and Covertype TabMix stays within 0.4/0.3 points of the baselines with no consistent advantage, so it makes no claim of a general improvement.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "The 0.1- and 0.4-point gains over no augmentation on Adult and Credit-default are called improvements without noting that they fall within the standard deviations (\u00b10.2 to \u00b10.5), so a reader may take them as real gains.",
+        "No dataset's differences are compared with their standard deviations, so the reader cannot tell that only the Churn-small gain lies outside noise."
+      ],
+      "trap": "correct",
+      "trap_note": "Y calls the results mixed, gives accurate per-dataset differences including the Covertype deficit, and does not claim TabMix helps in general, but it never states that the benefit is limited to the small dataset.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both texts get the numbers right, but X frames the non-Churn differences as no consistent advantage while Y labels within-noise gaps as improvements, so X more faithfully shows that the contribution is limited to the small dataset.",
+  "q2": "X",
+  "q2_reason": "In two sentences X states the pattern (a clear gain on the small dataset, parity elsewhere), whereas Y lists differences dataset by dataset under a vague \"mixed results\" and leaves the reader to work out the pattern.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

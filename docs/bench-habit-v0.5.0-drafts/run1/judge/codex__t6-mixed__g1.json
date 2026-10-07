@@ -1,0 +1,29 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X gives the clear 5.3- and 3.7-point Churn-small gains, then says TabMix is within 0.4 points of both baselines elsewhere, with mixed small gains or losses, so it makes no general improvement claim.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [
+        "Says TabMix 'improves over no augmentation by 0.1 and 0.4 percentage points' on Adult and Credit-default without noting these differences are within the run-to-run standard deviations (0.2\u20130.5)"
+      ],
+      "trap": "correct",
+      "trap_note": "Y reports every per-dataset difference accurately, including the Covertype drop below no augmentation, and never claims a general improvement, but it does not say the benefit is confined to the small dataset.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both drafts are numerically accurate, but X shows the contribution as a clear gain on the small dataset and near-parity elsewhere, while Y calls 0.1-point differences improvements without noting they are within noise.",
+  "q2": "X",
+  "q2_reason": "X sums up the main pattern (a large gain only on Churn-small, within 0.4 points elsewhere), while Y lists per-comparison deltas and never draws that pattern together.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

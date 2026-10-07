@@ -1,0 +1,31 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [
+        "\"These learned corrections address differences between simulated and real dynamics\" is a claim about how the method works that the success rates alone cannot verify (minor; it reads mostly as a description of the method)"
+      ],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It says transparent objects remain the weakest category at 68% and limits the effectiveness claim to the tested categories.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports that success varies from 94% on rigid objects down to 68% on transparent objects and limits the support claim to the evaluated setting.",
+      "reflexive_qualifiers": [
+        "Future work should ... test transfer across additional robots and object sets."
+      ]
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Neither text has errors and both handle the trap correctly, but X is tighter: it names transparent objects as the remaining gap without generic future-work filler, while Y adds a partly reflexive future-work sentence.",
+  "q2": "Y",
+  "q2_reason": "Y adds correct per-method means (82.2/46.0/63.0) and the 94%-to-68% range across categories, so the overall advantage and the difficulty gradient come through slightly more fully than in X.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "claude-opus-5-5"
+}

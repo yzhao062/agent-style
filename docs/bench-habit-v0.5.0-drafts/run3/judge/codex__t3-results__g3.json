@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "X reports the brain MRI difference as +0.4 (CI [-0.8, 1.6], p = 0.48) and says that superiority and equivalence are both unestablished, so it claims neither an improvement nor equivalence.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "Y calls the brain MRI difference inconclusive and gives the CI spanning -0.8 to 1.6, without claiming an improvement or equivalence.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "tie",
+  "q1_reason": "Both texts state the significant cardiac and lung gains, the inconclusive brain result, the descriptive-only SwinUNETR comparison and the 87% parameter reduction accurately, with no unsupported claims or trap errors.",
+  "q2": "Y",
+  "q2_reason": "Y gives the same pattern (significant gains on two organs, inconclusive on brain, far fewer parameters) in four compact sentences, while X spreads it across per-task statistics and SwinUNETR margins.",
+  "mapping": {
+    "X": "A",
+    "Y": "B"
+  },
+  "judge": "claude-opus-5-5"
+}

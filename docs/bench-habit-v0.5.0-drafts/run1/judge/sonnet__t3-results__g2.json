@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly reports no significant difference on brain MRI because the difference interval spans zero.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It distinguishes the highest point estimate from evidence of improvement and reports that the brain MRI difference interval spans zero.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both texts are supported, but X presents the significant gains, brain MRI exception, and parameter reduction more directly.",
+  "q2": "X",
+  "q2_reason": "X foregrounds the cardiac and lung gains and clearly contrasts them with the nonsignificant brain MRI result.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

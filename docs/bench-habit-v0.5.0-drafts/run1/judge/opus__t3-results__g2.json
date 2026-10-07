@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly identifies the brain MRI difference as non-significant.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports the brain confidence interval crossing zero and p = 0.48 without claiming significant improvement or proven equivalence.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "X presents the significant cardiac and lung gains and parameter reduction directly, while Y introduces an additional multiplicity criterion that makes the contribution less clear.",
+  "q2": "X",
+  "q2_reason": "X clearly states the main pattern of significant improvement on two tasks and a non-significant difference on brain MRI.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

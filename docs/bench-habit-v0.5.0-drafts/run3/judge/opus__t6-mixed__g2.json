@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It explicitly identifies Churn-small as the only clear gain and reports the decline on Covertype.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It locates the clear benefit on Churn-small, reports the decline on Covertype, and limits the small-data interpretation to one dataset.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both texts are supported, but X makes the contribution clearer by stating the only clear gain immediately.",
+  "q2": "X",
+  "q2_reason": "X foregrounds the main pattern of a clear benefit only on Churn-small, while Y presents the dataset details before that conclusion.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

@@ -6,11 +6,27 @@ All notable changes to *The Elements of Agent Style* are documented here.
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versioning: [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 
-> **Version distribution for the v0.4.2 release.** The last shared PyPI and npm release before this one is **0.4.1**; this release publishes **0.4.2** to both registries. Git tags **v0.3.2** and **v0.3.3** remain *docs-only* additions (`docs/rule-pack.md` published as the `anywhere-agents` rule-pack pin target, and README Use option 3 cross-reference); they were never a PyPI or npm publish target, and the package version files skipped them. No package release may reuse a docs-only ref. See `RELEASING.md` for the docs-only tag convention. This banner is the authoritative record `RELEASING.md` consults when deciding what may be published, so it is updated on every release.
+> **Version distribution for the v0.5.0 release.** The last shared PyPI and npm release before this one is **0.4.2**; this release publishes **0.5.0** to both registries. Git tags **v0.3.2** and **v0.3.3** remain *docs-only* additions (`docs/rule-pack.md` published as the `anywhere-agents` rule-pack pin target, and README Use option 3 cross-reference); they were never a PyPI or npm publish target, and the package version files skipped them. No package release may reuse a docs-only ref. See `RELEASING.md` for the docs-only tag convention. This banner is the authoritative record `RELEASING.md` consults when deciding what may be published, so it is updated on every release.
 
 ## [Unreleased]
 
 *No unreleased changes queued.*
+
+## [0.5.0] — 2026-10-06
+
+Minor: the RULE-03 and RULE-08 directives now ask for calibration in both directions, which `RELEASING.md` counts as a change to the ruleset contract. The rule count, the rule IDs, the adapters' structure and the CLI interface are unchanged. Agent drafts of papers and proposals were attaching a caveat to good results and transcribing tables into prose, and the rule pack's own examples modeled both habits.
+
+### Changed
+
+- **RULE-08 names the structural form of underclaiming.** The directive already ruled out overclaiming and reflexive weasel wording. It now also names the caveat tail: a "however", a future-work aside, or a note on what the work does not establish, attached to a result by habit. A second paragraph gives the test for any qualifier: it stays, inside the claim, when it changes what the evidence supports or what the reader should conclude. Ties, losses, differences within noise, and the weakest cases are findings, reported next to the claims they bound and in any summary of the results. Qualifiers that add nothing are cut. General limitations of the study design go to the venue's Limitations section. The first pair, which every compact consumer loads, used to end its GOOD sentence on a future-work parenthetical. Its BAD now shows hype and a caveat tail together, and its GOOD drops the tail. Three pairs are new: negative framing, a mixed result stated as a finding, and a proposal limit turned into an aim. Two GOOD sentences were corrected so they no longer turn "no measurable speedup" or "within one standard deviation" into stronger claims. The rationale gains a paragraph on the measured habit and on the Limitations sections that NeurIPS and ACL Rolling Review provide.
+- **RULE-03 gains its counterweight.** Concrete means naming the specific finding, and a table transcribed into a sentence buries it. When a display holds the results, prose states the pattern with the magnitude a reader needs and points to the display. Uncertainty that changes the interpretation goes beside the estimate, and an inconclusive difference is not called a gain. Numbers that change the claim, that the reader acts on, or that no display holds stay. Its first GOOD sentence carried five numbers and now carries two. Three pairs are new. The enforcement line no longer names a "claim-without-number heuristic", which never existed.
+- **RULE-H examples state evidence without stacking scores.** The directive asks for "the magnitude or a table pointer" where it asked for "number". Four GOOD sentences were rewritten; the SimCLR example now names the four-times-wider ResNet-50 behind the 76.5% result, a condition the old sentence left out.
+- **Semantic judge prompts** in `skills/style-review/references/rule-detectors.md` and its two package copies now cover both directions. RULE-08 asks about both, RULE-03 asks about transcribed tables, and RULE-H accepts a table pointer as checkable evidence. The old prompts asked for claims "without a metric/name/date", which rewarded inline numbers.
+- **Adapter one-liners** for RULE-03 and RULE-08 in the eight adapters that carry directives say the same in one clause each.
+
+### Added
+
+- **Habit bench** (`scripts/bench/habit/`): a before-and-after check of the compact pack on paper and proposal tasks, with a blind cross-family judge and a per-writer, per-task safety gate against overclaiming. The first wording of this release failed that gate: one writer dropped qualifiers that changed the claim. Two revisions followed, each checked on a new held-out task. On the release wording, reflexive qualifiers fall from 3 to 0, no judged trap error appears, and B wins both pairwise questions (62% and 69%). The strict per-cell safety criterion still fails on three minor error patterns, and numbers per sentence fall 13% against a 25% target. Results and evidence: [`docs/bench-habit-v0.5.0.md`](docs/bench-habit-v0.5.0.md). The maintainer shipped this release on 2026-10-06 as a field trial; section 8 of that report records the decision.
 
 ## [0.4.2] — 2026-08-14
 
@@ -277,7 +293,8 @@ The v0.3.0 cycle turns the bench from a narrow, API-billable CI job into a full-
 
 ---
 
-[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.4.2...HEAD
+[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/yzhao062/agent-style/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/yzhao062/agent-style/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/yzhao062/agent-style/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/yzhao062/agent-style/compare/v0.3.6...v0.4.0

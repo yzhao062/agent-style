@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports gains over SubgraphAnomaly on three datasets and a near tie on Cora-OOD.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports a match with SubgraphAnomaly on Cora-OOD and explicitly relates the small gaps to seed variability.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "X",
+  "q1_reason": "Both texts are supported, but X presents the method and its contribution more directly, with fewer explanatory interruptions.",
+  "q2": "X",
+  "q2_reason": "X makes the main pattern clearer by grouping the substantial gains on three datasets and distinguishing the near tie on Cora-OOD.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}

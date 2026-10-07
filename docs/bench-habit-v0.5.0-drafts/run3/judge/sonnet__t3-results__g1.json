@@ -1,0 +1,27 @@
+{
+  "texts": {
+    "X": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It reports no detected difference on brain MRI and gives the confidence interval and p-value.",
+      "reflexive_qualifiers": []
+    },
+    "Y": {
+      "unsupported_claims": [],
+      "missing_material_qualifiers": [],
+      "trap": "correct",
+      "trap_note": "It describes the brain MRI difference as indistinguishable from zero without claiming equivalence.",
+      "reflexive_qualifiers": []
+    }
+  },
+  "q1": "Y",
+  "q1_reason": "Y presents the supported cardiac and lung gains and parameter savings more directly, while X introduces a Bonferroni comparison that distracts from the contribution.",
+  "q2": "Y",
+  "q2_reason": "Y leads with the main pattern of improvement on two tasks and clearly distinguishes the nonsignificant brain result.",
+  "mapping": {
+    "X": "B",
+    "Y": "A"
+  },
+  "judge": "gpt-6.1-sol"
+}
