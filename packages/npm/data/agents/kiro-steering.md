@@ -25,7 +25,7 @@ Canonical rules (from Strunk & White 1959, Orwell 1946, Pinker 2014, Gopen & Swa
 
 - **RULE-01 Curse of knowledge**: Name your intended reader; do not assume they share your tacit knowledge.
 - **RULE-02 Passive voice**: Prefer active voice when the agent is known and worth naming.
-- **RULE-03 Concrete language**: Prefer concrete, specific terms over abstract category words like "factors" or "aspects"; state a result's pattern and key magnitude, and leave full numbers to tables.
+- **RULE-03 Concrete language**: Prefer concrete, specific terms over abstract category words like "factors" or "aspects"; state a result's pattern and rounded magnitude, and leave intervals and full numbers to tables. Do not stack figures in consecutive sentences.
 - **RULE-04 Needless words**: Cut filler phrases like "in order to", "due to the fact that", "may potentially".
 - **RULE-05 Dying metaphors**: Delete clichés like "pushes the boundaries", "paradigm shift", or "state of the art".
 - **RULE-06 Plain English**: Prefer "use" over "leverage", "method" over "methodology", "feature" over "functionality".

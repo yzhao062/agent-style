@@ -10,7 +10,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 ## [Unreleased]
 
-*No unreleased changes queued.*
+Minor, planned as 0.6.0: the RULE-03 directive changes, which `RELEASING.md` counts as a change to the ruleset contract, and the mechanical detectors gain a function. The rule count, the rule IDs, the CLI interface, and the published bench scope are unchanged.
+
+### Changed
+
+- **RULE-03 asks for rounded magnitudes and no stacked figures.** v0.5.0 told agents to keep uncertainty beside an estimate, and agents read that as an interval for every finding. In a 2026 blind comparison, three agents wrote abstracts for the same two conference drafts. On each draft, the two versions the author ranked lower put an interval beside nearly every finding and stacked precise figures across consecutive sentences. The directive now asks for each magnitude rounded to the precision the claim needs. It rules out precise figures in consecutive sentences and gives an abstract or introduction the fewest numbers of any section, with no intervals or p-values. One pair is new, a paper abstract on a synthetic caching result, and the rationale gains a paragraph on the comparison. The adapter one-liners in the eight adapters that carry directives say the same in one clause.
+
+### Added
+
+- **A mechanical check for RULE-03.** `_rule_03` in `detectors_mech.py` and `rule03` in `detectors_mech.js` give the same findings on the replayed corpus, apart from known Unicode differences in case matching and column offsets. Each counts precise figures: decimals and percentages, never integer counts, versions, dates, section or table numbers, model names, identifiers, or anything in code, tables, or equations. Markdown tables count with or without outer pipes, and code fences close only as CommonMark closes them. In body prose, it flags a sentence that writes a numeric interval, and asks the author to keep in words what the reader needs to judge the claim. Appendices and supplements are exempt from that check, because they are where such detail belongs. Within an abstract or introduction, it also flags three consecutive sentences with two or more figures each, or one sentence with five or more. A file name, an abstract environment, an Introduction or Abstract section, or a heading of that name marks the region, so the function takes an optional `file_path`. On the six generated abstracts of the comparison, it flags the four the author ranked lower and passes the other two. Both abstracts already in the drafts pass as well. Across the ordinary documentation of this repository and its two sibling configuration repositories, it reports nothing outside two saved review notes that quote intervals. `agent-style review` does not run it, with or without `--mechanical-only`, because the v0.3.0 bench replay pins the mechanical rule set. Hooks that import the detectors, such as the anywhere-agents guard, run it as an advisory, and the style-review detector matrix says so. `packages/pypi/tests/test_rule03_figures.py` and the npm review tests cover it with synthetic text only.
 
 ## [0.5.0] — 2026-10-06
 
