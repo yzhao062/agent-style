@@ -54,7 +54,11 @@ MANUAL_CHECKS = [
 # the release being prepared, rather than the one before it, had been the first
 # to fire the publish workflow, and collapsed a two-sided "hand-publish this one,
 # make the next one the OIDC cut" choice into naming the same release twice.
-SKIP_PREFIXES = ("docs/followups/",)
+# Bench reports and their harness record the release they measured. One bump
+# retitled the habit bench as a run of the release being prepared, shipped on
+# the earlier release's date, and pointed its README at a report that does not
+# exist. (No literal version here: the script rewrites its own source too.)
+SKIP_PREFIXES = ("docs/followups/", "docs/bench", "scripts/bench/")
 
 PATTERNS = [
     (f"v{OLD}", f"v{NEW}"),

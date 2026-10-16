@@ -243,7 +243,7 @@ def test_results_paragraph_outside_abstract_and_introduction_is_quiet():
 
 def test_changelog_like_text_is_quiet_even_as_an_abstract():
     text = (
-        "Release v0.5.0 (2026-10-16) ships 38 tests and 2,417 fixtures. "
+        "Release v0.6.0 (2026-10-16) ships 38 tests and 2,417 fixtures. "
         "It follows 0.4.2 and 0.4.1, and runs on Python 3.9-3.13 with Node 20.11.1. "
         "The matrix is ubuntu x 3.9/3.10/3.11/3.12/3.13 and macos x 3.12/3.13. "
         "See Section 3.2, Tables 4 and 5, Figure 2.1, Appendix B.3, and Eq. 7.1. "
@@ -1049,7 +1049,7 @@ def test_two_hundred_kilobytes_is_fast():
     paragraph = (
         "The build gave 0.62 on the first split and 0.52 on the second, with "
         "Section 3.2 and Table 4 as context. Prefetching lowers the miss rate by 8.9 points "
-        "(95\\% interval 0.51 to 0.83) at full load. v0.5.0 shipped on 2026-10-16.\n\n"
+        "(95\\% interval 0.51 to 0.83) at full load. v0.6.0 shipped on 2026-10-16.\n\n"
     )
     text = paragraph * (200_000 // len(paragraph) + 1)
     assert len(text) >= 200_000
@@ -1059,18 +1059,21 @@ def test_two_hundred_kilobytes_is_fast():
         assert time.perf_counter() - start < 3.0, path
 
 
-@pytest.mark.parametrize(
-    "text",
-    ["0" * 200_000, "!" * 200_000, "(1.5" + " " * 100_000 + "2.5)", "\\begin{figure} 0.5 " * 10_000,
-     "$$ 0.5 " * 20_000, "123," * 50_000, "a/" * 100_000,
-     "|\n" * 100_000, "a | b\n- | -\n" * 50_000, "|" * 200_000, "-|" * 100_000 + "\n",
-     "## Appendix\n" * 100_000, "    x\n\n" * 50_000, "- a\n\n    b\n" * 50_000,
-     "````\n```\n" * 50_000, "```x`\n" * 50_000, "\\appendix " * 20_000,
-     "> ```\n> x\n" * 50_000, "- ```\n  x\n" * 50_000, "> " * 150_000 + "```\n" + "x\n" * 100_000,
-     "- " * 100_000 + "```\n" + "  x\n" * 100_000, "> " * 1000 + "```\n" + ("> " * 1000 + "x\n") * 100,
-     ">" * 200_000 + "\n" + "> x\n" * 50_000, "Foo\n---\n" * 50_000, "***\n    x\n" * 50_000,
-     "- - -\n" * 100_000, "- > " * 50_000 + "```\n" + "  > x\n" * 50_000],
-)
+# Built inside a list with short ids: pytest copies a test id into the
+# PYTEST_CURRENT_TEST environment variable, and Windows caps one variable at
+# 32,767 characters, so a raw 200 KB parameter breaks setup there.
+HOSTILE_INPUTS = ["0" * 200_000, "!" * 200_000, "(1.5" + " " * 100_000 + "2.5)", "\\begin{figure} 0.5 " * 10_000,
+    "$$ 0.5 " * 20_000, "123," * 50_000, "a/" * 100_000,
+    "|\n" * 100_000, "a | b\n- | -\n" * 50_000, "|" * 200_000, "-|" * 100_000 + "\n",
+    "## Appendix\n" * 100_000, "    x\n\n" * 50_000, "- a\n\n    b\n" * 50_000,
+    "````\n```\n" * 50_000, "```x`\n" * 50_000, "\\appendix " * 20_000,
+    "> ```\n> x\n" * 50_000, "- ```\n  x\n" * 50_000, "> " * 150_000 + "```\n" + "x\n" * 100_000,
+    "- " * 100_000 + "```\n" + "  x\n" * 100_000, "> " * 1000 + "```\n" + ("> " * 1000 + "x\n") * 100,
+    ">" * 200_000 + "\n" + "> x\n" * 50_000, "Foo\n---\n" * 50_000, "***\n    x\n" * 50_000,
+    "- - -\n" * 100_000, "- > " * 50_000 + "```\n" + "  > x\n" * 50_000]
+
+
+@pytest.mark.parametrize("text", HOSTILE_INPUTS, ids=[f"hostile-{i}" for i in range(len(HOSTILE_INPUTS))])
 def test_hostile_inputs_are_fast(text):
     for path in ("00-abstract.tex", "notes.md"):
         start = time.perf_counter()

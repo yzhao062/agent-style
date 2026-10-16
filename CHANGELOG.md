@@ -6,11 +6,15 @@ All notable changes to *The Elements of Agent Style* are documented here.
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versioning: [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 
-> **Version distribution for the v0.5.0 release.** The last shared PyPI and npm release before this one is **0.4.2**; this release publishes **0.5.0** to both registries. Git tags **v0.3.2** and **v0.3.3** remain *docs-only* additions (`docs/rule-pack.md` published as the `anywhere-agents` rule-pack pin target, and README Use option 3 cross-reference); they were never a PyPI or npm publish target, and the package version files skipped them. No package release may reuse a docs-only ref. See `RELEASING.md` for the docs-only tag convention. This banner is the authoritative record `RELEASING.md` consults when deciding what may be published, so it is updated on every release.
+> **Version distribution for the v0.6.0 release.** The last shared PyPI and npm release before this one is **0.5.0**; this release publishes **0.6.0** to both registries. Git tags **v0.3.2** and **v0.3.3** remain *docs-only* additions (`docs/rule-pack.md` published as the `anywhere-agents` rule-pack pin target, and README Use option 3 cross-reference); they were never a PyPI or npm publish target, and the package version files skipped them. No package release may reuse a docs-only ref. See `RELEASING.md` for the docs-only tag convention. This banner is the authoritative record `RELEASING.md` consults when deciding what may be published, so it is updated on every release.
 
 ## [Unreleased]
 
-Minor, planned as 0.6.0: the RULE-03 directive changes, which `RELEASING.md` counts as a change to the ruleset contract, and the mechanical detectors gain a function. The rule count, the rule IDs, the CLI interface, and the published bench scope are unchanged.
+*No unreleased changes queued.*
+
+## [0.6.0] — 2026-10-16
+
+Minor: the RULE-03 directive changes, which `RELEASING.md` counts as a change to the ruleset contract, and the mechanical detectors gain a function. The rule count, the rule IDs, the CLI interface, and the published bench scope are unchanged.
 
 ### Changed
 
@@ -301,7 +305,8 @@ The v0.3.0 cycle turns the bench from a narrow, API-billable CI job into a full-
 
 ---
 
-[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/yzhao062/agent-style/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/yzhao062/agent-style/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/yzhao062/agent-style/compare/v0.4.1...v0.4.2
 [0.4.1]: https://github.com/yzhao062/agent-style/compare/v0.4.0...v0.4.1

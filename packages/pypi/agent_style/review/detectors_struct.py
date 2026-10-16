@@ -7,7 +7,7 @@ Rules with deterministic structural detectors:
   RULE-E  paragraph-closing summaries (last sentence restates the paragraph topic)
 
 Rules in the structural bucket that still have no detector and report
-"skipped" (as of v0.5.0):
+"skipped" (as of v0.6.0):
   RULE-02  passive voice when agent matters
   RULE-07  positive form for affirmative claims
   RULE-09  parallel structure across coordinate items

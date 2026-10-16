@@ -554,7 +554,7 @@ test('RULE-03 check B stays quiet outside an abstract or introduction', () => {
 
 test('RULE-03 ignores versions, dates, counts, references, identifiers and code', () => {
   const text =
-    'Release v0.5.0 (2026-10-16) ships 38 tests and 2,417 fixtures. ' +
+    'Release v0.6.0 (2026-10-16) ships 38 tests and 2,417 fixtures. ' +
     'It follows 0.4.2 and 0.4.1, and runs on Python 3.9-3.13 with Node 20.11.1. ' +
     'The matrix is ubuntu x 3.9/3.10/3.11/3.12/3.13 and macos x 3.12/3.13. ' +
     'See Section 3.2, Tables 4 and 5, Figure 2.1, Appendix B.3, and Eq. 7.1. ' +

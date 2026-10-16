@@ -2,9 +2,9 @@
 
 # Adapter Matrix
 
-Every shipped adapter file in `agents/`, with its target path, install mode, and load class. v0.5.0 ships 9 primary adapters plus the `style-review` skill; 11 additional tool surfaces are on the v1.1 "Planned adapters" roadmap. Windsurf contributes separate repository and global surfaces, and Replit contributes separate project and Skills surfaces.
+Every shipped adapter file in `agents/`, with its target path, install mode, and load class. v0.6.0 ships 9 primary adapters plus the `style-review` skill; 11 additional tool surfaces are on the v1.1 "Planned adapters" roadmap. Windsurf contributes separate repository and global surfaces, and Replit contributes separate project and Skills surfaces.
 
-## Primary Adapters (v0.5.0, Shipped)
+## Primary Adapters (v0.6.0, Shipped)
 
 | Surface | Shipped file | Target path | install_mode | Load class |
 | --- | --- | --- | --- | --- |
