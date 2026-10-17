@@ -938,18 +938,49 @@ function r03Re(src, flags) {
   return new RegExp(src, flags === undefined ? 'gu' : flags);
 }
 
+// Compiled patterns by flags and source. Building a RegExp cost more than running it
+// on a file of many short captions (84% of a scan of 50,000), so the scanners below
+// compile each pattern once. Each use sets lastIndex before it reads, and r03Matches
+// marks its pattern busy while it iterates, so any use of the same pattern meanwhile
+// gets a fresh one and never shares lastIndex with the scan in progress.
+// Keyed by flags, then by the source string itself: the sources are module constants,
+// so a lookup reuses the string's hash instead of hashing a fresh concatenation.
+const R03_RE_CACHE = new Map();
+function r03Cached(src, flags) {
+  let bySrc = R03_RE_CACHE.get(flags);
+  if (bySrc === undefined) {
+    bySrc = new Map();
+    R03_RE_CACHE.set(flags, bySrc);
+  }
+  let re = bySrc.get(src);
+  if (re === undefined) {
+    re = new RegExp(src, flags);
+    bySrc.set(src, re);
+  } else if (re.r03Busy) {
+    return new RegExp(src, flags);
+  }
+  return re;
+}
+
 function* r03Matches(src, text, flags) {
-  const re = r03Re(src, flags);
-  let m;
-  while ((m = re.exec(text)) !== null) {
-    if (m[0].length === 0) re.lastIndex++;
-    yield m;
+  const f = flags === undefined ? 'gu' : flags;
+  const re = r03Cached(src, f);
+  re.r03Busy = true;
+  re.lastIndex = 0;
+  try {
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      if (m[0].length === 0) re.lastIndex++;
+      yield m;
+    }
+  } finally {
+    re.r03Busy = false;
   }
 }
 
 // Anchored match at `pos`, like Python's pattern.match(text, pos).
 function r03MatchAt(src, text, pos, flags) {
-  const re = new RegExp(src, flags);
+  const re = r03Cached(src, flags);
   re.lastIndex = pos;
   return re.exec(text);
 }
@@ -1624,10 +1655,11 @@ function r03Intervals(masked) {
     const vb = r03ParseNumber(b);
     return !(domain.includes(va) && domain.includes(vb));
   };
-  const numberBefore = r03Re(R03_NUMBER_BEFORE_SRC, 'u');
-  const ciWordBefore = r03Re(R03_CI_WORD_BEFORE_SRC, 'iu');
-  const wordBeforeKeyword = r03Re(R03_WORD_BEFORE_KEYWORD_SRC, 'iu');
-  const levelBefore = r03Re(R03_LEVEL_BEFORE_SRC, 'iu');
+  // Neither global nor sticky, so the shared compiled patterns carry no state.
+  const numberBefore = r03Cached(R03_NUMBER_BEFORE_SRC, 'u');
+  const ciWordBefore = r03Cached(R03_CI_WORD_BEFORE_SRC, 'iu');
+  const wordBeforeKeyword = r03Cached(R03_WORD_BEFORE_KEYWORD_SRC, 'iu');
+  const levelBefore = r03Cached(R03_LEVEL_BEFORE_SRC, 'iu');
 
   for (const m of r03Matches(R03_BRACKET_SRC, masked)) {
     const prefix = masked.slice(Math.max(0, m.index - 40), m.index);
@@ -1824,13 +1856,13 @@ function r03PlainText(raw) {
   // A line break first: the two words in `one\\two` are not a word and a command.
   let t = raw.split('\\\\').join(' ');
   for (const src of [R03_ARG1_SRC, R03_ARGN_SRC, R03_FIRST_ARG_SRC, R03_RULE_ARGS_SRC, R03_SPAN_ARGS_SRC]) {
-    t = t.replace(r03Re(src), ' ');
+    t = t.replace(r03Cached(src, 'gu'), ' ');
   }
   t = r03StripMath(t);
-  t = t.replace(r03Re(R03_COMMAND_SRC), ' ');
-  t = t.replace(r03Re(R03_ESCAPED_SRC), '$1');
+  t = t.replace(r03Cached(R03_COMMAND_SRC, 'gu'), ' ');
+  t = t.replace(r03Cached(R03_ESCAPED_SRC, 'gu'), '$1');
   t = t.replace(/[{}~\\]/gu, ' ');
-  return r03PyStrip(t.replace(r03Re(R03_PY_SPACE_RUN_G_SRC), ' '));
+  return r03PyStrip(t.replace(r03Cached(R03_PY_SPACE_RUN_G_SRC, 'gu'), ' '));
 }
 
 // Tokens with at least two letters in a row; numbers and single letters are not words.
