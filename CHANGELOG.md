@@ -6,11 +6,24 @@ All notable changes to *The Elements of Agent Style* are documented here.
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versioning: [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 
-> **Version distribution for the v0.6.0 release.** The last shared PyPI and npm release before this one is **0.5.0**; this release publishes **0.6.0** to both registries. Git tags **v0.3.2** and **v0.3.3** remain *docs-only* additions (`docs/rule-pack.md` published as the `anywhere-agents` rule-pack pin target, and README Use option 3 cross-reference); they were never a PyPI or npm publish target, and the package version files skipped them. No package release may reuse a docs-only ref. See `RELEASING.md` for the docs-only tag convention. This banner is the authoritative record `RELEASING.md` consults when deciding what may be published, so it is updated on every release.
+> **Version distribution for the v0.7.0 release.** The last shared PyPI and npm release before this one is **0.6.0**; this release publishes **0.7.0** to both registries. Git tags **v0.3.2** and **v0.3.3** remain *docs-only* additions (`docs/rule-pack.md` published as the `anywhere-agents` rule-pack pin target, and README Use option 3 cross-reference); they were never a PyPI or npm publish target, and the package version files skipped them. No package release may reuse a docs-only ref. See `RELEASING.md` for the docs-only tag convention. This banner is the authoritative record `RELEASING.md` consults when deciding what may be published, so it is updated on every release.
 
 ## [Unreleased]
 
 *No unreleased changes queued.*
+
+## [0.7.0] — 2026-10-17
+
+Minor: the RULE-A and RULE-03 directives change, which `RELEASING.md` counts as a change to the ruleset contract, and the mechanical detectors gain a function. The rule count, the rule IDs, the CLI interface, and the published bench scope are unchanged.
+
+### Changed
+
+- **RULE-A covers tables, and RULE-03 covers captions.** Agent drafts of papers write paragraphs into table cells and put results, setup details, and caveats into captions. Across 91 tables from twelve pre-2023 human-written papers, no cell ran past six words; in 2026 agent-assisted drafts, one table in eight had a cell over fifteen. The drafts' 345 captions ran twice as long at the median as 169 human ones, and one in eight carried three or more precise figures. RULE-A's directive now applies its list test to tables: a cell holds a number, a label, or a short phrase. RULE-03's directive says a caption names what the display shows, the pattern to read from it, and what a reader needs to decode it, such as error bars. Repeated results, setup narration, and caveats go to the text or an appendix. Each rule gains a BAD → GOOD pair and a rationale paragraph, and the adapter one-liners follow.
+- **The compact render pays for the new directive text.** RULE-12 now leads with the shorter runbook example, and the introduction to the field-observed rules is three short sentences. RULE-03's uncertainty example keeps one phrase, so `docs/rule-pack-compact.md` is 103 bytes smaller than in 0.6.0.
+
+### Added
+
+- **LaTeX checks in the hook-only detectors.** `_rule_03` in `detectors_mech.py` and `rule03` in `detectors_mech.js` gain three checks for LaTeX sources. The three-sentence figure run, which 0.6.0 checked only in an abstract or introduction, is now flagged anywhere in the body outside setup sections such as Methods. Paragraphs are flagged when four or more numbers use at least four decimal places and three significant digits; learning-rate grids such as 0.0001 stay quiet. Captions are flagged when they carry three or more precise figures, not counting legend values such as quantile lines or significance thresholds, or run past 100 words. A new `_rule_a` and `ruleA` flag a LaTeX table with a cell of more than 15 words or two sentences. All four skip appendices and supplements, now including files named `app-*`, `appx`, or `apx`, and the interval check honors the same names. `tblr` and `tabulary` join the display environments that RULE-03 skips. The measurement covered 169 files from the twelve human-written papers and 335 files of agent-assisted drafts. Human and draft files drew 0 and 53 body runs, 0 and 29 table findings, 2 and 14 precision findings, and 5 and 98 caption findings. Every human hit was a genuine instance, such as a paragraph quoting eight scores to four decimal places. Markdown is not read: long table cells are common in agent working notes, and flagging them would bury the paper findings. A hook that passes only an edited fragment cannot see the section or appendix around it. Hooks that import the detectors, such as the anywhere-agents guard from this release, run them as an advisory; `agent-style review` and the published bench scope are unchanged. The two engines give identical findings on the replayed corpus and on fuzzed LaTeX, apart from column offsets on astral characters. A pre-existing difference remains on non-ASCII digits and some control characters, in the figure counter that checks A, B, and C share.
 
 ## [0.6.0] — 2026-10-16
 
@@ -305,7 +318,8 @@ The v0.3.0 cycle turns the bench from a narrow, API-billable CI job into a full-
 
 ---
 
-[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/yzhao062/agent-style/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/yzhao062/agent-style/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/yzhao062/agent-style/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/yzhao062/agent-style/compare/v0.4.1...v0.4.2

@@ -40,7 +40,9 @@ function excerpt(lineText, span, width = 120) {
   const [s, e] = span;
   let start = Math.max(0, s - 20);
   let end = Math.min(lineText.length, start + width);
-  let out = lineText.slice(start, end).trim();
+  // Python's str.strip(): U+001C-U+001F and U+0085 count as blanks and U+FEFF
+  // does not, which is the reverse of trim().
+  let out = r03PyStrip(lineText.slice(start, end));
   if (start > 0) out = '\u2026' + out;
   if (end < lineText.length) out = out + '\u2026';
   return out;
@@ -498,13 +500,16 @@ function rule06(text) {
 }
 
 // ---------- RULE-03 precise figures: intervals in prose, stacked figures ----
-// Mirrors the RULE-03 section of agent_style.review.detectors_mech. Two checks:
+// Mirrors the RULE-03 section of agent_style.review.detectors_mech. Checks:
 //   A. a numeric interval written into a sentence, anywhere outside a table and
 //      outside an appendix (appendix prose is where intervals cut from an
 //      abstract belong)
 //   B. precise figures (decimals, percentages) stacked in an abstract or an
-//      introduction
-// See the Python module for the full semantics and the calibration. Every
+//      introduction and, in a LaTeX file, in the body prose (run criterion only)
+//   C. a LaTeX caption that carries precise figures or runs long (0.7.0)
+//   D. numbers written to many decimal places in LaTeX prose (0.7.0)
+// plus the hook-only RULE-A table-cell check (`ruleA`). See the Python module
+// for the full semantics and the calibration. Every
 // blanking step is length-preserving, so an offset in the blanked text is an
 // offset in the original and line numbers stay correct.
 //
@@ -526,8 +531,8 @@ function r03Escape(s) {
 }
 
 const R03_DISPLAY_ENVS = [
-  'tabular', 'tabular*', 'tabularx', 'longtable', 'array', 'supertabular',
-  'tabu', 'equation', 'equation*', 'align', 'align*', 'alignat', 'alignat*',
+  'tabular', 'tabular*', 'tabularx', 'tabulary', 'tblr', 'longtable', 'array',
+  'supertabular', 'tabu', 'equation', 'equation*', 'align', 'align*', 'alignat', 'alignat*',
   'gather', 'gather*', 'multline', 'multline*', 'eqnarray', 'eqnarray*',
   'flalign', 'flalign*', 'displaymath', 'math', 'figure', 'figure*', 'table',
   'table*', 'wrapfigure', 'wraptable', 'tikzpicture', 'verbatim', 'verbatim*',
@@ -673,8 +678,260 @@ const R03_PIPE_SRC = String.raw`(?<!\\)\|`;
 const R03_DELIMITER_CELL_SRC = String.raw`^[ \t]*:?-+:?[ \t]*$`;
 // A file named for an appendix or a supplement holds detailed prose; so does the
 // part of a LaTeX file after `\appendix`. `support` is not one of the tokens.
-const R03_APPENDIX_NAME_TOKENS = new Set(['appendix', 'appendices', 'supplement', 'supplementary', 'supp']);
+// Paper repositories also split appendices into app-*.tex, appx.tex, or apx-*.tex;
+// tokens split on -, _, ., and spaces, so application.tex stays a body file.
+const R03_APPENDIX_NAME_TOKENS = new Set(['appendix', 'appendices', 'supplement', 'supplementary', 'supp', 'app', 'appx', 'apx']);
 const R03_APPENDIX_CMD_SRC = String.raw`\\appendix` + R03_NOT_W_AFTER;
+
+// ---------- RULE-03 checks C and D, body-prose check B, RULE-A table cells ----
+//
+// Mirrors the 0.7.0 block of agent_style.review.detectors_mech. These checks
+// extend the hook-only figure checks from the abstract and the introduction to
+// the rest of a LaTeX paper, and they read LaTeX only: the Markdown tables of
+// agent documents carry long cells by design (30-40% of the ones measured), so
+// the same limits there would flood. The appendix and supplement exemptions are
+// those of check A.
+//
+//   B (body)  the run criterion of check B, in LaTeX body prose outside a
+//             method or setup section
+//   C         a caption that carries precise figures or runs long; the numbers
+//             of a legend (quantile lines, significance levels, markers) are
+//             keys and not figures
+//   D         numbers written to four or more decimal places and three or more
+//             significant digits (0.0143 counts, 0.0001 does not), outside a
+//             method or setup section
+//   RULE-A    a LaTeX table cell that holds prose (`ruleA` below)
+//
+// Measured in 2026-10 on the .tex files of 12 pre-2023 arXiv papers (169 files
+// after content-hash dedupe) and of agent-assisted drafts (335 files), with each
+// path passed so the file-name exemptions apply. Findings as human | drafts:
+//
+//   B body run          0 | 53 (18 files; none sit in files named app-*, which
+//                       the name exemption covers). The method and setup
+//                       exemption removes 4 of the draft findings.
+//   B body crowded      limit 5: 6 | 76 (5 distinct human sentences), limit 6:
+//                       4 | 54. A human body sentence with five figures is not
+//                       rare, so the crowded criterion stays in the abstract
+//                       and the introduction.
+//   C caption           5 of 202 human captions | 98 of 373 at 3 figures or over
+//                       100 words (human: 3 by figures, 2 by words; drafts: 44
+//                       and 71, each limit alone). Legend numbers removed 2
+//                       draft findings and no human one. One step up on both
+//                       (4 figures, 120 words) leaves 3 | 62. The human hits
+//                       restate results or run to a paragraph, which is the
+//                       pattern.
+//   D excess precision  numbers at 4+ places and 3+ significant digits. A
+//                       paragraph with 3 numbers at 3+ places: 5 | 145; at 4+
+//                       places: 3 | 20; a sentence with 2 at 4+ places: 5 | 39.
+//                       None keeps the human count at 2 or fewer. A paragraph
+//                       with 4 numbers at 4+ places does: 2 | 14 (each human
+//                       paragraph holds eight such numbers). Three places is
+//                       ordinary reporting (an AUC of 0.824), and a paragraph
+//                       at 3+ places stays above 2 human at every count up to 7
+//                       (8 gives 2 | 45, but that counts density and not
+//                       precision). A sentence with 5 numbers at 3+ places
+//                       gives 2 | 35 and measures crowding, so it is not
+//                       shipped. The significant-digit rule removed 6 draft
+//                       findings (21 to 15) and the setup exemption 1 more; the
+//                       human count stayed at 2.
+//   RULE-A table cell   0 of 103 human tables | 29 of 292 (24 files; none in
+//                       app-* files). The longest human cell holds 6 words.
+//
+// The detectors are advisory and the guard caps what it shows, so each value
+// below was set to miss some of the pattern rather than flood. Change a value
+// only with a new measurement.
+
+const R03_BODY = 'body'; // label of a sentence in LaTeX body prose
+
+// The values the Python module holds as _R03_* constants, in one object so a
+// test can set them the way the Python tests monkeypatch the module (exported
+// as r03Tuning). Shipped values:
+//   bodyCrowded     null: off. Five figures in one human body sentence is not
+//                   rare (6 of them in the human corpora at a limit of 5).
+//   captionFigures  precise figures that make a caption a results table; 5 of
+//   captionWords    202 human, 98 of 373 draft captions (3 | 44 by figures,
+//                   2 | 71 by words). A caption over this many words is a paragraph.
+//   decimalPlaces   numbers with at least this many decimal places and
+//   decimalSignificant  this many significant digits (leading zeros after the
+//                   point are scale, so 0.0001 is one), decimalCount of them in
+//   decimalCount    one decimalUnit ('paragraph' or 'sentence'): 2 human
+//   decimalUnit     paragraphs | 14 draft paragraphs.
+const R03_TUNING = {
+  bodyCrowded: null,
+  captionFigures: 3,
+  captionWords: 100,
+  decimalPlaces: 4,
+  decimalCount: 4,
+  decimalUnit: 'paragraph',
+  decimalSignificant: 3,
+};
+
+// A table cell holds a number, a label, or a short phrase. 0 of 103 human tables |
+// 29 of 292 draft tables (26 by words, 3 by sentences). A sentence of one or two
+// words is not counted: at 1, eight more draft tables flag, each on the period
+// of an abbreviation.
+const RA_CELL_WORDS = 15; // words above which a cell is prose
+const RA_CELL_SENTENCES = 2; // sentences that make a cell prose
+const RA_SENTENCE_WORDS = 3; // words a piece needs to count as a sentence
+const RA_MAX_DEPTH = 4; // nested tables read; deeper ones stay inside their parent's cell
+
+// Python's str.split(), str.strip() and \s treat U+001C-U+001F and U+0085 as
+// whitespace and U+FEFF as text; JavaScript's \s does the opposite. The new
+// checks count words and trim cells, so they use this class and the two engines
+// agree on every character.
+const R03_PY_SPACE = String.raw`\t\n\v\f\r \x1c-\x1f\x85\xa0  -     　`;
+const R03_PY_SPACE_RUN_RE = new RegExp('[' + R03_PY_SPACE + ']+', 'u');
+const R03_PY_SPACE_RUN_G_SRC = '[' + R03_PY_SPACE + ']+';
+
+// Environments whose body is code or a comment: a \caption or a \begin{tabular}
+// in one of them is an example, not a display.
+const R03_CODE_ENV_SRC = String.raw`\\begin\{(verbatim\*?|lstlisting|minted|comment)\}`;
+
+// \caption{, \caption*{, \caption[short]{, \captionof{figure}{. A command such
+// as \captionsetup is not one.
+const R03_CAPTION_SRC = String.raw`\\caption(?<of>of)?\*?(?![A-Za-z@])`;
+
+// Commands whose first brace argument is layout or style, and rule commands with
+// their arguments. Removed before words are counted, so \cmidrule(lr){2-3} and
+// \cellcolor{gray} add none. \multicolumn and \multirow lose their two layout
+// arguments and keep the text.
+const R03_FIRST_ARG_SRC =
+  String.raw`\\(?:parbox|makebox|framebox|raisebox|rotatebox|resizebox|scalebox|textcolor|` +
+  String.raw`colorbox|fcolorbox|cellcolor|rowcolor|columncolor|arrayrulecolor)\*?` +
+  String.raw`(?:[ \t]{0,3}\[[^\]]{0,50}\]){0,3}[ \t\n]{0,3}\{[^{}]{0,100}\}`;
+const R03_SPAN_ARGS_SRC =
+  String.raw`\\(?:multicolumn|multirow)\*?[ \t\n]{0,3}\{[^{}]{0,60}\}[ \t\n]{0,3}` +
+  String.raw`(?:\[[^\]]{0,50}\][ \t\n]{0,3})?\{[^{}]{0,60}\}`;
+const R03_RULE_ARGS_SRC =
+  String.raw`\\(?:cmidrule|cline|specialrule|noalign|hhline)\*?(?![A-Za-z@])` +
+  String.raw`(?:[ \t]{0,3}(?:\[[^\]]{0,30}\]|\([^)]{0,20}\))){0,2}` +
+  String.raw`(?:[ \t\n]{0,3}\{[^{}]{0,60}\}){0,3}` +
+  String.raw`|\\(?:toprule|midrule|bottomrule|hline|addlinespace)\*?(?![A-Za-z@])(?:[ \t]{0,3}\[[^\]]{0,30}\])?`;
+// What opens a table cell without being its text: blanks and rule commands.
+const RA_LEAD_SRC = '^(?:[' + R03_PY_SPACE + ']|' + R03_RULE_ARGS_SRC + ')*';
+const R03_COMMAND_SRC = String.raw`\\[A-Za-z@]+\*?(?:\[[^\]\n]{0,200}\])?`;
+const R03_ESCAPED_SRC = String.raw`\\([%&_#$])`;
+const R03_DOLLAR_SRC = String.raw`(?<!\\)\$`;
+// Python's [^\W\d_]{2,}: a letter or a non-decimal number character, twice or more.
+const R03_WORD_SRC = String.raw`[\p{L}\p{Nl}\p{No}]{2,}`;
+const R03_WORD_RE = new RegExp(R03_WORD_SRC, 'u');
+const R03_BRACE_TOKEN_SRC = String.raw`\\.|[{}]`;
+// A sentence end inside a table cell, after cleaning (single spaces). The
+// lookbehind keeps a long run of full stops from being retried at every offset.
+const RA_BOUNDARY_SRC = String.raw`(?<![.!?])[.!?]+["')\]]*[ ]+(?=[A-Z0-9"'(\[])`;
+
+// A table environment, its begin and end tokens.
+const RA_ENV_SRC = String.raw`\\(begin|end)\{(tabular\*|tabular|tabularx|tabulary|longtable|tblr)\}`;
+const RA_ARG_COUNT = { tabular: 1, 'tabular*': 2, tabularx: 2, tabulary: 2, longtable: 1, tblr: 1 };
+// Inside a table body: a row break (\\, \\*, \\[2pt]), a command name, an
+// escaped character, a brace, a cell separator.
+const RA_TOKEN_SRC = String.raw`\\\\\*?(?:\[[^\]\n]{0,20}\])?|\\[A-Za-z@]+|\\.|[{}&]`;
+
+// Legend and decoding metadata in a caption (check C). A caption names its lines,
+// markers, bands and thresholds so the reader can decode the display: "Lines mark
+// the 25%, 50% and 75% quantiles", "Stars denote p < 0.05, 0.01 and 0.001". Those
+// numbers are keys and not results, so the figure count skips them. Each pattern
+// takes one run of numbers beside the word that names it, never the rest of the
+// sentence, so a result written next to a legend still counts. Digits are ASCII and
+// blanks are spelled out, so both engines read every input the same way. Compiled
+// case-insensitively.
+const LG_WS = String.raw`[ \t\r\n~]`;
+const LG_NUM =
+  String.raw`\$?[-+−]?[0-9]+(?:\.[0-9]+)?\$?` +
+  String.raw`(?:(?:[ \t~]|\\,)?(?:\\%|%|percent` + R03_NOT_W_AFTER +
+  String.raw`|(?:st|nd|rd|th)` + R03_NOT_W_AFTER + String.raw`))?\$?`;
+const LG_SEP =
+  String.raw`(?:` + LG_WS + String.raw`{0,3}(?:,|;|/|&|--|–|-)` + LG_WS + String.raw`{0,3}` +
+  String.raw`|` + LG_WS + String.raw`{0,3},?` + LG_WS + String.raw`{1,3}(?:and|or|to)` + LG_WS + String.raw`{1,3})`;
+// One to six numbers. The lookbehind starts a list at its first number, so a long
+// run of digits or of "1,1,1" is entered once.
+const LG_LIST = LG_NUM + String.raw`(?:` + LG_SEP + LG_NUM + String.raw`){0,5}`;
+const LG_WORD_BEFORE = String.raw`(?:` + LG_WS + String.raw`{1,3}[A-Za-z-]{1,15}){0,1}` + LG_WS + String.raw`{1,3}`;
+const LG_QUANTILE = String.raw`(?:quantiles?|percentiles?|quartiles?|deciles?)` + R03_NOT_W_AFTER;
+const LG_SIGNIFICANCE =
+  String.raw`(?:\\?alpha|α|significan(?:ce|t)(?:` + LG_WS +
+  String.raw`{1,3}(?:levels?|thresholds?|codes?|stars?))?|thresholds?)` + R03_NOT_W_AFTER;
+const LG_COMPARE = String.raw`\$?(?:[<>=≤≥]|\\(?:leqslant|geqslant|leq|geq|le|ge|lt|gt)(?![A-Za-z]))\$?`;
+// A p-value is a key only beside an inequality or a threshold word: "p < 0.05" and
+// "p-value thresholds of 0.05 and 0.01" define stars, while "p = 0.03" and "p-values
+// of 0.041, 0.023 and 0.012" report results and stay in the count.
+const LG_P = String.raw`p(?:[ -]?values?)?` + R03_NOT_W_AFTER;
+const LG_INEQ = String.raw`\$?(?:[<>≤≥]|\\(?:leqslant|geqslant|leq|geq|le|ge|lt|gt)(?![A-Za-z]))\$?`;
+const LG_P_KEY = String.raw`(?:levels?|thresholds?|cut-?offs?)` + R03_NOT_W_AFTER;
+// A confidence level names a band: "the 68%, 95% and 99.7% confidence intervals".
+const LG_CONF = String.raw`(?:confidence|credible|prediction|highest[ -]density)` + R03_NOT_W_AFTER;
+// The singular "a confidence interval of 79.4% to 83.0%" is an estimate; the plural
+// and a level name the bands of a legend.
+const LG_CONF_NOUN = String.raw`(?:levels?|intervals|bands|regions|ellipses)` + R03_NOT_W_AFTER;
+// A level is a percentage, so "a confidence interval of 39.8 to 42.7" stays a result.
+const LG_PCT =
+  String.raw`\$?[0-9]+(?:\.[0-9]+)?\$?(?:[ \t~]|\\,)?(?:\\%|%|percent` + R03_NOT_W_AFTER + String.raw`)\$?`;
+const LG_PCT_LIST = LG_PCT + String.raw`(?:` + LG_SEP + LG_PCT + String.raw`){0,5}`;
+const LG_MARKER =
+  R03_NOT_W_BEFORE +
+  String.raw`(?:lines?|markers?|symbols?|stars?|asterisks?|daggers?|bands?|shad(?:ing|ed)|` +
+  String.raw`whiskers?|ticks?|contours?|isolines?|circles?|triangles?|squares?|diamonds?|crosses|arrows?)` +
+  R03_NOT_W_AFTER;
+const R03_LEGEND_SRCS = [
+  // "25%, 50% and 75% quantiles", "the 5th and 95th percentiles"
+  String.raw`(?<![0-9.,])` + LG_LIST + LG_WORD_BEFORE + LG_QUANTILE,
+  // "quantiles at 25%, 50% and 75%", "percentiles (5, 50, 95)", "quantile levels 0.1, 0.5 and 0.9"
+  R03_NOT_W_BEFORE + LG_QUANTILE +
+    String.raw`(?:` + LG_WS + String.raw`{0,3}(?:at|of|are|is|for|to|the|from|between|set|levels?|values?|bands?|lines?|ranges?|\(|:|=|,)){0,4}` +
+    LG_WS + String.raw`{0,3}` + LG_LIST,
+  // "p < 0.05, 0.01 and 0.001", "alpha = 0.05", "significance thresholds at 0.05, 0.01 and 0.001"
+  String.raw`(?<![\p{L}\p{N}_\\])` + LG_SIGNIFICANCE +
+    String.raw`(?:` + LG_WS + String.raw`{0,3}(?:` + LG_COMPARE +
+    String.raw`|is|are|was|were|at|of|set|to|below|under|above|for|levels?|values?|\(|:|\\,|\\;)){0,4}` +
+    LG_WS + String.raw`{0,3}` + LG_LIST,
+  // "p < 0.05, 0.01 and 0.001", "$p \le 0.05$", "p-value thresholds of 0.05 and 0.01"
+  String.raw`(?<![\p{L}\p{N}_\\])` + LG_P +
+    String.raw`(?:` + LG_WS + String.raw`{0,3}` + LG_INEQ + String.raw`|` + LG_WS + String.raw`{1,3}` + LG_P_KEY +
+    String.raw`(?:` + LG_WS + String.raw`{0,3}(?:` + LG_COMPARE + String.raw`|is|are|at|of|set|to|below|under|\(|:)){0,3})` +
+    LG_WS + String.raw`{0,3}` + LG_LIST,
+  // "0.05, 0.01 and 0.001 significance levels", "the 0.05 and 0.01 p-value thresholds"
+  String.raw`(?<![0-9.,])` + LG_LIST + LG_WORD_BEFORE +
+    String.raw`(?:significance|thresholds?|\\?alpha|α|p[- ]?levels?|p[- ]?values?` + LG_WS +
+    String.raw`{1,3}` + LG_P_KEY + String.raw`)` + R03_NOT_W_AFTER,
+  // "the 68%, 95% and 99.7% confidence intervals", "95% CIs"
+  String.raw`(?<![0-9.,])` + LG_PCT_LIST + LG_WORD_BEFORE + String.raw`(?:` + LG_CONF +
+    String.raw`|CIs?` + R03_NOT_W_AFTER + String.raw`|HDIs?` + R03_NOT_W_AFTER + String.raw`)`,
+  // "confidence levels of 68%, 95% and 99.7%"
+  R03_NOT_W_BEFORE + LG_CONF + LG_WS + String.raw`{1,3}` + LG_CONF_NOUN +
+    String.raw`(?:` + LG_WS + String.raw`{0,3}(?:at|of|are|is|for|the|=|:|\(|,)){0,3}` + LG_WS + String.raw`{0,3}` + LG_PCT_LIST,
+  // "Lines mark the 0.5 chance level", "Dashed lines at 0.25, 0.50 and 0.75"
+  LG_MARKER +
+    String.raw`(?:` + LG_WS + String.raw`{0,3}(?:mark(?:s|ed|ing)?|denote[sd]?|indicate[sd]?|indicating|at|the|an?|chance|random|` +
+    String.raw`baseline|reference|threshold|target|levels?|values?|of|for|=|:|\(|,)){1,5}` +
+    LG_WS + String.raw`{0,3}` + LG_LIST,
+  // "Solid, dashed and dotted lines correspond to dropout rates of 0.1, 0.2 and 0.5,
+  // respectively": a style mapped to a setting. "respectively" must follow the list,
+  // so "Lines represent accuracies of 0.81, 0.83 and 0.85" still counts.
+  LG_MARKER +
+    String.raw`(?:` + LG_WS + String.raw`{1,3}(?:correspond(?:s|ing)?` + LG_WS + String.raw`{1,3}to|denote[sd]?|indicate[sd]?|` +
+    String.raw`represent(?:s|ed|ing)?|mark(?:s|ed)?|encode[sd]?|use[sd]?))` +
+    String.raw`(?:` + LG_WS + String.raw`{1,3}(?:[A-Za-z$\\-]{1,20}|=)){0,4}` +
+    LG_WS + String.raw`{0,3}` + LG_LIST + String.raw`(?=` + LG_WS + String.raw`{0,3},?` + LG_WS +
+    String.raw`{0,3}respectively` + R03_NOT_W_AFTER + String.raw`)`,
+];
+
+// A heading that opens a method or setup section: its title names a method or an
+// experimental setup and does not also name an outcome, so "Implementation Details"
+// and "Hyperparameters" are exempt and "Experiments", "Evaluation", "Results" and
+// "Setup and Results" are read. Words are ASCII, so both engines read every title
+// the same way.
+const R03_TEX_HEADING_SRC =
+  String.raw`\\(chapter|section|subsection|subsubsection|paragraph|subparagraph)\*?[ \t]{0,3}` +
+  String.raw`(?:\[[^\]\n]{0,200}\])?[ \t]{0,3}\{([^{}\n]{0,200})\}`;
+const R03_HEADING_LEVELS = { chapter: 0, section: 1, subsection: 2, subsubsection: 3, paragraph: 4, subparagraph: 5 };
+const R03_SETUP_WORDS = new Set([
+  'method', 'methods', 'methodology', 'approach', 'setup', 'setups', 'setting', 'settings',
+  'implementation', 'hyperparameter', 'hyperparameters', 'configuration', 'configurations',
+  'dataset', 'datasets', 'details', 'protocol', 'protocols',
+]);
+const R03_OUTCOME_WORDS = new Set([
+  'result', 'results', 'finding', 'findings', 'analysis', 'analyses', 'discussion', 'ablation', 'ablations',
+]);
 
 // Fresh global matcher each time: a shared one carries lastIndex between calls.
 function r03Re(src, flags) {
@@ -1123,9 +1380,35 @@ function r03TableSpans(text, lines) {
   return spans;
 }
 
-function r03StageTwo(text, latex) {
+// Spans of material that carries digits without being a result: labels,
+// citations, layout lengths, identifiers, reference numbers, link targets, and
+// paths. Shared by the prose pass and by the caption check, which reads a
+// caption in isolation.
+function r03MaskSpans(text) {
   const spans = [];
-  const display = [];
+  for (const [src, flags] of [
+    [R03_ARG1_SRC, 'gu'], [R03_ARGN_SRC, 'gu'], [R03_SECTIONING_SRC, 'gu'],
+    [R03_LENGTH_SRC, 'gu'], [R03_IDENT_SRC, 'gu'], [R03_REF_SRC, 'giu'],
+    [R03_SECTION_SIGN_SRC, 'gu'],
+  ]) {
+    for (const m of r03Matches(src, text, flags)) spans.push([m.index, m.index + m[0].length]);
+  }
+  // Markdown link and image targets.
+  for (const m of r03Matches(String.raw`\]\([^)\s]{0,500}\)`, text)) {
+    spans.push([m.index, m.index + m[0].length]);
+  }
+  // A whitespace-delimited token that holds a slash and a letter is a path or a
+  // file name. A bare ratio such as 0.93/1.00 has no letter and stays.
+  for (const m of r03Matches(String.raw`(?<!\S)[^\s/]*/\S*`, text)) {
+    if (/[A-Za-z]/.test(m[0].split('\\%').join(''))) spans.push([m.index, m.index + m[0].length]);
+  }
+  return spans;
+}
+
+// `extra` holds further display spans, such as the captions of a LaTeX file.
+function r03StageTwo(text, latex, extra = []) {
+  const spans = [];
+  const display = extra.slice();
   let covered = 0;
   const exhausted = new Set();
   for (const m of r03Matches(R03_BEGIN_ENV_SRC, text)) {
@@ -1152,23 +1435,9 @@ function r03StageTwo(text, latex) {
   }
   display.push(...r03TableSpans(text, lines));
 
-  spans.push(...display);
-  for (const [src, flags] of [
-    [R03_ARG1_SRC, 'gu'], [R03_ARGN_SRC, 'gu'], [R03_SECTIONING_SRC, 'gu'],
-    [R03_LENGTH_SRC, 'gu'], [R03_IDENT_SRC, 'gu'], [R03_REF_SRC, 'giu'],
-    [R03_SECTION_SIGN_SRC, 'gu'],
-  ]) {
-    for (const m of r03Matches(src, text, flags)) spans.push([m.index, m.index + m[0].length]);
-  }
-  // Markdown link and image targets.
-  for (const m of r03Matches(String.raw`\]\([^)\s]{0,500}\)`, text)) {
-    spans.push([m.index, m.index + m[0].length]);
-  }
-  // A whitespace-delimited token that holds a slash and a letter is a path or a
-  // file name. A bare ratio such as 0.93/1.00 has no letter and stays.
-  for (const m of r03Matches(String.raw`(?<!\S)[^\s/]*/\S*`, text)) {
-    if (/[A-Za-z]/.test(m[0].split('\\%').join(''))) spans.push([m.index, m.index + m[0].length]);
-  }
+  // Loops, not push(...): a long file holds more spans than a call takes.
+  for (const s of display) spans.push(s);
+  for (const s of r03MaskSpans(text)) spans.push(s);
   return [r03Blank(text, spans), display];
 }
 
@@ -1425,6 +1694,261 @@ function r03Figures(masked) {
   return out;
 }
 
+// ---------- LaTeX helpers for checks C and D and for RULE-A -----------------------
+
+// Python's str.isspace() for one UTF-16 unit (all of its whitespace is in the
+// BMP).
+function r03IsPySpace(c) {
+  return (
+    (c >= 9 && c <= 13) || (c >= 28 && c <= 32) || c === 0x85 || c === 0xa0 || c === 0x1680 ||
+    (c >= 0x2000 && c <= 0x200a) || c === 0x2028 || c === 0x2029 || c === 0x202f ||
+    c === 0x205f || c === 0x3000
+  );
+}
+
+// Python's str.strip() with no argument. A loop and not a regex: a trailing
+// `\s+$` retried at every offset of a long run of blanks is quadratic.
+function r03PyStrip(s) {
+  let a = 0;
+  let b = s.length;
+  while (a < b && r03IsPySpace(s.charCodeAt(a))) a++;
+  while (b > a && r03IsPySpace(s.charCodeAt(b - 1))) b--;
+  return s.slice(a, b);
+}
+
+// Length in code points, which is what Python's len() counts.
+function r03CodePointLength(s) {
+  let n = 0;
+  for (const _ch of s) n++; // eslint-disable-line no-unused-vars
+  return n;
+}
+
+// Python's str.find(ch, start, end) for one character, bounded so a scan for a
+// closing bracket costs a fixed number of steps.
+function r03FindBounded(s, ch, start, end) {
+  const stop = Math.min(end, s.length);
+  for (let k = start; k < stop; k++) if (s[k] === ch) return k;
+  return -1;
+}
+
+// Spans of each environment whose \begin token `beginSrc` finds. Found by
+// search, so an unclosed environment costs one scan and not one per opener.
+function r03EnvSpans(text, beginSrc) {
+  const spans = [];
+  let covered = 0;
+  const exhausted = new Set();
+  for (const m of r03Matches(beginSrc, text)) {
+    if (m.index < covered || exhausted.has(m[1])) continue;
+    const endTok = '\\end{' + m[1] + '}';
+    const j = text.indexOf(endTok, m.index + m[0].length);
+    if (j < 0) {
+      exhausted.add(m[1]);
+      continue;
+    }
+    covered = j + endTok.length;
+    spans.push([m.index, covered]);
+  }
+  return spans;
+}
+
+// Map the offset of each `{` to the offset of its closing `}`. A backslash
+// escapes the next character, so `\{` and `\\{` read as they do in LaTeX. One
+// pass with a stack, so a file of unclosed groups costs nothing extra per group.
+function r03BraceMap(text) {
+  const match = new Map();
+  const stack = [];
+  for (const m of r03Matches(R03_BRACE_TOKEN_SRC, text, 'gsu')) {
+    const ch = m[0];
+    if (ch === '{') stack.push(m.index);
+    else if (ch === '}' && stack.length > 0) match.set(stack.pop(), m.index);
+  }
+  return match;
+}
+
+function r03SkipBlanks(text, i) {
+  while (i < text.length) {
+    const c = text.charCodeAt(i);
+    if (c === 32 || c === 9 || c === 13 || c === 10) i++;
+    else break;
+  }
+  return i;
+}
+
+// [command start, body start, body end, offset after the closing brace] per
+// caption: \caption{..}, \caption*{..}, \caption[short]{..} and
+// \captionof{type}{..}, braces balanced. A caption inside a code environment is
+// an example and is not read; a caption that opens inside another one is part
+// of it.
+function r03Captions(text) {
+  if (!text.includes('\\caption')) return [];
+  const src = r03Blank(text, r03EnvSpans(text, R03_CODE_ENV_SRC));
+  const n = src.length;
+  let braces = null;
+  const out = [];
+  let covered = 0;
+  for (const m of r03Matches(R03_CAPTION_SRC, src)) {
+    if (m.index < covered) continue;
+    if (braces === null) braces = r03BraceMap(src);
+    let i = r03SkipBlanks(src, m.index + m[0].length);
+    if (m.groups.of) {
+      if (i >= n || src[i] !== '{' || !braces.has(i)) continue;
+      i = r03SkipBlanks(src, braces.get(i) + 1);
+    }
+    if (i < n && src[i] === '[') {
+      const j = r03FindBounded(src, ']', i, i + 600);
+      if (j < 0) continue;
+      i = r03SkipBlanks(src, j + 1);
+    }
+    if (i < n && src[i] === '{' && braces.has(i)) {
+      covered = braces.get(i) + 1;
+      out.push([m.index, i + 1, braces.get(i), covered]);
+    }
+  }
+  return out;
+}
+
+// Blank $..$ and \(..\) math, length-preserving. A \$ is a dollar sign.
+function r03StripMath(text) {
+  const marks = [];
+  for (const m of r03Matches(R03_DOLLAR_SRC, text)) marks.push(m.index);
+  const spans = [];
+  for (let i = 0; i < marks.length - 1; i += 2) spans.push([marks[i], marks[i + 1] + 1]);
+  for (const s of r03Pairs(text, '\\(', '\\)')) spans.push(s);
+  return r03Blank(text, spans);
+}
+
+// The words of a LaTeX fragment: no citations, references, math or commands. A
+// command is dropped and its text argument is kept, so `\textbf{Left:} the run`
+// reads `Left: the run`.
+function r03PlainText(raw) {
+  // A line break first: the two words in `one\\two` are not a word and a command.
+  let t = raw.split('\\\\').join(' ');
+  for (const src of [R03_ARG1_SRC, R03_ARGN_SRC, R03_FIRST_ARG_SRC, R03_RULE_ARGS_SRC, R03_SPAN_ARGS_SRC]) {
+    t = t.replace(r03Re(src), ' ');
+  }
+  t = r03StripMath(t);
+  t = t.replace(r03Re(R03_COMMAND_SRC), ' ');
+  t = t.replace(r03Re(R03_ESCAPED_SRC), '$1');
+  t = t.replace(/[{}~\\]/gu, ' ');
+  return r03PyStrip(t.replace(r03Re(R03_PY_SPACE_RUN_G_SRC), ' '));
+}
+
+// Tokens with at least two letters in a row; numbers and single letters are not words.
+function r03CountWords(plain) {
+  let n = 0;
+  for (const token of plain.split(R03_PY_SPACE_RUN_RE)) {
+    if (token !== '' && R03_WORD_RE.test(token)) n++;
+  }
+  return n;
+}
+
+// Spans of legend and decoding metadata: quantile lines, significance levels,
+// markers. Used on a caption only. A number beside the word that names a line, a
+// threshold or a symbol is a key to the display and not a result.
+function r03LegendSpans(text) {
+  const spans = [];
+  for (const src of R03_LEGEND_SRCS) {
+    for (const m of r03Matches(src, text, 'giu')) spans.push([m.index, m.index + m[0].length]);
+  }
+  return spans;
+}
+
+// Precise figures in a fragment read alone, with the masks and the level rule of
+// check A. A confidence level and the numbers of a legend are not figures.
+function r03SpanFigures(segment) {
+  // The fragment is only counted, never located, so its blanks can be collapsed: a
+  // caption wrapped and indented in the source reads like one written on one line.
+  const masked = r03Blank(segment, r03MaskSpans(segment)).replace(/[ \t\r\n~]+/g, ' ');
+  const levels = r03Intervals(masked)[1];
+  // Legends are read before the levels are blanked: blanking "99.7% confidence"
+  // first would cut the end off "68%, 95% and 99.7% confidence intervals".
+  return r03Figures(r03Blank(masked, levels.concat(r03LegendSpans(masked)))).length;
+}
+
+// True when a heading title names a method or a setup and no outcome.
+function r03IsSetupTitle(raw) {
+  const words = new Set();
+  for (const m of r03Matches(String.raw`[A-Za-z]+`, raw.replace(/(?<=[A-Za-z])-(?=[A-Za-z])/g, ''), 'g')) {
+    words.add(m[0].toLowerCase());
+  }
+  let setup = false;
+  for (const w of words) {
+    if (R03_OUTCOME_WORDS.has(w)) return false;
+    if (R03_SETUP_WORDS.has(w)) setup = true;
+  }
+  return setup;
+}
+
+// Sorted [start, end] spans of LaTeX method and setup sections. A \section,
+// \subsection, \subsubsection or \paragraph heading (a star or a short title in
+// brackets allowed) whose title names a method or a setup opens a span that runs to
+// the next heading of the same or a higher level, or to the end of the text. Exact
+// settings (learning rates, dropout, splits) belong there. One pass, so a file of
+// headings costs a single scan.
+function r03SetupSpans(text) {
+  const spans = [];
+  let openLevel = -1;
+  let openStart = 0;
+  for (const m of r03Matches(R03_TEX_HEADING_SRC, text)) {
+    const level = R03_HEADING_LEVELS[m[1]];
+    if (openLevel >= 0 && level <= openLevel) {
+      spans.push([openStart, m.index]);
+      openLevel = -1;
+    }
+    if (openLevel < 0 && r03IsSetupTitle(m[2])) {
+      openLevel = level;
+      openStart = m.index + m[0].length;
+    }
+  }
+  if (openLevel >= 0) spans.push([openStart, text.length]);
+  return spans;
+}
+
+// [start, end] of the LaTeX document body: after \begin{document}, before
+// \end{document}. A fragment with neither command is all body.
+function r03DocumentRange(stageOne) {
+  let start = 0;
+  let end = stageOne.length;
+  const tok = '\\begin{document}';
+  const i = stageOne.indexOf(tok);
+  if (i >= 0) start = i + tok.length;
+  const j = stageOne.indexOf('\\end{document}', start);
+  if (j >= 0) end = j;
+  return [start, end];
+}
+
+// A number with at least `places` decimal places, sign included. The sign is a
+// minus, a plus, U+2212, or one wrapped in math ($-$0.05, $-0.05$). A hyphen
+// inside a name (ResNet-18.1234) is not a sign, and a number glued to a word or
+// to another number is an identifier. Up to five thousands groups belong to the
+// number (1,234.5678); the bound keeps a long run of 123,123,123 from being
+// rescanned at every group.
+function r03DecimalSrc(places) {
+  return (
+    String.raw`(?<![\p{L}\p{N}_.])(?:\$?[-+−]\$?)?(?<![\p{L}\p{N}_.])` +
+    String.raw`(?:\p{Nd}{1,3}(?:,\p{Nd}{3}){1,5}|\p{Nd}*)\.\p{Nd}{` + places + String.raw`,}(?!\p{Nd})(?!\.\p{Nd})`
+  );
+}
+
+// Significant digits of a matched number: its digits without the leading zeros.
+// 0.0143 has three, 0.00025 two and 0.0001 one; a zero after the first digit counts
+// (0.1000 has four). Leading zeros are the ASCII zero only, so both engines count
+// exotic digits the same way.
+function r03Significant(number) {
+  return r03CodePointLength(number.replace(/[^\p{Nd}]/gu, '').replace(/^0+/, ''));
+}
+
+// A function from an offset to [line, column, line text], for findings.
+function r03MakeLocate(text) {
+  const spans = lineSpans(text);
+  const starts = spans.map((s) => s[0]);
+  return (offset) => {
+    const lineNo = Math.max(1, r03BisectRight(starts, offset));
+    const [lineStart, lineEnd] = spans[lineNo - 1];
+    return [lineNo, offset - lineStart + 1, text.slice(lineStart, lineEnd)];
+  };
+}
+
 // Number of elements of sorted `arr` strictly below `x` (Python's bisect_left).
 function r03BisectLeft(arr, x) {
   let lo = 0;
@@ -1470,16 +1994,36 @@ function rule03Scan(text, filePath) {
   // so check A skips it. Check B does not.
   const appendix = r03AppendixNamed(base) ? [[0, stageOne.length]] : r03AppendixSpans(stageOne, latex);
   const appendixStarts = appendix.map((s) => s[0]);
-  const [masked, display] = r03StageTwo(stageOne, latex);
+  // A method or setup section holds the exact settings a reader needs to repeat the
+  // work, so the body run of check B and check D skip it.
+  const setup = latex ? r03SetupSpans(stageOne) : [];
+  const setupStarts = setup.map((s) => s[0]);
+  // A caption is display material: it feeds check C and neither A nor B, in or
+  // out of a figure or table environment.
+  const captions = latex ? r03Captions(stageOne) : [];
+  const [masked, display] = r03StageTwo(stageOne, latex, captions.map((c) => [c[0], c[3]]));
+  const [docStart, docEnd] = latex ? r03DocumentRange(stageOne) : [0, 0];
+
+  const inAppendix = (offset) => {
+    const slot = r03BisectRight(appendixStarts, offset) - 1;
+    return slot >= 0 && offset < appendix[slot][1];
+  };
+
+  const inSetup = (offset) => {
+    const slot = r03BisectRight(setupStarts, offset) - 1;
+    return slot >= 0 && offset < setup[slot][1];
+  };
 
   const cuts = display.map((s) => s[0]).concat(display.map((s) => s[1]));
   for (const [start, end] of regions) cuts.push(start, end);
+  for (const [start, end] of setup) cuts.push(start, end);
   const sentences = r03Sentences(masked, cuts);
-  if (sentences.length === 0) return [];
+  if (sentences.length === 0 && captions.length === 0) return [];
   const sentenceStarts = sentences.map((s) => s[0]);
 
   const [intervals, levels] = r03Intervals(masked);
-  const figureStarts = r03Figures(r03Blank(masked, levels));
+  const figuresText = r03Blank(masked, levels);
+  const figureStarts = r03Figures(figuresText);
 
   const spans = lineSpans(text);
   const lineStarts = spans.map((s) => s[0]);
@@ -1518,7 +2062,8 @@ function rule03Scan(text, filePath) {
     });
   }
 
-  // Check B: stacked figures, only inside an abstract or an introduction.
+  // Check B: stacked figures, inside an abstract or an introduction and, in a
+  // LaTeX file, in the body prose between them.
   const merged = [];
   for (const [start, end, label] of regions) {
     if (merged.length > 0 && start < merged[merged.length - 1][1]) {
@@ -1535,25 +2080,38 @@ function rule03Scan(text, filePath) {
     return null;
   };
 
+  const labelOf = (offset) => {
+    const label = regionOf(offset);
+    if (label === null && latex && docStart <= offset && offset < docEnd && !inAppendix(offset) && !inSetup(offset)) {
+      return R03_BODY;
+    }
+    return label;
+  };
+
   const counts = sentences.map(([start, end]) => [
     start,
     end,
     r03BisectLeft(figureStarts, end) - r03BisectLeft(figureStarts, start),
-    regionOf(start),
+    labelOf(start),
   ]);
 
   const reportRun = (run) => {
     const start = run[0][0];
     const total = run.reduce((acc, item) => acc + item[2], 0);
     const [lineNo, col, line] = locate(start);
+    const detail =
+      run[0][3] === R03_BODY
+        ? `${run.length} consecutive sentences in the body text carry ${total} precise figures. ` +
+          'Keep the few magnitudes behind the main findings, round them, ' +
+          'and move the rest to a table or an appendix'
+        : `${run.length} consecutive sentences in the ${run[0][3]} carry ${total} precise figures; ` +
+          'keep the few magnitudes behind the main findings and move the rest to a table';
     out.push({
       rule: 'RULE-03',
       line: lineNo,
       column: col,
       excerpt: excerpt(line, [col - 1, col - 1 + Math.min(run[0][1] - start, 80)]),
-      detail:
-        `${run.length} consecutive sentences in the ${run[0][3]} carry ${total} precise figures; ` +
-        'keep the few magnitudes behind the main findings and move the rest to a table',
+      detail,
     });
   };
 
@@ -1568,15 +2126,17 @@ function rule03Scan(text, filePath) {
       reportRun(run);
     } else {
       for (const [start, end, n, lab] of run) {
-        if (n >= R03_CROWDED) {
+        const limit = lab === R03_BODY ? R03_TUNING.bodyCrowded : R03_CROWDED;
+        if (limit !== null && n >= limit) {
           const [lineNo, col, line] = locate(start);
+          const where = lab === R03_BODY ? 'the body text' : `the ${lab}`;
           out.push({
             rule: 'RULE-03',
             line: lineNo,
             column: col,
             excerpt: excerpt(line, [col - 1, col - 1 + Math.min(end - start, 80)]),
             detail:
-              `one sentence in the ${lab} carries ${n} precise figures; ` +
+              `one sentence in ${where} carries ${n} precise figures; ` +
               'keep the one the claim rests on and move the rest to a table',
           });
         }
@@ -1584,7 +2144,269 @@ function rule03Scan(text, filePath) {
     }
     run = label !== null && item[2] >= R03_RUN_FIGURES ? [item] : [];
   }
+  // A crowded sentence below the run threshold of figures per sentence cannot
+  // exist (crowded implies at least the run threshold), so nothing is missed.
 
+  // Check C: a caption that carries precise figures or runs long. LaTeX only,
+  // outside an appendix.
+  const capTail =
+    'A caption names the display, its pattern, and what the marks mean. Keep decoding ' +
+    'values such as error-bar definitions; move repeated results, setup narration, ' +
+    'and caveats to the text or an appendix';
+  for (const [cmdStart, bodyStart, bodyEnd] of captions) {
+    if (inAppendix(cmdStart)) continue;
+    const body = stageOne.slice(bodyStart, bodyEnd);
+    const words = r03CountWords(r03PlainText(body));
+    const figs = r03SpanFigures(body);
+    let head;
+    if (figs >= R03_TUNING.captionFigures) head = `a caption carries ${figs} precise figures`;
+    else if (words > R03_TUNING.captionWords) head = `a caption runs ${words} words`;
+    else continue;
+    const [lineNo, col, line] = locate(cmdStart);
+    out.push({
+      rule: 'RULE-03',
+      line: lineNo,
+      column: col,
+      excerpt: excerpt(line, [col - 1, col - 1 + 80]),
+      detail: `${head}. ${capTail}`,
+    });
+  }
+
+  // Check D: numbers written to many decimal places, in LaTeX body prose (the
+  // abstract and introduction included) outside an appendix.
+  if (latex && sentences.length > 0) {
+    const places = R03_TUNING.decimalPlaces;
+    const need = R03_TUNING.decimalCount;
+    const perSentence = R03_TUNING.decimalUnit === 'sentence';
+    const digits = R03_TUNING.decimalSignificant;
+    const longStarts = [];
+    for (const m of r03Matches(r03DecimalSrc(places), figuresText)) {
+      if (
+        docStart <= m.index && m.index < docEnd && !inAppendix(m.index) &&
+        !inSetup(m.index) && r03Significant(m[0]) >= digits
+      ) {
+        longStarts.push(m.index);
+      }
+    }
+    if (longStarts.length > 0) {
+      let units;
+      if (perSentence) {
+        units = sentences;
+      } else {
+        const points = new Set([0, masked.length]);
+        for (const m of r03Matches(R03_BLOCK_SRC, masked)) points.add(m.index);
+        // A heading ends a paragraph even when its body runs on in the same
+        // source line, as a \paragraph{} heading does.
+        for (const m of r03Matches(R03_TEX_HEADING_SRC, stageOne)) points.add(m.index);
+        const ordered = [...points].sort((x, y) => x - y);
+        units = [];
+        for (let i = 0; i + 1 < ordered.length; i++) units.push([ordered[i], ordered[i + 1]]);
+      }
+      const unit = perSentence ? 'sentence' : 'paragraph';
+      for (const [start, end] of units) {
+        const lo = r03BisectLeft(longStarts, start);
+        const hi = r03BisectLeft(longStarts, end);
+        if (hi - lo < need) continue;
+        const [lineNo, col, line] = locate(longStarts[lo]);
+        out.push({
+          rule: 'RULE-03',
+          line: lineNo,
+          column: col,
+          excerpt: excerpt(line, [col - 1, col - 1 + 20]),
+          detail:
+            `${hi - lo} numbers written to ${places} or more decimal places in one ${unit}. ` +
+            'Report the precision the measurement supports, usually two or three ' +
+            'significant digits, and keep the full values in a table or an appendix',
+        });
+      }
+    }
+  }
+
+  out.sort((x, y) => x.line - y.line || x.column - y.column);
+  return out;
+}
+
+// ---------- RULE-A table cells (hook-only, LaTeX only) -----------------------
+
+// Table environments as [begin, body start, body end, end, nested spans, env].
+// `text` is LaTeX with comments and code blanked. A table nested in a table cell
+// is its own entry and its span is listed under its parent, whose cells then
+// skip it. Only the outer RA_MAX_DEPTH levels are returned, so a file of deeply
+// nested tables costs a bounded number of rescans.
+function raTables(text) {
+  const stack = [];
+  const openCount = new Map();
+  const out = [];
+  for (const m of r03Matches(RA_ENV_SRC, text)) {
+    const env = m[2];
+    const endAt = m.index + m[0].length;
+    if (m[1] === 'begin') {
+      stack.push([env, m.index, endAt, [], stack.length]);
+      openCount.set(env, (openCount.get(env) || 0) + 1);
+      continue;
+    }
+    if (!openCount.get(env)) continue;
+    let k = stack.length - 1;
+    while (stack[k][0] !== env) k--;
+    const node = stack[k];
+    for (let q = k; q < stack.length; q++) {
+      openCount.set(stack[q][0], openCount.get(stack[q][0]) - 1);
+    }
+    stack.length = k;
+    if (node[4] < RA_MAX_DEPTH) out.push([node[1], node[2], m.index, endAt, node[3], node[0]]);
+    if (stack.length > 0) stack[stack.length - 1][3].push([node[1], endAt]);
+  }
+  out.sort((x, y) => x[0] - y[0]);
+  return out;
+}
+
+// Offset after the optional and brace arguments that open a table environment.
+function raSkipArgs(text, braces, i, nargs) {
+  const n = text.length;
+  let got = 0;
+  while (got < nargs) {
+    const j = r03SkipBlanks(text, i);
+    if (j < n && text[j] === '[') {
+      const k = r03FindBounded(text, ']', j, j + 200);
+      if (k < 0) break;
+      i = k + 1;
+    } else if (j < n && text[j] === '{' && braces.has(j)) {
+      i = braces.get(j) + 1;
+      got++;
+    } else {
+      break;
+    }
+  }
+  return i;
+}
+
+// [offset, text] of each cell of a table body, split at `&` and at row breaks.
+// `work` is the body with nested tables and captions blanked, and `base` the
+// offset it starts at. A separator inside braces, such as the `\\` of a
+// `\makecell`, does not split.
+function raCells(work, base) {
+  const cells = [];
+  let depth = 0;
+  let start = 0;
+  for (const m of r03Matches(RA_TOKEN_SRC, work, 'gsu')) {
+    const tok = m[0];
+    if (tok === '{') {
+      depth++;
+    } else if (tok === '}') {
+      depth = Math.max(0, depth - 1);
+    } else if (depth > 0) {
+      continue;
+    } else if (tok === '&' || tok.slice(0, 2) === '\\\\' || tok === '\\tabularnewline' || tok === '\\cr') {
+      cells.push([base + start, work.slice(start, m.index)]);
+      start = m.index + tok.length;
+    }
+  }
+  cells.push([base + start, work.slice(start)]);
+  return cells;
+}
+
+// Pieces of a cleaned cell that hold at least RA_SENTENCE_WORDS words. A full
+// stop after an abbreviation, an initial, or a dotted abbreviation such as `e.g.`
+// does not end a sentence.
+function raSentenceCount(plain) {
+  const pieces = [];
+  let start = 0;
+  const tokenRe = new RegExp(R03_PRECEDING_TOKEN_SRC, 'u');
+  for (const m of r03Matches(RA_BOUNDARY_SRC, plain)) {
+    const token = tokenRe.exec(plain.slice(Math.max(0, m.index - 16), m.index));
+    if (token !== null) {
+      const word = token[1].toLowerCase();
+      if (
+        R03_ABBREVIATIONS.has(word) ||
+        word.length === 1 ||
+        (word.includes('.') && word.split('.').every((p) => p.length === 1))
+      ) {
+        continue;
+      }
+    }
+    const end = m.index + m[0].length;
+    pieces.push(plain.slice(start, end));
+    start = end;
+  }
+  pieces.push(plain.slice(start));
+  let n = 0;
+  for (const piece of pieces) if (r03CountWords(piece) >= RA_SENTENCE_WORDS) n++;
+  return n;
+}
+
+// Flag a LaTeX table cell that holds prose. A table environment (tabular,
+// tabular*, tabularx, tabulary, longtable, tblr) outside an appendix or a
+// supplement is flagged, once, when a cell holds more than RA_CELL_WORDS words
+// or RA_CELL_SENTENCES sentences. A word is a token with two or more letters
+// once commands, math, citations and references are stripped. The finding sits
+// on the first such cell. LaTeX only: a Markdown table in an agent document may
+// carry long cells by design, so a `.md` file is never read.
+//
+// Hook-only, like rule03: the CLI audit classifies RULE-A as structural and
+// never calls this. Never throws: the guard treats an exception from any
+// advisory detector as a broken package.
+function ruleA(text, filePath = '') {
+  try {
+    return ruleAScan(text, filePath);
+  } catch (err) {
+    return [];
+  }
+}
+
+function ruleAScan(text, filePath) {
+  if (typeof text !== 'string' || text.length === 0) return [];
+  const base = String(filePath || '').split(/[\\/]/).pop().toLowerCase();
+  if (!r03IsLatex(base, text) || r03AppendixNamed(base)) return [];
+  const stageOne = r03StageOne(text, true, false);
+  if (!stageOne.includes('\\begin{')) return [];
+  const src = r03Blank(stageOne, r03EnvSpans(stageOne, R03_CODE_ENV_SRC));
+  const tables = raTables(src);
+  if (tables.length === 0) return [];
+  const appendix = r03AppendixSpans(stageOne, true);
+  const appendixStarts = appendix.map((s) => s[0]);
+  const braces = r03BraceMap(src);
+  const captions = r03Captions(src).map((c) => [c[0], c[3]]);
+  const captionStarts = captions.map((c) => c[0]);
+  const locate = r03MakeLocate(text);
+  const leadRe = new RegExp(RA_LEAD_SRC, 'u');
+  const out = [];
+  for (const [begin, bodyStart, bodyEnd, , nested, env] of tables) {
+    const slot = r03BisectRight(appendixStarts, begin) - 1;
+    if (slot >= 0 && begin < appendix[slot][1]) continue;
+    const start = raSkipArgs(src, braces, bodyStart, RA_ARG_COUNT[env]);
+    if (start >= bodyEnd) continue;
+    const lo = r03BisectLeft(captionStarts, start);
+    const hi = r03BisectLeft(captionStarts, bodyEnd);
+    const skip = [];
+    for (const [a, b] of nested.concat(captions.slice(lo, hi))) {
+      if (a >= start) skip.push([a - start, b - start]);
+    }
+    const work = r03Blank(src.slice(start, bodyEnd), skip);
+    for (const [offset, raw] of raCells(work, start)) {
+      if (raw.length < 18 || r03CodePointLength(r03PyStrip(raw)) < 18) continue;
+      const plain = r03PlainText(raw);
+      const words = r03CountWords(plain);
+      let head;
+      if (words > RA_CELL_WORDS) {
+        head = `a table cell of ${words} words`;
+      } else if (words >= 2 * RA_SENTENCE_WORDS && raSentenceCount(plain) >= RA_CELL_SENTENCES) {
+        head = `a table cell of ${raSentenceCount(plain)} sentences`;
+      } else {
+        continue;
+      }
+      const [lineNo, col, line] = locate(offset + leadRe.exec(raw)[0].length);
+      out.push({
+        rule: 'RULE-A',
+        line: lineNo,
+        column: col,
+        excerpt: excerpt(line, [col - 1, col - 1 + 80]),
+        detail:
+          `${head}; a table cell holds a number, a label, or a short phrase, ` +
+          'so move content that needs a sentence into the text',
+      });
+      break;
+    }
+  }
   out.sort((x, y) => x.line - y.line || x.column - y.column);
   return out;
 }
@@ -1600,14 +2422,33 @@ const DISPATCH = {
   'RULE-05': rule05,
   'RULE-06': rule06,
   'RULE-03': rule03,
+  'RULE-A': ruleA,
 };
 
 // Detectors that also take the file path. RULE-03 locates the abstract and the
-// introduction by file name as well as by markup.
-const FILE_PATH_RULES = new Set(['RULE-03']);
+// introduction by file name as well as by markup, and RULE-03 and RULE-A read
+// LaTeX only and exempt appendix and supplement files by name.
+//
+// RULE-A is registered here so a hook can reach it as `ruleA`, but the audit
+// never runs it: CLASSIFICATION in primitive.js holds RULE-A as structural only,
+// and `audit` calls this module for a rule only when its bucket holds
+// 'mechanical'. The structural RULE-A (bullet overuse) stays what `agent-style
+// review` reports under that id, and the mechanical scope the benchmark pins
+// does not change. RULE-03 is registered the same way.
+const FILE_PATH_RULES = new Set(['RULE-03', 'RULE-A']);
 
 // lineSpans is exported for the boundary tests: it is the detector's own
 // CR/LF/CRLF line model, and `audit` normalises on read, so a direct-text
-// caller is the only path that exercises it. rule03 is exported for the same
-// reason: the RULE-03 tests call it on text with a file path.
-module.exports = { run, lineSpans, rule03 };
+// caller is the only path that exercises it. rule03 and ruleA are exported for
+// the same reason: the tests call them on text with a file path, and a hook
+// imports ruleA the way it imports rule03. r03Tuning is the object that holds
+// the 0.7.0 limits of check B (body), C and D, which the Python module holds as
+// _R03_* constants; a test sets a field the way a Python test monkeypatches
+// the constant, and restores it. rule03Scan and ruleAScan are the scans without
+// the catch-all, so a never-throws test cannot hide a bug behind the wrapper, as
+// the Python tests call _rule_03_scan and _rule_a_scan. r03Significant is the
+// significant-digit count of check D, which the Python tests call as
+// _r03_significant.
+module.exports = {
+  run, lineSpans, rule03, ruleA, rule03Scan, ruleAScan, r03Tuning: R03_TUNING, r03Significant,
+};

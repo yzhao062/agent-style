@@ -4,7 +4,15 @@
 Rules covered (see ``skills/style-review/references/rule-detectors.md``):
   RULE-03 numeric intervals written into prose, and precise figures (decimals,
           percentages) stacked in an abstract or introduction; takes the file
-          path, because a file named for the abstract or introduction is one
+          path, because a file named for the abstract or introduction is one.
+          In a LaTeX file it also reads the body prose for the same stack of
+          three sentences, a caption that carries three precise figures or runs
+          over 100 words, and a paragraph with four numbers at four or more
+          decimal places (hook-only: the audit classifies RULE-03 as semantic)
+  RULE-A  (hook-only, ``_rule_a``) a LaTeX table cell that holds more than 15
+          words or two sentences; takes the file path and reads LaTeX only. The
+          audit never calls it: it classifies RULE-A as structural (bullet
+          overuse)
   RULE-B  em/en-dash casual use (excludes numeric ranges and paired names)
   RULE-D  overused sentence-initial transition openers from the six-item rule list
   RULE-G  heading title-case per RULE-G's own convention (lowercase articles,
@@ -692,8 +700,8 @@ _R03_NOT_NEWLINE = re.compile(r"[^\n\r]")
 
 # Environments whose whole body is display material, not prose.
 _R03_DISPLAY_ENVS = (
-    "tabular", "tabular*", "tabularx", "longtable", "array", "supertabular",
-    "tabu", "equation", "equation*", "align", "align*", "alignat", "alignat*",
+    "tabular", "tabular*", "tabularx", "tabulary", "tblr", "longtable", "array",
+    "supertabular", "tabu", "equation", "equation*", "align", "align*", "alignat", "alignat*",
     "gather", "gather*", "multline", "multline*", "eqnarray", "eqnarray*",
     "flalign", "flalign*", "displaymath", "math", "figure", "figure*", "table",
     "table*", "wrapfigure", "wraptable", "tikzpicture", "verbatim", "verbatim*",
@@ -883,11 +891,255 @@ _R03_DELIMITER_CELL_RE = re.compile(r"[ \t]*:?-+:?[ \t]*")
 
 # A file named for an appendix or a supplement holds detailed prose; so does the
 # part of a LaTeX file after `\appendix`. `support` is not one of the tokens.
+# Paper repositories also split appendices into `app-*.tex`, `appx.tex`, or
+# `apx-*.tex`; tokens split on `-`, `_`, `.`, and spaces, so `application.tex`
+# stays a body file.
 _R03_APPENDIX_NAME_TOKENS = frozenset(
-    {"appendix", "appendices", "supplement", "supplementary", "supp"}
+    {"appendix", "appendices", "supplement", "supplementary", "supp", "app", "appx", "apx"}
 )
 _R03_APPENDIX_NAME_SPLIT_RE = re.compile(r"[-_. ]+")
 _R03_APPENDIX_CMD_RE = re.compile(r"\\appendix(?!\w)")
+
+
+# ---------- RULE-03 checks C and D, body-prose check B, RULE-A table cells ----
+#
+# agent-style 0.7.0 extends the hook-only figure checks from the abstract and
+# introduction to the rest of a LaTeX paper. Everything below reads LaTeX only:
+# the Markdown tables of agent documents carry long cells by design (30-40% of
+# the ones measured), so the same limits there would flood. The appendix and
+# supplement exemptions are those of check A.
+#
+#   B (body)  the run criterion of check B, in LaTeX body prose outside a
+#             method or setup section
+#   C         a caption that carries precise figures or runs long; the numbers
+#             of a legend (quantile lines, significance levels, markers) are
+#             keys and not figures
+#   D         numbers written to four or more decimal places and three or more
+#             significant digits (0.0143 counts, 0.0001 does not), outside a
+#             method or setup section
+#   RULE-A    a LaTeX table cell that holds prose (``_rule_a`` below)
+#
+# Measured in 2026-10 on the .tex files of 12 pre-2023 arXiv papers (169 files
+# after content-hash dedupe) and of agent-assisted drafts (335 files), with each
+# path passed so the file-name exemptions apply. Findings as human | drafts:
+#
+#   B body run          0 | 53 (18 files; none sit in files named app-*, which
+#                       the name exemption covers). The method and setup
+#                       exemption removes 4 of the draft findings.
+#   B body crowded      limit 5: 6 | 76 (5 distinct human sentences), limit 6:
+#                       4 | 54. A human body sentence with five figures is not
+#                       rare, so the crowded criterion stays in the abstract
+#                       and the introduction.
+#   C caption           5 of 202 human captions | 98 of 373 at 3 figures or over
+#                       100 words (human: 3 by figures, 2 by words; drafts: 44
+#                       and 71, each limit alone). Legend numbers removed 2
+#                       draft findings and no human one. One step up on both
+#                       (4 figures, 120 words) leaves 3 | 62. The human hits
+#                       restate results or run to a paragraph, which is the
+#                       pattern.
+#   D excess precision  numbers at 4+ places and 3+ significant digits. A
+#                       paragraph with 3 numbers at 3+ places: 5 | 145; at 4+
+#                       places: 3 | 20; a sentence with 2 at 4+ places: 5 | 39.
+#                       None keeps the human count at 2 or fewer. A paragraph
+#                       with 4 numbers at 4+ places does: 2 | 14 (each human
+#                       paragraph holds eight such numbers). Three places is
+#                       ordinary reporting (an AUC of 0.824), and a paragraph
+#                       at 3+ places stays above 2 human at every count up to 7
+#                       (8 gives 2 | 45, but that counts density and not
+#                       precision). A sentence with 5 numbers at 3+ places
+#                       gives 2 | 35 and measures crowding, so it is not
+#                       shipped. The significant-digit rule removed 6 draft
+#                       findings (21 to 15) and the setup exemption 1 more; the
+#                       human count stayed at 2.
+#   RULE-A table cell   0 of 103 human tables | 29 of 292 (24 files; none in
+#                       app-* files). The longest human cell holds 6 words.
+#
+# The detectors are advisory and the guard caps what it shows, so each value
+# below was set to miss some of the pattern rather than flood. Change a value
+# only with a new measurement.
+
+_R03_BODY = "body"          # label of a sentence in LaTeX body prose
+# Crowded sentences in body prose. None: off, because five figures in one human
+# body sentence is not rare (6 of them in the human corpora at a limit of 5).
+_R03_BODY_CROWDED = None
+
+# Captions: 5 of 202 human, 98 of 373 draft captions (3 | 44 by figures, 2 | 71 by words).
+_R03_CAPTION_FIGURES = 3    # precise figures that make a caption a results table
+_R03_CAPTION_WORDS = 100    # words above which a caption is a paragraph
+
+# Excess precision: numbers with at least _R03_DECIMAL_PLACES decimal places and
+# _R03_DECIMAL_SIGNIFICANT significant digits, _R03_DECIMAL_COUNT of them in one
+# _R03_DECIMAL_UNIT ("paragraph" or "sentence"). Leading zeros after the point are
+# scale, so a learning rate of 0.0001 is one significant digit and not precision.
+# Shipped values: 2 human paragraphs | 14 draft paragraphs.
+_R03_DECIMAL_PLACES = 4
+_R03_DECIMAL_COUNT = 4
+_R03_DECIMAL_UNIT = "paragraph"
+_R03_DECIMAL_SIGNIFICANT = 3
+
+# A table cell holds a number, a label, or a short phrase. 0 of 103 human tables |
+# 29 of 292 draft tables (26 by words, 3 by sentences). A sentence of one or two
+# words is not counted: at 1, eight more draft tables flag, each on the period
+# of an abbreviation.
+_RA_CELL_WORDS = 15         # words above which a cell is prose
+_RA_CELL_SENTENCES = 2      # sentences that make a cell prose
+_RA_SENTENCE_WORDS = 3      # words a piece needs to count as a sentence
+_RA_MAX_DEPTH = 4           # nested tables read; deeper ones stay inside their parent's cell
+
+# Environments whose body is code or a comment: a `\caption` or a `\begin{tabular}`
+# in one of them is an example, not a display.
+_R03_CODE_ENV_RE = re.compile(r"\\begin\{(verbatim\*?|lstlisting|minted|comment)\}")
+
+# `\caption{`, `\caption*{`, `\caption[short]{`, `\captionof{figure}{`. A command
+# such as `\captionsetup` is not one.
+_R03_CAPTION_RE = re.compile(r"\\caption(?P<of>of)?\*?(?![A-Za-z@])")
+_R03_BLANKS_RE = re.compile(r"[ \t\r\n]*")
+
+# Commands whose first brace argument is layout or style, and rule commands with
+# their arguments. Removed before words are counted, so `\cmidrule(lr){2-3}` and
+# `\cellcolor{gray}` add none. `\multicolumn` and `\multirow` lose their two
+# layout arguments and keep the text.
+_R03_FIRST_ARG_RE = re.compile(
+    r"\\(?:parbox|makebox|framebox|raisebox|rotatebox|resizebox|scalebox|textcolor|"
+    r"colorbox|fcolorbox|cellcolor|rowcolor|columncolor|arrayrulecolor)\*?"
+    r"(?:[ \t]{0,3}\[[^\]]{0,50}\]){0,3}[ \t\n]{0,3}\{[^{}]{0,100}\}"
+)
+_R03_SPAN_ARGS_RE = re.compile(
+    r"\\(?:multicolumn|multirow)\*?[ \t\n]{0,3}\{[^{}]{0,60}\}[ \t\n]{0,3}"
+    r"(?:\[[^\]]{0,50}\][ \t\n]{0,3})?\{[^{}]{0,60}\}"
+)
+_R03_RULE_ARGS_RE = re.compile(
+    r"\\(?:cmidrule|cline|specialrule|noalign|hhline)\*?(?![A-Za-z@])"
+    r"(?:[ \t]{0,3}(?:\[[^\]]{0,30}\]|\([^)]{0,20}\))){0,2}"
+    r"(?:[ \t\n]{0,3}\{[^{}]{0,60}\}){0,3}"
+    r"|\\(?:toprule|midrule|bottomrule|hline|addlinespace)\*?(?![A-Za-z@])(?:[ \t]{0,3}\[[^\]]{0,30}\])?"
+)
+# What opens a table cell without being its text: blanks and rule commands.
+_RA_LEAD_RE = re.compile(r"(?:\s|" + _R03_RULE_ARGS_RE.pattern + r")*")
+_R03_COMMAND_RE = re.compile(r"\\[A-Za-z@]+\*?(?:\[[^\]\n]{0,200}\])?")
+_R03_ESCAPED_RE = re.compile(r"\\([%&_#$])")
+_R03_DOLLAR_RE = re.compile(r"(?<!\\)\$")
+_R03_WORD_RE = re.compile(r"[^\W\d_]{2,}")
+_R03_BRACE_TOKEN_RE = re.compile(r"\\.|[{}]", re.DOTALL)
+# A sentence end inside a table cell, after cleaning (single spaces). The
+# lookbehind keeps a long run of full stops from being retried at every offset.
+_RA_BOUNDARY_RE = re.compile(r"(?<![.!?])[.!?]+[\"')\]]*[ ]+(?=[A-Z0-9\"'(\[])")
+
+# A table environment, its begin and end tokens.
+_RA_ENV_RE = re.compile(r"\\(begin|end)\{(tabular\*|tabular|tabularx|tabulary|longtable|tblr)\}")
+_RA_ARG_COUNT = {"tabular": 1, "tabular*": 2, "tabularx": 2, "tabulary": 2, "longtable": 1, "tblr": 1}
+# Inside a table body: a row break (`\\`, `\\*`, `\\[2pt]`), a command name, an
+# escaped character, a brace, a cell separator.
+_RA_TOKEN_RE = re.compile(r"\\\\\*?(?:\[[^\]\n]{0,20}\])?|\\[A-Za-z@]+|\\.|[{}&]", re.DOTALL)
+
+# Legend and decoding metadata in a caption (check C). A caption names its lines,
+# markers, bands and thresholds so the reader can decode the display: "Lines mark the
+# 25%, 50% and 75% quantiles", "Stars denote p < 0.05, 0.01 and 0.001". Those numbers
+# are keys and not results, so the figure count skips them. Each pattern takes one run
+# of numbers beside the word that names it, never the rest of the sentence, so a result
+# written next to a legend still counts. Digits are ASCII and blanks are spelled out, so
+# the JavaScript port reads every input the same way.
+_LG_WS = r"[ \t\r\n~]"
+_LG_NUM = (
+    r"\$?[-+\u2212]?[0-9]+(?:\.[0-9]+)?\$?"
+    r"(?:(?:[ \t~]|\\,)?(?:\\%|%|percent(?!\w)|(?:st|nd|rd|th)(?!\w)))?\$?"
+)
+_LG_SEP = (
+    r"(?:" + _LG_WS + r"{0,3}(?:,|;|/|&|--|\u2013|-)" + _LG_WS + r"{0,3}"
+    r"|" + _LG_WS + r"{0,3},?" + _LG_WS + r"{1,3}(?:and|or|to)" + _LG_WS + r"{1,3})"
+)
+# One to six numbers. The lookbehind starts a list at its first number, so a long run of
+# digits or of "1,1,1" is entered once.
+_LG_LIST = _LG_NUM + r"(?:" + _LG_SEP + _LG_NUM + r"){0,5}"
+_LG_WORD_BEFORE = r"(?:" + _LG_WS + r"{1,3}[A-Za-z-]{1,15}){0,1}" + _LG_WS + r"{1,3}"
+_LG_QUANTILE = r"(?:quantiles?|percentiles?|quartiles?|deciles?)(?!\w)"
+_LG_SIGNIFICANCE = (
+    r"(?:\\?alpha|\u03b1|significan(?:ce|t)(?:" + _LG_WS
+    + r"{1,3}(?:levels?|thresholds?|codes?|stars?))?|thresholds?)(?!\w)"
+)
+_LG_COMPARE = r"\$?(?:[<>=\u2264\u2265]|\\(?:leqslant|geqslant|leq|geq|le|ge|lt|gt)(?![A-Za-z]))\$?"
+# A p-value is a key only beside an inequality or a threshold word: "p < 0.05" and
+# "p-value thresholds of 0.05 and 0.01" define stars, while "p = 0.03" and "p-values of
+# 0.041, 0.023 and 0.012" report results and stay in the count.
+_LG_P = r"p(?:[ -]?values?)?(?!\w)"
+_LG_INEQ = r"\$?(?:[<>\u2264\u2265]|\\(?:leqslant|geqslant|leq|geq|le|ge|lt|gt)(?![A-Za-z]))\$?"
+_LG_P_KEY = r"(?:levels?|thresholds?|cut-?offs?)(?!\w)"
+# A confidence level names a band: "the 68%, 95% and 99.7% confidence intervals".
+_LG_CONF = r"(?:confidence|credible|prediction|highest[ -]density)(?!\w)"
+# The singular "a confidence interval of 79.4% to 83.0%" is an estimate; the plural
+# and a level name the bands of a legend.
+_LG_CONF_NOUN = r"(?:levels?|intervals|bands|regions|ellipses)(?!\w)"
+# A level is a percentage, so "a confidence interval of 39.8 to 42.7" stays a result.
+_LG_PCT = r"\$?[0-9]+(?:\.[0-9]+)?\$?(?:[ \t~]|\\,)?(?:\\%|%|percent(?!\w))\$?"
+_LG_PCT_LIST = _LG_PCT + r"(?:" + _LG_SEP + _LG_PCT + r"){0,5}"
+_LG_MARKER = (
+    r"(?<!\w)(?:lines?|markers?|symbols?|stars?|asterisks?|daggers?|bands?|shad(?:ing|ed)|"
+    r"whiskers?|ticks?|contours?|isolines?|circles?|triangles?|squares?|diamonds?|crosses|arrows?)(?!\w)"
+)
+_R03_LEGEND_RES = tuple(
+    re.compile(src, re.IGNORECASE)
+    for src in (
+        # "25%, 50% and 75% quantiles", "the 5th and 95th percentiles"
+        r"(?<![0-9.,])" + _LG_LIST + _LG_WORD_BEFORE + _LG_QUANTILE,
+        # "quantiles at 25%, 50% and 75%", "percentiles (5, 50, 95)", "quantile levels 0.1, 0.5 and 0.9"
+        r"(?<!\w)" + _LG_QUANTILE
+        + r"(?:" + _LG_WS + r"{0,3}(?:at|of|are|is|for|to|the|from|between|set|levels?|values?|bands?|lines?|ranges?|\(|:|=|,)){0,4}"
+        + _LG_WS + r"{0,3}" + _LG_LIST,
+        # "p < 0.05, 0.01 and 0.001", "alpha = 0.05", "significance thresholds at 0.05, 0.01 and 0.001"
+        r"(?<![\w\\])" + _LG_SIGNIFICANCE
+        + r"(?:" + _LG_WS + r"{0,3}(?:" + _LG_COMPARE + r"|is|are|was|were|at|of|set|to|below|under|above|for|levels?|values?|\(|:|\\,|\\;)){0,4}"
+        + _LG_WS + r"{0,3}" + _LG_LIST,
+        # "p < 0.05, 0.01 and 0.001", "$p \le 0.05$", "p-value thresholds of 0.05 and 0.01"
+        r"(?<![\w\\])" + _LG_P
+        + r"(?:" + _LG_WS + r"{0,3}" + _LG_INEQ + r"|" + _LG_WS + r"{1,3}" + _LG_P_KEY
+        + r"(?:" + _LG_WS + r"{0,3}(?:" + _LG_COMPARE + r"|is|are|at|of|set|to|below|under|\(|:)){0,3})"
+        + _LG_WS + r"{0,3}" + _LG_LIST,
+        # "0.05, 0.01 and 0.001 significance levels", "the 0.05 and 0.01 p-value thresholds"
+        r"(?<![0-9.,])" + _LG_LIST + _LG_WORD_BEFORE
+        + r"(?:significance|thresholds?|\\?alpha|\u03b1|p[- ]?levels?|p[- ]?values?" + _LG_WS
+        + r"{1,3}" + _LG_P_KEY + r")(?!\w)",
+        # "the 68%, 95% and 99.7% confidence intervals", "95% CIs"
+        r"(?<![0-9.,])" + _LG_PCT_LIST + _LG_WORD_BEFORE + r"(?:" + _LG_CONF + r"|CIs?(?!\w)|HDIs?(?!\w))",
+        # "confidence levels of 68%, 95% and 99.7%"
+        r"(?<!\w)" + _LG_CONF + _LG_WS + r"{1,3}" + _LG_CONF_NOUN
+        + r"(?:" + _LG_WS + r"{0,3}(?:at|of|are|is|for|the|=|:|\(|,)){0,3}" + _LG_WS + r"{0,3}" + _LG_PCT_LIST,
+        # "Lines mark the 0.5 chance level", "Dashed lines at 0.25, 0.50 and 0.75"
+        _LG_MARKER
+        + r"(?:" + _LG_WS + r"{0,3}(?:mark(?:s|ed|ing)?|denote[sd]?|indicate[sd]?|indicating|at|the|an?|chance|random|"
+        r"baseline|reference|threshold|target|levels?|values?|of|for|=|:|\(|,)){1,5}"
+        + _LG_WS + r"{0,3}" + _LG_LIST,
+        # "Solid, dashed and dotted lines correspond to dropout rates of 0.1, 0.2 and 0.5,
+        # respectively": a style mapped to a setting. "respectively" must follow the list,
+        # so "Lines represent accuracies of 0.81, 0.83 and 0.85" still counts.
+        _LG_MARKER
+        + r"(?:" + _LG_WS + r"{1,3}(?:correspond(?:s|ing)?" + _LG_WS + r"{1,3}to|denote[sd]?|indicate[sd]?|"
+        r"represent(?:s|ed|ing)?|mark(?:s|ed)?|encode[sd]?|use[sd]?))"
+        + r"(?:" + _LG_WS + r"{1,3}(?:[A-Za-z$\\-]{1,20}|=)){0,4}"
+        + _LG_WS + r"{0,3}" + _LG_LIST + r"(?=" + _LG_WS + r"{0,3},?" + _LG_WS + r"{0,3}respectively(?!\w))",
+    )
+)
+
+# A heading that opens a method or setup section: its title names a method or an
+# experimental setup and does not also name an outcome, so "Implementation Details"
+# and "Hyperparameters" are exempt and "Experiments", "Evaluation", "Results" and
+# "Setup and Results" are read. Words are ASCII, so the JavaScript port reads every title the same way.
+_R03_TEX_HEADING_RE = re.compile(
+    r"\\(chapter|section|subsection|subsubsection|paragraph|subparagraph)\*?[ \t]{0,3}"
+    r"(?:\[[^\]\n]{0,200}\])?[ \t]{0,3}\{([^{}\n]{0,200})\}"
+)
+_R03_HEADING_LEVELS = {
+    "chapter": 0, "section": 1, "subsection": 2, "subsubsection": 3, "paragraph": 4, "subparagraph": 5,
+}
+_R03_SETUP_WORDS = frozenset({
+    "method", "methods", "methodology", "approach", "setup", "setups", "setting", "settings",
+    "implementation", "hyperparameter", "hyperparameters", "configuration", "configurations",
+    "dataset", "datasets", "details", "protocol", "protocols",
+})
+_R03_OUTCOME_WORDS = frozenset({
+    "result", "results", "finding", "findings", "analysis", "analyses", "discussion", "ablation", "ablations",
+})
+_R03_TITLE_WORD_RE = re.compile(r"[A-Za-z]+")
+_R03_TITLE_HYPHEN_RE = re.compile(r"(?<=[A-Za-z])-(?=[A-Za-z])")
 
 
 def _r03_blank(text: str, spans: list) -> str:
@@ -1315,10 +1567,37 @@ def _r03_table_spans(text: str, line_spans: list) -> list:
     return spans
 
 
-def _r03_stage_two(text: str, latex: bool) -> tuple:
-    """Blank non-prose material. Returns (blanked text, display spans)."""
+def _r03_mask_spans(text: str) -> list:
+    """Spans of material that carries digits without being a result.
+
+    Labels, citations, layout lengths, identifiers, reference numbers, link
+    targets, and paths. Shared by the prose pass and by the caption check, which
+    reads a caption in isolation.
+    """
     spans: list = []
-    display: list = []
+    for pattern in (
+        _R03_ARG1_RE, _R03_ARGN_RE, _R03_SECTIONING_RE, _R03_LENGTH_RE,
+        _R03_IDENT_RE, _R03_REF_RE, _R03_SECTION_SIGN_RE,
+    ):
+        spans.extend(m.span() for m in pattern.finditer(text))
+    # Markdown link and image targets.
+    spans.extend(m.span() for m in re.finditer(r"\]\([^)\s]{0,500}\)", text))
+    # A whitespace-delimited token that holds a slash and a letter is a path or
+    # a file name. A bare ratio such as `0.93/1.00` has no letter and stays.
+    for m in re.finditer(r"(?<!\S)[^\s/]*/\S*", text):
+        token = m.group()
+        if re.search(r"[A-Za-z]", token.replace("\\%", "")):
+            spans.append(m.span())
+    return spans
+
+
+def _r03_stage_two(text: str, latex: bool, extra: tuple = ()) -> tuple:
+    """Blank non-prose material. Returns (blanked text, display spans).
+
+    ``extra`` holds further display spans, such as the captions of a LaTeX file.
+    """
+    spans: list = []
+    display: list = list(extra)
 
     # Display environments, found by search so an unclosed one costs nothing.
     covered = 0
@@ -1349,19 +1628,7 @@ def _r03_stage_two(text: str, latex: bool) -> tuple:
     display.extend(_r03_table_spans(text, line_spans))
 
     spans.extend(display)
-    for pattern in (
-        _R03_ARG1_RE, _R03_ARGN_RE, _R03_SECTIONING_RE, _R03_LENGTH_RE,
-        _R03_IDENT_RE, _R03_REF_RE, _R03_SECTION_SIGN_RE,
-    ):
-        spans.extend(m.span() for m in pattern.finditer(text))
-    # Markdown link and image targets.
-    spans.extend(m.span() for m in re.finditer(r"\]\([^)\s]{0,500}\)", text))
-    # A whitespace-delimited token that holds a slash and a letter is a path or
-    # a file name. A bare ratio such as `0.93/1.00` has no letter and stays.
-    for m in re.finditer(r"(?<!\S)[^\s/]*/\S*", text):
-        token = m.group()
-        if re.search(r"[A-Za-z]", token.replace("\\%", "")):
-            spans.append(m.span())
+    spans.extend(_r03_mask_spans(text))
     return _r03_blank(text, spans), display
 
 
@@ -1597,6 +1864,238 @@ def _r03_figures(masked: str) -> list:
     return out
 
 
+def _r03_env_spans(text: str, begin_re) -> list:
+    """Spans of each environment whose ``\\begin`` token ``begin_re`` finds.
+
+    Found by search, so an unclosed environment costs one scan and not one per
+    opener.
+    """
+    spans: list = []
+    covered = 0
+    exhausted = set()
+    for m in begin_re.finditer(text):
+        if m.start() < covered or m.group(1) in exhausted:
+            continue
+        end_tok = "\\end{" + m.group(1) + "}"
+        j = text.find(end_tok, m.end())
+        if j < 0:
+            exhausted.add(m.group(1))
+            continue
+        covered = j + len(end_tok)
+        spans.append((m.start(), covered))
+    return spans
+
+
+def _r03_brace_map(text: str) -> dict:
+    """Map the offset of each ``{`` to the offset of its closing ``}``.
+
+    A backslash escapes the next character, so ``\\{`` and ``\\\\{`` read as they
+    do in LaTeX. One pass with a stack, so a file of unclosed groups costs
+    nothing extra per group.
+    """
+    match: dict = {}
+    stack: list = []
+    for m in _R03_BRACE_TOKEN_RE.finditer(text):
+        ch = m.group()
+        if ch == "{":
+            stack.append(m.start())
+        elif ch == "}" and stack:
+            match[stack.pop()] = m.start()
+    return match
+
+
+def _r03_skip_blanks(text: str, i: int) -> int:
+    return _R03_BLANKS_RE.match(text, i).end()
+
+
+def _r03_captions(text: str) -> list:
+    """(command start, body start, body end, offset after the closing brace) per caption.
+
+    ``\\caption{..}``, ``\\caption*{..}``, ``\\caption[short]{..}`` and
+    ``\\captionof{type}{..}``, braces balanced. A caption inside a code
+    environment is an example and is not read; a caption that opens inside
+    another one is part of it.
+    """
+    if "\\caption" not in text:
+        return []
+    src = _r03_blank(text, _r03_env_spans(text, _R03_CODE_ENV_RE))
+    n = len(src)
+    braces = None
+    out: list = []
+    covered = 0
+    for m in _R03_CAPTION_RE.finditer(src):
+        if m.start() < covered:
+            continue
+        if braces is None:
+            braces = _r03_brace_map(src)
+        i = _r03_skip_blanks(src, m.end())
+        if m.group("of"):
+            if i >= n or src[i] != "{" or i not in braces:
+                continue
+            i = _r03_skip_blanks(src, braces[i] + 1)
+        if i < n and src[i] == "[":
+            j = src.find("]", i, i + 600)
+            if j < 0:
+                continue
+            i = _r03_skip_blanks(src, j + 1)
+        if i < n and src[i] == "{" and i in braces:
+            covered = braces[i] + 1
+            out.append((m.start(), i + 1, braces[i], covered))
+    return out
+
+
+def _r03_strip_math(text: str) -> str:
+    """Blank ``$..$`` and ``\\(..\\)`` math, length-preserving. A ``\\$`` is a dollar sign."""
+    marks = [m.start() for m in _R03_DOLLAR_RE.finditer(text)]
+    spans = [(marks[i], marks[i + 1] + 1) for i in range(0, len(marks) - 1, 2)]
+    spans.extend(_r03_pairs(text, "\\(", "\\)"))
+    return _r03_blank(text, spans)
+
+
+def _r03_plain_text(raw: str) -> str:
+    """The words of a LaTeX fragment: no citations, references, math or commands.
+
+    A command is dropped and its text argument is kept, so ``\\textbf{Left:} the
+    run`` reads ``Left: the run``.
+    """
+    # A line break first: the two words in `one\\two` are not a word and a command.
+    t = raw.replace("\\\\", " ")
+    t = _R03_ARG1_RE.sub(" ", t)
+    t = _R03_ARGN_RE.sub(" ", t)
+    t = _R03_FIRST_ARG_RE.sub(" ", t)
+    t = _R03_RULE_ARGS_RE.sub(" ", t)
+    t = _R03_SPAN_ARGS_RE.sub(" ", t)
+    t = _r03_strip_math(t)
+    t = _R03_COMMAND_RE.sub(" ", t)
+    t = _R03_ESCAPED_RE.sub(r"\1", t)
+    t = re.sub(r"[{}~\\]", " ", t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def _r03_count_words(plain: str) -> int:
+    """Tokens with at least two letters in a row; numbers and single letters are not words."""
+    return sum(1 for token in plain.split() if _R03_WORD_RE.search(token))
+
+
+def _r03_legend_spans(text: str) -> list:
+    """Spans of legend and decoding metadata: quantile lines, significance levels, markers.
+
+    Used on a caption only. A number beside the word that names a line, a threshold
+    or a symbol is a key to the display and not a result.
+    """
+    spans: list = []
+    for pattern in _R03_LEGEND_RES:
+        spans.extend(m.span() for m in pattern.finditer(text))
+    return spans
+
+
+_R03_SPAN_BLANKS_RE = re.compile(r"[ \t\r\n~]+")
+
+
+def _r03_span_figures(segment: str) -> int:
+    """Precise figures in a fragment read alone, with the masks and the level rule of check A.
+
+    A confidence level and the numbers of a legend (``_r03_legend_spans``) are not figures.
+    """
+    masked = _r03_blank(segment, _r03_mask_spans(segment))
+    # The fragment is only counted, never located, so its blanks can be collapsed: a
+    # caption wrapped and indented in the source reads like one written on one line.
+    masked = _R03_SPAN_BLANKS_RE.sub(" ", masked)
+    _intervals, levels = _r03_intervals(masked)
+    # Legends are read before the levels are blanked: blanking "99.7% confidence"
+    # first would cut the end off "68%, 95% and 99.7% confidence intervals".
+    return len(_r03_figures(_r03_blank(masked, levels + _r03_legend_spans(masked))))
+
+
+def _r03_is_setup_title(raw: str) -> bool:
+    """True when a heading title names a method or a setup and no outcome."""
+    words = {w.lower() for w in _R03_TITLE_WORD_RE.findall(_R03_TITLE_HYPHEN_RE.sub("", raw))}
+    return bool(words & _R03_SETUP_WORDS) and not (words & _R03_OUTCOME_WORDS)
+
+
+def _r03_setup_spans(text: str) -> list:
+    """Sorted (start, end) spans of LaTeX method and setup sections.
+
+    A ``\\section``, ``\\subsection``, ``\\subsubsection`` or ``\\paragraph`` heading
+    (a star or a short title in brackets allowed) whose title names a method or a
+    setup opens a span that runs to the next heading of the same or a higher level,
+    or to the end of the text. Exact settings (learning rates, dropout, splits)
+    belong there. One pass, so a file of headings costs a single scan.
+    """
+    spans: list = []
+    open_level = -1
+    open_start = 0
+    for m in _R03_TEX_HEADING_RE.finditer(text):
+        level = _R03_HEADING_LEVELS[m.group(1)]
+        if open_level >= 0 and level <= open_level:
+            spans.append((open_start, m.start()))
+            open_level = -1
+        if open_level < 0 and _r03_is_setup_title(m.group(2)):
+            open_level, open_start = level, m.end()
+    if open_level >= 0:
+        spans.append((open_start, len(text)))
+    return spans
+
+
+def _r03_document_range(stage_one: str) -> tuple:
+    """(start, end) of the LaTeX document body: after ``\\begin{document}``, before ``\\end{document}``.
+
+    A fragment with neither command is all body.
+    """
+    start, end = 0, len(stage_one)
+    tok = "\\begin{document}"
+    i = stage_one.find(tok)
+    if i >= 0:
+        start = i + len(tok)
+    j = stage_one.find("\\end{document}", start)
+    if j >= 0:
+        end = j
+    return start, end
+
+
+_R03_DECIMAL_RES: dict = {}
+
+
+def _r03_decimal_re(places: int):
+    """A number with at least ``places`` decimal places, sign included.
+
+    The sign is a minus, a plus, U+2212, or one wrapped in math (``$-$0.05``,
+    ``$-0.05$``). A hyphen inside a name (``ResNet-18.1234``) is not a sign, and
+    a number glued to a word or to another number is an identifier. Up to five
+    thousands groups belong to the number (``1,234.5678``); the bound keeps a long
+    run of ``123,123,123`` from being rescanned at every group.
+    """
+    pattern = _R03_DECIMAL_RES.get(places)
+    if pattern is None:
+        pattern = _R03_DECIMAL_RES[places] = re.compile(
+            r"(?<![\w.])(?:\$?[-+−]\$?)?(?<![\w.])(?:\d{1,3}(?:,\d{3}){1,5}|\d*)\.\d{%d,}(?!\d)(?!\.\d)" % places
+        )
+    return pattern
+
+
+def _r03_significant(number: str) -> int:
+    """Significant digits of a matched number: its digits without the leading zeros.
+
+    ``0.0143`` has three, ``0.00025`` two and ``0.0001`` one; a zero after the
+    first digit counts (``0.1000`` has four). Leading zeros are the ASCII zero only,
+    so the JavaScript port counts exotic digits the same way.
+    """
+    return len(re.sub(r"\D", "", number).lstrip("0"))
+
+
+def _r03_make_locate(text: str):
+    """A function from an offset to (line, column, line text), for findings."""
+    spans = _line_spans(text)
+    starts = [s for s, _e in spans]
+
+    def locate(offset: int) -> tuple:
+        line_no = max(1, bisect.bisect_right(starts, offset))
+        line_start, line_end = spans[line_no - 1]
+        return line_no, offset - line_start + 1, text[line_start:line_end]
+
+    return locate
+
+
 def _rule_03(text: str, file_path: str = "") -> list[Violation]:
     """Flag numeric intervals in prose and precise figures stacked up front.
 
@@ -1612,6 +2111,24 @@ def _rule_03(text: str, file_path: str = "") -> list[Violation]:
     when the file name contains "abstract" or "intro", else an abstract
     environment, an Introduction or Abstract section, or a Markdown heading
     of that name.
+
+    A LaTeX file (a `.tex` name, or unnamed text with a LaTeX marker) is read
+    further, and each check skips the same appendix and supplement text as check
+    A. Check B also reports the run, but not the crowded sentence, in the body
+    prose between the abstract and the introduction and the appendix, from
+    `\\begin{document}` to `\\end{document}`, except in a method or setup section
+    (`_r03_setup_spans`). Check C reports a `\\caption`,
+    `\\caption*`, `\\caption[..]` or `\\captionof` that carries
+    ``_R03_CAPTION_FIGURES`` precise figures or more than ``_R03_CAPTION_WORDS``
+    words, once per caption; a caption feeds neither check A nor check B, and the
+    numbers of a legend (`_r03_legend_spans`) are not figures. Check
+    D reports a paragraph that holds ``_R03_DECIMAL_COUNT`` numbers written to
+    ``_R03_DECIMAL_PLACES`` or more decimal places and ``_R03_DECIMAL_SIGNIFICANT``
+    or more significant digits, once, at the first, in the abstract and the
+    introduction too, except in a method or setup section. Every table
+    environment RULE-A reads (tabular, tabularx, tabulary, longtable, tblr) is a
+    display here, so its cells feed none of the checks. Markdown, plain text and
+    reStructuredText are not read by B (body), C or D.
 
     Never raises: the guard treats an exception from any advisory detector as
     a broken package and drops every advisory, so a malformed input must cost
@@ -1638,13 +2155,31 @@ def _rule_03_scan(text: str, file_path: str) -> list[Violation]:
     else:
         appendix = _r03_appendix_spans(stage_one, latex)
     appendix_starts = [s for s, _e in appendix]
-    masked, display = _r03_stage_two(stage_one, latex)
+    # A method or setup section holds the exact settings a reader needs to repeat the
+    # work, so the body run of check B and check D skip it.
+    setup = _r03_setup_spans(stage_one) if latex else []
+    setup_starts = [s for s, _e in setup]
+    # A caption is display material: it feeds check C and neither A nor B, in or
+    # out of a figure or table environment.
+    captions = _r03_captions(stage_one) if latex else []
+    masked, display = _r03_stage_two(stage_one, latex, tuple((c[0], c[3]) for c in captions))
+    doc_start, doc_end = _r03_document_range(stage_one) if latex else (0, 0)
+
+    def in_appendix(offset: int) -> bool:
+        slot = bisect.bisect_right(appendix_starts, offset) - 1
+        return slot >= 0 and offset < appendix[slot][1]
+
+    def in_setup(offset: int) -> bool:
+        slot = bisect.bisect_right(setup_starts, offset) - 1
+        return slot >= 0 and offset < setup[slot][1]
 
     cuts = [s for s, _e in display] + [e for _s, e in display]
     for start, end, _label in regions:
         cuts.extend((start, end))
+    for start, end in setup:
+        cuts.extend((start, end))
     sentences = _r03_sentences(masked, cuts)
-    if not sentences:
+    if not sentences and not captions:
         return []
     sentence_starts = [s for s, _e in sentences]
 
@@ -1687,7 +2222,8 @@ def _rule_03_scan(text: str, file_path: str) -> list[Violation]:
             ),
         ))
 
-    # Check B: stacked figures, only inside an abstract or an introduction.
+    # Check B: stacked figures, inside an abstract or an introduction and, in a
+    # LaTeX file, in the body prose between them.
     merged: list = []
     for start, end, label in regions:
         if merged and start < merged[-1][1]:
@@ -1702,24 +2238,41 @@ def _rule_03_scan(text: str, file_path: str) -> list[Violation]:
             return merged[idx][2]
         return None
 
+    def label_of(offset: int):
+        label = region_of(offset)
+        if (
+            label is None and latex and doc_start <= offset < doc_end
+            and not in_appendix(offset) and not in_setup(offset)
+        ):
+            return _R03_BODY
+        return label
+
     counts = []
     for start, end in sentences:
         n = bisect.bisect_left(figure_starts, end) - bisect.bisect_left(figure_starts, start)
-        counts.append((start, end, n, region_of(start)))
+        counts.append((start, end, n, label_of(start)))
 
     def report_run(run: list) -> None:
         start = run[0][0]
         total = sum(item[2] for item in run)
         line_no, col, line = locate(start)
+        if run[0][3] == _R03_BODY:
+            detail = (
+                f"{len(run)} consecutive sentences in the body text carry {total} precise figures. "
+                "Keep the few magnitudes behind the main findings, round them, "
+                "and move the rest to a table or an appendix"
+            )
+        else:
+            detail = (
+                f"{len(run)} consecutive sentences in the {run[0][3]} carry {total} precise figures; "
+                "keep the few magnitudes behind the main findings and move the rest to a table"
+            )
         out.append(Violation(
             rule="RULE-03",
             line=line_no,
             column=col,
             excerpt=_excerpt(line, (col - 1, col - 1 + min(run[0][1] - start, 80))),
-            detail=(
-                f"{len(run)} consecutive sentences in the {run[0][3]} carry {total} precise figures; "
-                "keep the few magnitudes behind the main findings and move the rest to a table"
-            ),
+            detail=detail,
         ))
 
     run: list = []
@@ -1732,15 +2285,17 @@ def _rule_03_scan(text: str, file_path: str) -> list[Violation]:
             report_run(run)
         else:
             for start, end, n, lab in run:
-                if n >= _R03_CROWDED:
+                limit = _R03_BODY_CROWDED if lab == _R03_BODY else _R03_CROWDED
+                if limit is not None and n >= limit:
                     line_no, col, line = locate(start)
+                    where = "the body text" if lab == _R03_BODY else f"the {lab}"
                     out.append(Violation(
                         rule="RULE-03",
                         line=line_no,
                         column=col,
                         excerpt=_excerpt(line, (col - 1, col - 1 + min(end - start, 80))),
                         detail=(
-                            f"one sentence in the {lab} carries {n} precise figures; "
+                            f"one sentence in {where} carries {n} precise figures; "
                             "keep the one the claim rests on and move the rest to a table"
                         ),
                     ))
@@ -1748,6 +2303,260 @@ def _rule_03_scan(text: str, file_path: str) -> list[Violation]:
     # A crowded sentence below the run threshold of figures per sentence cannot
     # exist (crowded implies at least the run threshold), so nothing is missed.
 
+    # Check C: a caption that carries precise figures or runs long. LaTeX only,
+    # outside an appendix.
+    cap_tail = (
+        "A caption names the display, its pattern, and what the marks mean. Keep decoding "
+        "values such as error-bar definitions; move repeated results, setup narration, "
+        "and caveats to the text or an appendix"
+    )
+    for cmd_start, body_start, body_end, _close in captions:
+        if in_appendix(cmd_start):
+            continue
+        body = stage_one[body_start:body_end]
+        words = _r03_count_words(_r03_plain_text(body))
+        figs = _r03_span_figures(body)
+        if figs >= _R03_CAPTION_FIGURES:
+            head = f"a caption carries {figs} precise figures"
+        elif words > _R03_CAPTION_WORDS:
+            head = f"a caption runs {words} words"
+        else:
+            continue
+        line_no, col, line = locate(cmd_start)
+        out.append(Violation(
+            rule="RULE-03",
+            line=line_no,
+            column=col,
+            excerpt=_excerpt(line, (col - 1, col - 1 + 80)),
+            detail=f"{head}. {cap_tail}",
+        ))
+
+    # Check D: numbers written to many decimal places, in LaTeX body prose
+    # (the abstract and introduction included) outside an appendix.
+    if latex and sentences:
+        places = _R03_DECIMAL_PLACES
+        need = _R03_DECIMAL_COUNT
+        per_sentence = _R03_DECIMAL_UNIT == "sentence"
+        digits = _R03_DECIMAL_SIGNIFICANT
+        long_starts = [
+            m.start() for m in _r03_decimal_re(places).finditer(figures_text)
+            if doc_start <= m.start() < doc_end and not in_appendix(m.start())
+            and not in_setup(m.start()) and _r03_significant(m.group()) >= digits
+        ]
+        if long_starts:
+            if per_sentence:
+                units = sentences
+            else:
+                points = {0, len(masked)}
+                points.update(m.start() for m in _R03_BLOCK_RE.finditer(masked))
+                # A heading ends a paragraph even when its body runs on in the same
+                # source line, as a \paragraph{} heading does.
+                points.update(m.start() for m in _R03_TEX_HEADING_RE.finditer(stage_one))
+                ordered = sorted(points)
+                units = list(zip(ordered, ordered[1:]))
+            unit = "sentence" if per_sentence else "paragraph"
+            for start, end in units:
+                lo = bisect.bisect_left(long_starts, start)
+                hi = bisect.bisect_left(long_starts, end)
+                if hi - lo < need:
+                    continue
+                line_no, col, line = locate(long_starts[lo])
+                out.append(Violation(
+                    rule="RULE-03",
+                    line=line_no,
+                    column=col,
+                    excerpt=_excerpt(line, (col - 1, col - 1 + 20)),
+                    detail=(
+                        f"{hi - lo} numbers written to {places} or more decimal places in one {unit}. "
+                        "Report the precision the measurement supports, usually two or three "
+                        "significant digits, and keep the full values in a table or an appendix"
+                    ),
+                ))
+
+    out.sort(key=lambda v: (v.line, v.column))
+    return out
+
+
+# ---------- RULE-A table cells (hook-only, LaTeX only) -----------------------
+
+
+def _ra_tables(text: str) -> list:
+    """Table environments as (begin, body start, body end, end, nested spans).
+
+    ``text`` is LaTeX with comments and code blanked. A table nested in a table
+    cell is its own entry and its span is listed under its parent, whose cells
+    then skip it. Only the outer ``_RA_MAX_DEPTH`` levels are returned, so a file
+    of deeply nested tables costs a bounded number of rescans.
+    """
+    stack: list = []
+    open_count: dict = {}
+    out: list = []
+    for m in _RA_ENV_RE.finditer(text):
+        env = m.group(2)
+        if m.group(1) == "begin":
+            stack.append([env, m.start(), m.end(), [], len(stack)])
+            open_count[env] = open_count.get(env, 0) + 1
+            continue
+        if not open_count.get(env):
+            continue
+        k = len(stack) - 1
+        while stack[k][0] != env:
+            k -= 1
+        node = stack[k]
+        for dropped in stack[k:]:
+            open_count[dropped[0]] -= 1
+        del stack[k:]
+        if node[4] < _RA_MAX_DEPTH:
+            out.append((node[1], node[2], m.start(), m.end(), node[3], node[0]))
+        if stack:
+            stack[-1][3].append((node[1], m.end()))
+    out.sort()
+    return out
+
+
+def _ra_skip_args(text: str, braces: dict, i: int, nargs: int) -> int:
+    """Offset after the optional and brace arguments that open a table environment."""
+    n = len(text)
+    got = 0
+    while got < nargs:
+        j = _r03_skip_blanks(text, i)
+        if j < n and text[j] == "[":
+            k = text.find("]", j, j + 200)
+            if k < 0:
+                break
+            i = k + 1
+        elif j < n and text[j] == "{" and j in braces:
+            i = braces[j] + 1
+            got += 1
+        else:
+            break
+    return i
+
+
+def _ra_cells(work: str, base: int) -> list:
+    """(offset, text) of each cell of a table body, split at ``&`` and at row breaks.
+
+    ``work`` is the body with nested tables and captions blanked, and ``base`` the
+    offset it starts at. A separator inside braces, such as the ``\\\\`` of a
+    ``\\makecell``, does not split.
+    """
+    cells: list = []
+    depth = 0
+    start = 0
+    for m in _RA_TOKEN_RE.finditer(work):
+        tok = m.group()
+        if tok == "{":
+            depth += 1
+        elif tok == "}":
+            depth = max(0, depth - 1)
+        elif depth:
+            continue
+        elif tok == "&" or tok[:2] == "\\\\" or tok in ("\\tabularnewline", "\\cr"):
+            cells.append((base + start, work[start:m.start()]))
+            start = m.end()
+    cells.append((base + start, work[start:]))
+    return cells
+
+
+def _ra_sentence_count(plain: str) -> int:
+    """Pieces of a cleaned cell that hold at least ``_RA_SENTENCE_WORDS`` words.
+
+    A full stop after an abbreviation, an initial, or a dotted abbreviation such
+    as ``e.g.`` does not end a sentence.
+    """
+    pieces: list = []
+    start = 0
+    for m in _RA_BOUNDARY_RE.finditer(plain):
+        token = _R03_PRECEDING_TOKEN_RE.search(plain[max(0, m.start() - 16):m.start()])
+        if token is not None:
+            word = token.group(1).lower()
+            if (
+                word in _R03_ABBREVIATIONS
+                or len(word) == 1
+                or ("." in word and all(len(p) == 1 for p in word.split(".")))
+            ):
+                continue
+        pieces.append(plain[start:m.end()])
+        start = m.end()
+    pieces.append(plain[start:])
+    return sum(1 for piece in pieces if _r03_count_words(piece) >= _RA_SENTENCE_WORDS)
+
+
+def _rule_a(text: str, file_path: str = "") -> list[Violation]:
+    """Flag a LaTeX table cell that holds prose.
+
+    A table environment (tabular, tabular*, tabularx, tabulary, longtable, tblr)
+    outside an appendix or a supplement is flagged, once, when a cell holds more
+    than ``_RA_CELL_WORDS`` words or ``_RA_CELL_SENTENCES`` sentences. A word is a
+    token with two or more letters once commands, math, citations and references
+    are stripped. The finding sits on the first such cell. LaTeX only: a Markdown
+    table in an agent document may carry long cells by design, so a ``.md`` file
+    is never read.
+
+    Hook-only, like ``_rule_03``: the CLI audit classifies RULE-A as structural
+    and never calls this. Never raises: the guard treats an exception from any
+    advisory detector as a broken package.
+    """
+    try:
+        return _rule_a_scan(text, file_path)
+    except Exception:
+        return []
+
+
+def _rule_a_scan(text: str, file_path: str) -> list[Violation]:
+    if not isinstance(text, str) or not text:
+        return []
+    base = re.split(r"[\\/]", str(file_path or ""))[-1].lower()
+    if not _r03_is_latex(base, text) or _r03_appendix_named(base):
+        return []
+    stage_one = _r03_stage_one(text, True, False)
+    if "\\begin{" not in stage_one:
+        return []
+    src = _r03_blank(stage_one, _r03_env_spans(stage_one, _R03_CODE_ENV_RE))
+    tables = _ra_tables(src)
+    if not tables:
+        return []
+    appendix = _r03_appendix_spans(stage_one, True)
+    appendix_starts = [s for s, _e in appendix]
+    braces = _r03_brace_map(src)
+    captions = [(c[0], c[3]) for c in _r03_captions(src)]
+    caption_starts = [a for a, _b in captions]
+    locate = _r03_make_locate(text)
+    out: list[Violation] = []
+    for begin, body_start, body_end, _end, nested, env in tables:
+        slot = bisect.bisect_right(appendix_starts, begin) - 1
+        if slot >= 0 and begin < appendix[slot][1]:
+            continue
+        start = _ra_skip_args(src, braces, body_start, _RA_ARG_COUNT[env])
+        if start >= body_end:
+            continue
+        lo = bisect.bisect_left(caption_starts, start)
+        hi = bisect.bisect_left(caption_starts, body_end)
+        skip = [(a - start, b - start) for a, b in nested + captions[lo:hi] if a >= start]
+        work = _r03_blank(src[start:body_end], skip)
+        for offset, raw in _ra_cells(work, start):
+            if len(raw.strip()) < 18:
+                continue
+            plain = _r03_plain_text(raw)
+            words = _r03_count_words(plain)
+            if words > _RA_CELL_WORDS:
+                head = f"a table cell of {words} words"
+            elif words >= 2 * _RA_SENTENCE_WORDS and _ra_sentence_count(plain) >= _RA_CELL_SENTENCES:
+                head = f"a table cell of {_ra_sentence_count(plain)} sentences"
+            else:
+                continue
+            line_no, col, line = locate(offset + _RA_LEAD_RE.match(raw).end())
+            out.append(Violation(
+                rule="RULE-A",
+                line=line_no,
+                column=col,
+                excerpt=_excerpt(line, (col - 1, col - 1 + 80)),
+                detail=(
+                    f"{head}; a table cell holds a number, a label, or a short phrase, "
+                    "so move content that needs a sentence into the text"
+                ),
+            ))
+            break
     out.sort(key=lambda v: (v.line, v.column))
     return out
 
@@ -1764,8 +2573,17 @@ _DISPATCH: dict[str, Callable[..., list[Violation]]] = {
     "RULE-05": _rule_05,
     "RULE-06": _rule_06,
     "RULE-03": _rule_03,
+    "RULE-A": _rule_a,
 }
 
 # Detectors that also take the file path. RULE-03 locates the abstract and the
-# introduction by file name as well as by markup.
-_FILE_PATH_RULES = frozenset({"RULE-03"})
+# introduction by file name as well as by markup, and RULE-03 and RULE-A read
+# LaTeX only and exempt appendix and supplement files by name.
+#
+# RULE-A is registered here so a hook can reach it as `_rule_a`, but the audit
+# never runs it: `primitive._CLASSIFICATION` holds RULE-A as structural only, and
+# `primitive.audit` calls this module for a rule only when its bucket holds
+# "mechanical". The structural RULE-A (bullet overuse) stays what `agent-style
+# review` reports under that id, and the mechanical scope the benchmark pins
+# (`EXPECTED_MECHANICAL`) does not change. RULE-03 is registered the same way.
+_FILE_PATH_RULES = frozenset({"RULE-03", "RULE-A"})

@@ -56,7 +56,7 @@ Do not write "X was done by Y" when "Y did X" fits. Active voice names the agent
 
 Do not use abstract nouns when concrete ones exist. "The system has performance issues" says nothing; "the checkout endpoint p95 latency rose from 120ms to 450ms at 14:00 UTC" names what, when, and how much. Replace category words ("factors", "aspects", "considerations", "issues", "elements") with the specific items they refer to. If you reach for a category word, ask: what exactly? If the answer takes longer than one clause to give, the sentence was hiding the work.
 
-Concrete means naming the specific finding, and a table transcribed into a sentence buries it. When a table or figure holds the results, state the pattern with the magnitude a reader needs to interpret it ("halves latency at batch size 1"). Point to the display for per-item scores, intervals, and p-values. Round each magnitude to the precision the claim needs ("about a third", "under one point"). Do not stack precise figures in consecutive sentences; after a sentence that carries them, say what they mean. An abstract or introduction carries the fewest numbers of any section: the few magnitudes behind the main findings, and no intervals or p-values. When uncertainty changes the interpretation, state it beside the estimate ("within noise", "no statistically significant speedup at batch size 32"), and do not call an inconclusive difference a gain. Keep numbers that change the claim, that the reader acts on, or that no display holds.
+Concrete means naming the specific finding, and a table transcribed into a sentence buries it. When a table or figure holds the results, state the pattern with the magnitude a reader needs to interpret it ("halves latency at batch size 1"). Point to the display for per-item scores, intervals, and p-values. A caption names what the display shows, the pattern to read from it, and what a reader needs to decode it, such as error bars or reference lines. Repeated results, setup narration, and caveats go to the text or an appendix. Round each magnitude to the precision the claim needs ("about a third", "under one point"). Do not stack precise figures in consecutive sentences; after a sentence that carries them, say what they mean. An abstract or introduction carries the fewest numbers of any section: the few magnitudes behind the main findings, and no intervals or p-values. When uncertainty changes the interpretation, state it beside the estimate ("within noise"), and do not call an inconclusive difference a gain. Keep numbers that change the claim, that the reader acts on, or that no display holds.
 
 ##### BAD → GOOD
 
@@ -167,12 +167,12 @@ Split any sentence over 30 words into two or more sentences. Vary sentence lengt
 
 ##### BAD → GOOD
 
-- BAD (43 words, single sentence): `We evaluate our model on five standard benchmarks covering natural-language inference, reading comprehension, and factual-recall tasks, reporting both in-distribution accuracy on held-out splits of the training corpora and out-of-distribution accuracy on benchmarks not seen during training or fine-tuning.`
-- GOOD (three sentences, 15 + 12 + 11 words): `We evaluate our model on five standard benchmarks: NLI, reading comprehension, and factual-recall. In-distribution accuracy uses held-out splits of the training corpora. Out-of-distribution accuracy uses benchmarks not seen during training.`
+- BAD (runbook, 36 words): `If the primary database instance becomes unavailable for more than two minutes due to either a network partition or a full restart cycle, initiate failover to the replica using the promote_replica.sh script in the ops directory.`
+- GOOD (split): ``Fail over to the replica if the primary is unavailable for more than two minutes. Unavailability includes both network partition and full restart cycle. Run `ops/promote_replica.sh` to promote.``
 
 ## The 9 Field-Observed Rules
 
-The following nine rules (RULE-A through RULE-I) come from my observation of LLM output across dozens of writing projects and code releases, 2022 to 2026. They are not drawn from cited writing authorities; each rule names a recurring pattern I saw frequently enough across distinct projects to warrant a named rule. They are treated as peer input to the 12 canonical rules in all adapter files; when an agent consumes the ruleset, both groups are binding.
+The nine rules RULE-A through RULE-I name patterns I saw recur in LLM output across dozens of writing projects and code releases, 2022 to 2026. No cited writing authority supplies them. They bind as fully as the 12 canonical rules.
 
 ### Observed LLM Patterns
 
@@ -180,7 +180,7 @@ The following nine rules (RULE-A through RULE-I) come from my observation of LLM
 
 ##### Directive
 
-Keep prose in paragraphs when ideas connect by cause-and-effect, argument, or narrative. Use bullets only when items are genuinely parallel enumerations (API endpoints, config options, checklist steps). The test: if a reader reads only the first few words of each bullet, does the shape recover meaning? For a genuine list, yes (each bullet names a thing); for fragmented prose, no (bullets are sentence shards with connective tissue stripped). Do not force 3-item lists when 2 items or a sentence fit; LLMs over-produce "first, second, third" triads where 2 items would be natural. Resist the pattern.
+Keep prose in paragraphs when ideas connect by cause-and-effect, argument, or narrative. Use bullets only when items are genuinely parallel enumerations (API endpoints, config options, checklist steps). The test: if a reader reads only the first few words of each bullet, does the shape recover meaning? For a genuine list, yes (each bullet names a thing); for fragmented prose, no (bullets are sentence shards with connective tissue stripped). Do not force 3-item lists when 2 items or a sentence fit; LLMs over-produce "first, second, third" triads where 2 items would be natural. Tables follow the same test: a cell holds a number, a label, or a short phrase, and content that needs a sentence belongs in the text.
 
 ##### BAD → GOOD
 

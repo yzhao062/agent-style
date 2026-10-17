@@ -3,13 +3,13 @@
 <!-- Target path: <repo root>/.github/copilot-instructions.md -->
 <!-- Load class: single-file; install_mode: append-block -->
 
-# agent-style v0.6.0 — GitHub Copilot repo-wide adapter
+# agent-style v0.7.0 — GitHub Copilot repo-wide adapter
 
 agent-style is a literature-backed English technical-prose writing ruleset for AI agents. This adapter is appended to your existing `.github/copilot-instructions.md` inside a marker block so that future agent-style updates replace only the marker region and leave your other repo-level instructions intact. For a path-scoped variant (only attaches to prose files), use `agents/copilot-path-instructions.md` instead.
 
 ## Self-Verification Handshake
 
-When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.6.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
+When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.7.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
 
 ## Load Statement
 
@@ -21,7 +21,7 @@ Canonical rules (from Strunk & White 1959, Orwell 1946, Pinker 2014, Gopen & Swa
 
 - **RULE-01 Curse of knowledge**: Name your intended reader; do not assume they share your tacit knowledge.
 - **RULE-02 Passive voice**: Prefer active voice when the agent is known and worth naming.
-- **RULE-03 Concrete language**: Prefer concrete, specific terms over abstract category words like "factors" or "aspects"; state a result's pattern and rounded magnitude, and leave intervals and full numbers to tables. Do not stack figures in consecutive sentences.
+- **RULE-03 Concrete language**: Prefer concrete, specific terms over abstract category words like "factors" or "aspects"; state a result's pattern and rounded magnitude, and leave intervals and full numbers to tables. Do not stack figures in consecutive sentences, and keep a caption to what the display shows.
 - **RULE-04 Needless words**: Cut filler phrases like "in order to", "due to the fact that", "may potentially".
 - **RULE-05 Dying metaphors**: Delete clichés like "pushes the boundaries", "paradigm shift", or "state of the art".
 - **RULE-06 Plain English**: Prefer "use" over "leverage", "method" over "methodology", "feature" over "functionality".
@@ -34,7 +34,7 @@ Canonical rules (from Strunk & White 1959, Orwell 1946, Pinker 2014, Gopen & Swa
 
 Field-observed rules (maintainer observation of LLM output, 2022-2026):
 
-- **RULE-A Bullet overuse**: Keep prose in paragraphs when ideas connect; bullets only for genuine lists; avoid forced 3-item triads.
+- **RULE-A Bullet overuse**: Keep prose in paragraphs when ideas connect; bullets only for genuine lists; avoid forced 3-item triads; table cells hold numbers or short labels.
 - **RULE-B Dash overuse**: Do not use em or en dashes as casual sentence punctuation; prefer commas, semicolons, colons, parentheses.
 - **RULE-C Same-starts**: Do not open two or more consecutive sentences with the same word.
 - **RULE-D Transitions**: Do not open sentences with "Additionally", "Furthermore", "Moreover", "In addition".
@@ -50,4 +50,4 @@ Field-observed rules (maintainer observation of LLM output, 2022-2026):
 
 ## Full Rule Bodies (Canonical)
 
-Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.6.0/RULES.md for the pinned canonical source.
+Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.7.0/RULES.md for the pinned canonical source.

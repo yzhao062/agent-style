@@ -130,7 +130,7 @@ Install the CLI once; then pick the paths you want.
 ```bash
 pip install agent-style                              # Python users
 # or: npm install -g agent-style                     # Node users
-# or: npx --yes agent-style@0.6.0 <subcommand>       # no install needed
+# or: npx --yes agent-style@0.7.0 <subcommand>       # no install needed
 ```
 
 ### 1. Soft Enforcement — rules at generation time
@@ -219,7 +219,7 @@ For `print-only` and `multi-file-required`, the JSON output carries `manual_step
 </details>
 
 <details>
-<summary><b>Per-surface install table (v0.6.0 primary set)</b></summary>
+<summary><b>Per-surface install table (v0.7.0 primary set)</b></summary>
 <br>
 
 | Tool | install_mode | Target path |
@@ -246,7 +246,7 @@ The 11 planned v1.1 surfaces are Amazon Q Developer, JetBrains AI Assistant, Win
 Skip the package install; pin to a specific release so adapters and `RULES.md` stay consistent:
 
 ```bash
-AGENT_STYLE_REF=v0.6.0
+AGENT_STYLE_REF=v0.7.0
 mkdir -p .agent-style
 curl -fsSLo .agent-style/RULES.md       "https://raw.githubusercontent.com/yzhao062/agent-style/${AGENT_STYLE_REF}/RULES.md"
 curl -fsSLo .agent-style/claude-code.md "https://raw.githubusercontent.com/yzhao062/agent-style/${AGENT_STYLE_REF}/agents/claude-code.md"
@@ -339,7 +339,7 @@ After running `agent-style enable <tool>`, ask your agent:
 
 Expected reply:
 
-> agent-style v0.6.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.
+> agent-style v0.7.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.
 
 For `style-review` specifically, ask:
 
@@ -372,7 +372,7 @@ npx anywhere-agents        # Node.js path
 
 Opt out by adding `rule_packs: []` to `agent-config.yaml` at your project root; pin to a specific ref or swap for a fork via `rule_packs: - name: agent-style\n    ref: <tag>`. See [anywhere-agents rule-pack composition docs](https://github.com/yzhao062/anywhere-agents/blob/main/docs/rule-pack-composition.md) for the full contract.
 
-### v0.6.0+ Roadmap
+### v0.7.0+ Roadmap
 
 Planned CLI additions: `agent-style update` (refresh installed adapters to latest), `agent-style override <RULE-ID> disable` (per-rule opt-out), `agent-style clean` (one-command uninstall), `.agent-style/config.toml` (project-level config), RULE-02 / 07 / 09 / 10 structural detectors filled in, and filled adapters for the planned-adapter set above (v1.1). Track progress in [`CHANGELOG.md`](CHANGELOG.md).
 

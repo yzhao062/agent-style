@@ -27,7 +27,7 @@ from types import SimpleNamespace
 import pytest
 
 from agent_style.review import detectors_mech
-from agent_style.review.detectors_mech import _rule_03
+from agent_style.review.detectors_mech import _rule_03, _rule_a
 
 
 def interval_hits(violations):
@@ -230,20 +230,22 @@ def test_two_stacked_sentences_are_below_the_run_threshold():
 
 
 def test_results_paragraph_outside_abstract_and_introduction_is_quiet():
+    # Only Markdown, plain text and unnamed non-LaTeX text: a LaTeX file reads its
+    # body prose too since 0.7.0 (tests/test_rule03_displays.py).
     text = (
-        "\\section{Results}\n"
+        "## Results\n\n"
         + STACKED
-        + "\n\\section{Discussion}\nThe gap is 0.15, 0.26, 0.48, 0.59, 0.67, 0.82.\n"
+        + "\n\n## Discussion\n\nThe gap is 0.15, 0.26, 0.48, 0.59, 0.67, 0.82.\n"
     )
-    assert _rule_03(text, "main.tex") == []
-    assert _rule_03(STACKED, "04-results.tex") == []
+    assert _rule_03(text, "paper.md") == []
     assert _rule_03(STACKED, "notes.md") == []
+    assert _rule_03(STACKED, "notes.txt") == []
     assert _rule_03(STACKED) == []
 
 
 def test_changelog_like_text_is_quiet_even_as_an_abstract():
     text = (
-        "Release v0.6.0 (2026-10-16) ships 38 tests and 2,417 fixtures. "
+        "Release v0.7.0 (2026-10-16) ships 38 tests and 2,417 fixtures. "
         "It follows 0.4.2 and 0.4.1, and runs on Python 3.9-3.13 with Node 20.11.1. "
         "The matrix is ubuntu x 3.9/3.10/3.11/3.12/3.13 and macos x 3.12/3.13. "
         "See Section 3.2, Tables 4 and 5, Figure 2.1, Appendix B.3, and Eq. 7.1. "
@@ -303,7 +305,7 @@ def test_file_name_makes_the_whole_text_a_region(name):
     assert len(stack_hits(_rule_03(STACKED, name))) == 1, name
 
 
-@pytest.mark.parametrize("name", ["", "results.tex", "main.tex", "notes.md", "README.md"])
+@pytest.mark.parametrize("name", ["", "notes.md", "README.md", "results.txt", "results.rst"])
 def test_other_file_names_do_not(name):
     assert _rule_03(STACKED, name) == []
 
@@ -327,15 +329,20 @@ def test_latex_abstract_environment_is_a_region():
 def test_latex_introduction_section_ends_at_the_next_section():
     inside = "\\section{Introduction}\n" + STACKED + "\n\\section{Method}\nWe run it.\n"
     assert len(stack_hits(_rule_03(inside, "main.tex"))) == 1
-    after = "\\section{Introduction}\nWe study caches.\n\\section{Method}\n" + STACKED + "\n"
-    assert _rule_03(after, "main.tex") == []
+    after = "\\section{Introduction}\nWe study caches.\n\\section{Results}\n" + STACKED + "\n"
+    found = stack_hits(_rule_03(after, "main.tex"))
+    # The stack after the introduction is body prose, reported as such.
+    assert len(found) == 1 and "in the body text" in found[0].detail and found[0].line == 4
+    assert [v for v in _rule_03(after, "main.tex") if "introduction" in v.detail] == []
     starred = "\\section*{Introduction}\n" + STACKED + "\n"
     assert len(stack_hits(_rule_03(starred, "main.tex"))) == 1
 
 
 def test_commented_out_section_heading_does_not_open_a_region():
     text = "% \\section{Introduction}\n" + STACKED + "\n"
-    assert _rule_03(text, "main.tex") == []
+    found = stack_hits(_rule_03(text, "main.tex"))
+    assert len(found) == 1 and "in the body text" in found[0].detail
+    assert [v for v in _rule_03(text, "main.tex") if "introduction" in v.detail] == []
 
 
 def test_markdown_heading_region_ends_at_a_heading_of_the_same_or_higher_level():
@@ -864,13 +871,14 @@ def test_a_run_of_closers_is_scanned_in_linear_time():
     "name",
     ["appendix.tex", "02-Appendix.tex", "A_appendices.md", "supplement.md", "Supplementary-Materials.tex",
      "paper supp results.tex", "supp.tex", "/tmp/x/sections/appendix_b.tex", "C:\\x\\appendix.md",
-     "results.appendix.tex"],
+     "results.appendix.tex", "app-prereg.tex", "app_results.tex", "appx.tex", "apx-b.tex"],
 )
 def test_appendix_and_supplement_file_names_skip_check_a(name):
     assert interval_hits(_rule_03(IV, name)) == [], name
 
 
-@pytest.mark.parametrize("name", ["support.md", "supportive-notes.md", "results.tex", "notes.md", ""])
+@pytest.mark.parametrize("name", ["support.md", "supportive-notes.md", "results.tex", "notes.md", "",
+                                  "application.tex", "apps.tex", "mapping.tex"])
 def test_other_file_names_keep_check_a(name):
     assert len(interval_hits(_rule_03(IV, name))) == 1, name
 
@@ -957,7 +965,7 @@ def test_findings_are_ordered_by_position():
 def test_registered_and_dispatched_with_the_file_path():
     assert "RULE-03" in detectors_mech._DISPATCH
     rule = SimpleNamespace(id="RULE-03", severity="high")
-    quiet = detectors_mech.run(rule, STACKED, "results.tex")
+    quiet = detectors_mech.run(rule, STACKED, "results.md")
     assert quiet.status == "ok" and quiet.count == 0
     loud = detectors_mech.run(rule, STACKED, "00-abstract.tex")
     assert loud.status == "violation" and loud.count == 1
@@ -1029,6 +1037,8 @@ def test_never_raises(text, path):
     result = detectors_mech._rule_03_scan(text, path)
     assert isinstance(result, list)
     assert isinstance(_rule_03(text, path), list)
+    assert isinstance(detectors_mech._rule_a_scan(text, path), list)
+    assert isinstance(_rule_a(text, path), list)
 
 
 def test_never_raises_on_odd_argument_types():
@@ -1049,13 +1059,14 @@ def test_two_hundred_kilobytes_is_fast():
     paragraph = (
         "The build gave 0.62 on the first split and 0.52 on the second, with "
         "Section 3.2 and Table 4 as context. Prefetching lowers the miss rate by 8.9 points "
-        "(95\\% interval 0.51 to 0.83) at full load. v0.6.0 shipped on 2026-10-16.\n\n"
+        "(95\\% interval 0.51 to 0.83) at full load. v0.7.0 shipped on 2026-10-16.\n\n"
     )
     text = paragraph * (200_000 // len(paragraph) + 1)
     assert len(text) >= 200_000
-    for path in ("", "00-abstract.tex"):
+    for path in ("", "00-abstract.tex", "main.tex"):
         start = time.perf_counter()
         _rule_03(text, path)
+        _rule_a(text, path)
         assert time.perf_counter() - start < 3.0, path
 
 
@@ -1075,9 +1086,12 @@ HOSTILE_INPUTS = ["0" * 200_000, "!" * 200_000, "(1.5" + " " * 100_000 + "2.5)",
 
 @pytest.mark.parametrize("text", HOSTILE_INPUTS, ids=[f"hostile-{i}" for i in range(len(HOSTILE_INPUTS))])
 def test_hostile_inputs_are_fast(text):
-    for path in ("00-abstract.tex", "notes.md"):
+    # `main.tex` reaches the body-prose, caption and precision checks, and
+    # `_rule_a` the table check, which the abstract path does not.
+    for path in ("00-abstract.tex", "notes.md", "main.tex"):
         start = time.perf_counter()
         _rule_03(text, path)
+        _rule_a(text, path)
         assert time.perf_counter() - start < 3.0, path
 
 
