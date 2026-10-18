@@ -26,7 +26,8 @@ From a clean `main` with no uncommitted changes:
 bash scripts/verify-install.sh
 
 # 2. Markdown lint clean across all tracked Markdown (CodexReview.md is intentionally excluded).
-npx --yes markdownlint-cli2 "**/*.md" "#CodexReview.md"
+#    Listing tracked files keeps local copies such as .agent-config/ and Review-*.md out of the run.
+git ls-files -z '*.md' | xargs -0 npx --yes markdownlint-cli2 '#CodexReview.md'
 
 # 3. Whitespace-clean staged diff (no trailing spaces / mixed tabs).
 git diff --cached --check

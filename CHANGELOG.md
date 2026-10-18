@@ -6,16 +6,20 @@ All notable changes to *The Elements of Agent Style* are documented here.
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versioning: [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html).
 
-> **Version distribution for the v0.8.0 release.** The last shared PyPI and npm release before this one is **0.7.0**; this release publishes **0.8.0** to both registries. Git tags **v0.3.2** and **v0.3.3** remain *docs-only* additions (`docs/rule-pack.md` published as the `anywhere-agents` rule-pack pin target, and README Use option 3 cross-reference); they were never a PyPI or npm publish target, and the package version files skipped them. No package release may reuse a docs-only ref. See `RELEASING.md` for the docs-only tag convention. This banner is the authoritative record `RELEASING.md` consults when deciding what may be published, so it is updated on every release.
+> **Version distribution for the v0.9.0 release.** The last shared PyPI and npm release before this one is **0.8.0**; this release publishes **0.9.0** to both registries. Git tags **v0.3.2** and **v0.3.3** remain *docs-only* additions (`docs/rule-pack.md` published as the `anywhere-agents` rule-pack pin target, and README Use option 3 cross-reference); they were never a PyPI or npm publish target, and the package version files skipped them. No package release may reuse a docs-only ref. See `RELEASING.md` for the docs-only tag convention. This banner is the authoritative record `RELEASING.md` consults when deciding what may be published, so it is updated on every release.
 
 ## [Unreleased]
+
+*No unreleased changes queued.*
+
+## [0.9.0] — 2026-10-18
 
 Minor: a House Style section ranks above the 21 rules where they conflict, and the RULE-01, RULE-03, RULE-04, RULE-07, RULE-08, RULE-A, RULE-B, RULE-D, RULE-E, RULE-G, and RULE-I directives change, which `RELEASING.md` counts as a change to the ruleset contract. The rule count, the rule IDs, and the CLI interface are unchanged, and the RULE-E detector skips a sentence that ends in a colon.
 
 ### Added
 
 - **The pack carries one author's style, and says so.** A House Style section after the Escape Hatch lists habits measured from the maintainer's five first-author ML papers written before AI writing tools: the moves of an abstract, introduction, results paragraph, and conclusion, about one sentence in four past 30 words carrying parenthetical glosses, and sparing signposts. Each habit carries the rate the papers show, because a card written as instructions made agents use every habit in every paragraph. Where a rule conflicts with a habit, the habit wins; the firm rules (no invented citations, evidence, or numbers, no placeholders) still hold. The facts outrank every habit: a move they do not support, such as a claim of being first, a cause, an exception, or a code release, is left out, and needed scope or uncertainty stays. The README and every adapter say the pack starts from the classics and carries this style, and a fork can swap the section for its own author's habits.
-- **`docs/bench-house-style.md` records the evidence.** On twelve sections rewritten from fact sheets by three writers, drafts under the House Style and the author's passages moved closer to the originals on word use, sentence length, glosses, and abstract moves, though relation words stayed below the author's rate, and judged accuracy held. In a four-pair blind test of drafts from an earlier form of the habits, the author took three for the originals. With the full composed `AGENTS.md` of a consumer and the `author-voice` skill from `agent-pack`, the share of sentences over 30 words went from 3% under 0.8.0 to 22%, against 25% in the papers, and unsupported claims went from 8 to 7. Every agent loaded the skill for a paper section without being asked and never for a README or an email.
+- **`docs/bench-house-style.md` records the evidence.** On twelve sections rewritten from fact sheets by three writers, drafts under the House Style and the author's passages moved closer to the originals on word use, sentence length, glosses, and abstract moves, though relation words stayed below the author's rate, and judged accuracy held. In a four-pair blind test of drafts from an earlier form of the habits, the author took three for the originals. With the full composed `AGENTS.md` of a consumer and the `author-voice` skill from `agent-pack`, the share of sentences over 30 words went from 3% under 0.8.0 to 24%, against 25% in the papers, and judged unsupported claims did not rise. Every agent loaded the skill for a paper section without being asked, also when asked only to polish an existing LaTeX section, and never for a README or an email.
 
 ### Changed
 
@@ -352,7 +356,8 @@ The v0.3.0 cycle turns the bench from a narrow, API-billable CI job into a full-
 
 ---
 
-[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/yzhao062/agent-style/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/yzhao062/agent-style/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/yzhao062/agent-style/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/yzhao062/agent-style/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/yzhao062/agent-style/compare/v0.5.0...v0.6.0

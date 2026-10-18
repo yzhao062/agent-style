@@ -8,6 +8,7 @@
 //   MD034 no-bare-urls    — tolerable in source citations and link lists
 //   MD026 no-trailing-punctuation — frontmatter `description:` fields legitimately end with a period
 //   MD029 ol-prefix       — SOURCES.md numbers 5-6 continue semantically from 1-4 across buckets
+//   MD060 table-column-style — newer markdownlint releases flag the compact tables in the archived bench docs
 {
   "config": {
     "MD013": false,
@@ -16,7 +17,8 @@
     "MD024": false,
     "MD034": false,
     "MD026": false,
-    "MD029": false
+    "MD029": false,
+    "MD060": false
   },
   "ignores": [
     "LICENSES/**",

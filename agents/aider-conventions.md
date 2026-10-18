@@ -3,13 +3,13 @@
 <!-- Target path: .agent-style/aider-conventions.md; user adds both files to .aider.conf.yml -->
 <!-- Load class: multi-file-required; install_mode: multi-file-required -->
 
-# agent-style v0.8.0 — Aider adapter
+# agent-style v0.9.0 — Aider adapter
 
 agent-style is a literature-backed English technical-prose writing ruleset for AI agents. Aider can load multiple read-only files via `--read` flags or `.aider.conf.yml`. For full rule bodies to reach context, both this file AND `.agent-style/RULES.md` must be listed. If only this file is loaded, the compact directives below reach context but the full rule bodies do not.
 
 ## Self-Verification Handshake
 
-When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.8.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
+When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.9.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
 
 ## Load Statement
 
@@ -68,4 +68,4 @@ The rules start from classic guides and are tuned to one author, Yue Zhao. A Hou
 
 ## Full Rule Bodies (Canonical)
 
-Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.8.0/RULES.md for the pinned canonical source.
+Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.9.0/RULES.md for the pinned canonical source.

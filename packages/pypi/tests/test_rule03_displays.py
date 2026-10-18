@@ -318,7 +318,7 @@ def test_a_caption_with_three_precise_figures_flags(caption):
         "\\caption{Hit rate was 41.6 and 45.3 (95\\% CI).}",
         "\\caption{Hit rate was 41.6 and 45.3, with 95\\% bootstrap intervals.}",
         "\\caption{Hit rate was 41.6 and 45.3 (CI 95\\%).}",
-        "\\caption{Hit rate was 41.6 and 45.3 on v0.8.0 of the tool, run 2026-10-16.}",
+        "\\caption{Hit rate was 41.6 and 45.3 on v0.9.0 of the tool, run 2026-10-16.}",
     ],
 )
 def test_a_caption_below_the_limits_stays_quiet(caption):
@@ -1057,7 +1057,7 @@ def test_two_hundred_kilobytes_of_latex_is_fast():
         "\\begin{figure}\n\\caption{Hit rate was 41.6, 45.3 and 47.1 on three traces, "
         "with Section 3.2 and Table 4 as context.}\n\\end{figure}\n"
         "The build gave 0.62 on the first split and 0.52 on the second, with 0.8123 and 0.8234. "
-        "Prefetching lowers the miss rate by 8.9 points at full load. v0.8.0 shipped on 2026-10-16.\n\n"
+        "Prefetching lowers the miss rate by 8.9 points at full load. v0.9.0 shipped on 2026-10-16.\n\n"
     )
     text = paragraph * (200_000 // len(paragraph) + 1)
     assert len(text) >= 200_000
