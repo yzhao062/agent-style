@@ -8,7 +8,7 @@
 
 **Make your AI agent write like a tech pro.**
 
-*21 rules: 12 from classic writing guides, 9 from field observation of LLM output, 2022-2026.*
+*21 rules: 12 from classic writing guides, 9 from field observation of LLM output, 2022-2026, and a House Style drawn from one author's own papers.*
 
 [![PyPI](https://img.shields.io/pypi/v/agent-style.svg?color=blue&cacheSeconds=300)](https://pypi.org/project/agent-style/)
 [![npm](https://img.shields.io/npm/v/agent-style.svg?color=blue&cacheSeconds=300)](https://www.npmjs.com/package/agent-style)
@@ -32,6 +32,10 @@ The top row is the identity: 21 rules, 12 canonical plus 9 field-observed; borde
 ## What It Is
 
 A curated set of English writing rules formatted for AI coding and writing agents to follow **at generation time**, not as a post-hoc linter.
+
+### House Style
+
+The rules start from the classics and carry a strong personal style. A House Style section in `RULES.md` comes from my first-author ML papers written before AI writing tools, and where it conflicts with one of the 21 rules, the agent follows the House Style. It covers how an abstract, introduction, results paragraph, and conclusion move, a share of long sentences that carry parenthetical glosses (about one in four), and sparing signposts, each at the rate my papers use it. In a four-pair blind test, I took three AI drafts written with an earlier form of these habits and my own exemplars for my originals; [`docs/bench-house-style.md`](docs/bench-house-style.md) has the measurements. To make the pack write like you, fork it and replace that section with habits measured from your own pre-AI writing.
 
 ### Scope
 
@@ -80,7 +84,7 @@ Structural patterns logged from LLM output across research, proposal, documentat
 | A | Do not convert prose into bullet points unless the content is a genuine list (and do not over-bullet where 2 items or a sentence fit) |
 | B | Do not use em or en dashes as casual sentence punctuation |
 | C | Do not start consecutive sentences with the same word or phrase |
-| D | Do not open sentences with additive-only transition words ("Additionally", "Furthermore", "Moreover"); keep the ones that mark a contrast, cause, or sequence the text establishes |
+| D | Do not open sentences with additive-only transition words ("Additionally", "Furthermore"), and let "Moreover" or "Notably" open at most one sentence in a paragraph; keep the ones that mark a contrast, cause, or sequence the text establishes |
 | E | Do not close every paragraph with a summary sentence |
 | F | Use consistent terms; do not redefine abbreviations mid-document |
 | G | Use title case for section and subsection headings (articles, short prepositions, and coordinating conjunctions stay lowercase); a full-sentence bold run-in lead takes sentence case |

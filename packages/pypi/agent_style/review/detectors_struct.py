@@ -342,14 +342,31 @@ _CLOSER_PATTERNS = (
 )
 
 
+_LATEX_LIST_RE = re.compile(r"^\s*\\(?:item\b|(?:begin|end)\{(?:itemize|enumerate|description)\})")
+
+
 def _rule_e(text: str) -> list[Violation]:
     """Flag paragraph-closing sentences that restate or summarize."""
     out: list[Violation] = []
     for start_line, para_lines in _paragraphs(text):
-        sentences = _sentences_in_paragraph(para_lines)
+        # A Markdown or LaTeX list line starts a new sentence, so a lead-in such
+        # as "... include:" stays its own sentence when a list follows it without
+        # a blank line.
+        segments: list[list[str]] = []
+        for line in para_lines:
+            if not segments or _BULLET_RE.match(line) or _LATEX_LIST_RE.match(line):
+                segments.append([line])
+            else:
+                segments[-1].append(line)
+        sentences = [s for seg in segments for s in _sentences_in_paragraph(seg)]
         if not sentences:
             continue
         last = sentences[-1]
+        # A sentence ending in a colon leads into what follows, such as the House
+        # Style's "In summary, the key contributions of this work include:"; it
+        # restates nothing.
+        if last.rstrip().endswith(":"):
+            continue
         for pat in _CLOSER_PATTERNS:
             if pat.search(last):
                 # Line number is start_line + number of lines before the last

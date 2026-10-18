@@ -48,6 +48,10 @@ Field-observed (maintainer observation of LLM output, 2022-2026):
 
 *"Break any of these rules sooner than say anything outright barbarous."* — George Orwell, "Politics and the English Language" (1946), Rule 6. Most rules are defaults to apply with judgment. Depart when the sentence reads better for it, not to vary the pattern. A few are firm (do not invent citations, evidence, or numbers; no placeholders in finished text). Judge a draft by its overall pattern: one that obeys every default in every sentence reads as machine-made.
 
+## House Style
+
+The rules start from classic guides and are tuned to one author, Yue Zhao. A House Style section in `RULES.md` lists that author's habits, drawn from first-author ML papers written before AI writing tools: the moves of an abstract, introduction, results paragraph, and conclusion; about one sentence in four past 30 words, carrying parenthetical glosses; and sparing signposts. Where a style rule conflicts with a habit there, follow the habit, but never against the facts or the firm rules. Read that section in `RULES.md` before drafting a paper or proposal section.
+
 ## Full Rule Bodies (Canonical)
 
 - Imported: `@.agent-style/RULES.md`

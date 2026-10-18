@@ -48,9 +48,8 @@ BUNDLE_RULES_OUTPUTS = [
 ]
 
 COMPACT_INTRO = (
-    "Compact render: each rule shows its directive and one BAD → GOOD pair. "
-    "The full reference (all pairs, evidence, severity, rationale) is "
-    "`rule-pack.md`, an alias of repo-root `RULES.md`, at the same release."
+    "Compact render: each rule shows its directive and one BAD → GOOD pair; "
+    "`rule-pack.md` (an alias of `RULES.md`) holds the rest."
 )
 
 # h2 sections of RULES.md that the compact render omits. The severity rubric

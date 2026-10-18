@@ -273,12 +273,26 @@ const CLOSER_PATTERNS = [
   /\brepresents? a (?:significant|major|substantial) (?:advance|step|improvement)\b/i,
 ];
 
+const LATEX_LIST_RE = /^\s*\\(?:item\b|(?:begin|end)\{(?:itemize|enumerate|description)\})/;
+
 function ruleE(text) {
   const out = [];
   for (const p of paragraphs(text)) {
-    const sentences = sentencesInParagraph(p.lines);
+    // A Markdown or LaTeX list line starts a new sentence, so a lead-in such
+    // as "... include:" stays its own sentence when a list follows it without
+    // a blank line.
+    const segments = [];
+    for (const line of p.lines) {
+      if (segments.length === 0 || BULLET_RE.test(line) || LATEX_LIST_RE.test(line)) segments.push([line]);
+      else segments[segments.length - 1].push(line);
+    }
+    const sentences = segments.flatMap((seg) => sentencesInParagraph(seg));
     if (sentences.length === 0) continue;
     const last = sentences[sentences.length - 1];
+    // A sentence ending in a colon leads into what follows, such as the House
+    // Style's "In summary, the key contributions of this work include:"; it
+    // restates nothing.
+    if (last.trimEnd().endsWith(':')) continue;
     for (const pat of CLOSER_PATTERNS) {
       if (pat.test(last)) {
         out.push({

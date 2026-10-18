@@ -2,14 +2,26 @@
 
 # The Elements of Agent Style — Rules
 
-Compact render: each rule shows its directive and one BAD → GOOD pair. The full reference (all pairs, evidence, severity, rationale) is `rule-pack.md`, an alias of repo-root `RULES.md`, at the same release.
+Compact render: each rule shows its directive and one BAD → GOOD pair; `rule-pack.md` (an alias of `RULES.md`) holds the rest.
 
 ## Escape Hatch (Meta-Principle)
 
 > *"Break any of these rules sooner than say anything outright barbarous."*
 > — George Orwell, "Politics and the English Language" (1946), Rule 6
 
-Most rules here are defaults to apply with judgment. Human writers depart from any single one now and then, and that variety is part of why their prose reads as written by a person. Depart when the sentence reads better for it, not to vary the pattern. A few are firm: do not invent citations, evidence, or numbers, and do not leave placeholders in finished text. Judge a draft by its overall pattern. A draft that obeys every default in every sentence (every sentence cut under 30 words, every connective removed, every paragraph opened the same way) reads as machine-made. When a rule fights the sentence, drop the rule.
+Most rules here are defaults to apply with judgment. Human writers depart from any single one now and then, and that variety is part of why their prose reads as written by a person. A few are firm: do not invent citations, evidence, or numbers, and do not leave placeholders in finished text. Judge a draft by its overall pattern: one that obeys every default in every sentence (every sentence under 30 words, every connective removed) reads as machine-made. When a rule fights the sentence, drop the rule.
+
+## House Style
+
+These habits, from Yue Zhao's pre-AI first-author ML papers, tune the classic rules to one author. A habit outranks a conflicting style rule below but never the facts: the firm rules and any needed scope or uncertainty come first, and a move the facts do not support is left out. Use each habit at its rate, not everywhere.
+
+- **Abstract.** Open on the problem, never on the field's importance: about half open with a question naming the input and the constraint ("Given X, how can we ... without any labels?"), the rest with a concession ("There is no shortage of X, yet ...") or a task definition. Say what makes it hard, often as "(i) ... (ii) ..." reasons. Then "In this work, we" name the method and coin its acronym, give the mechanism, report evidence in words or one rounded figure ("Extensive experiments on more than 20 datasets show ..."), and close on code if released.
+- **Introduction.** Concede, then turn ("Although X, they cannot Y"), naming the alternative and why it does not transfer; state limits of prior work flatly ("none of them"). A "first" the facts support takes "(to the best of our knowledge)"; add one scope remark ("We remark that X is strictly a Y technique, rather than a new Z"). No roadmap. End with "In summary, the key contributions of this work include:", three to five items with bold noun-phrase heads and full "We ..." sentences, effectiveness last, then a bold "Reproducibility." line if code is released.
+- **Results.** Open a paragraph with a bold full-sentence finding, then the evidence and, where it shows them, a one-clause cause ("This is mainly because ...") and the exception.
+- **Conclusion.** About 125 words in one paragraph: the claim in the abstract's words, the mechanism in a clause, one evidence sentence without numbers, at most one scoped limitation, and one future-work sentence.
+- **Sentences.** About one in four runs past 30 words, carrying glosses ("(e.g., ...)", "(i.e., ...)") and inline "(i) ... (ii) ..." lists; short flat ones sit beside them ("Consider iForest as an example."). The method is the subject of plain active verbs (capitalizes on, carries over).
+- **Signposts.** Most sentences start with their subject. Five abstracts hold two "Moreover" and one each of "Notably" and "In a nutshell"; an introduction has about one every two or three paragraphs, a conclusion one at most.
+- **Words.** Keep the central claim and fixed terms in the same words across sections. Hedge a cause with one word ("possibly due to"). A plain colloquial word beside technical terms is fine ("juice out", "a black art").
 
 ## The 12 Rules
 
@@ -19,7 +31,7 @@ Most rules here are defaults to apply with judgment. Human writers depart from a
 
 ##### Directive
 
-Do not use technical terms or acronyms that have not been established for the reader's background level. Do not launch into mechanics before naming the purpose. Do not write a multi-paragraph argument without a one-sentence map first. Before writing, name the intended reader for this artifact: adjacent-field graduate student for research papers, junior engineer for API docs, on-call engineer for runbooks, cross-panel reviewer for proposals, release reader for changelogs, or another concrete reader. If that reader would pause to infer what a term means, define it or rewrite around it.
+Do not use technical terms or acronyms that have not been established for the reader's background level. Do not launch into mechanics before naming the purpose. Do not write a multi-paragraph argument without a one-sentence map first. Before writing, name the intended reader (an adjacent-field graduate student for a paper, a cross-panel reviewer for a proposal, an on-call engineer for a runbook). If that reader would pause to infer what a term means, define it or rewrite around it.
 
 ##### BAD → GOOD
 
@@ -47,7 +59,7 @@ Do not write "X was done by Y" when "Y did X" fits. Active voice names the agent
 
 Do not use abstract nouns when concrete ones exist. "The system has performance issues" says nothing; "the checkout endpoint p95 latency rose from 120ms to 450ms at 14:00 UTC" names what, when, and how much. Replace category words ("factors", "aspects", "considerations", "issues", "elements") with the specific items they refer to.
 
-Concrete means naming the specific finding, and a table transcribed into a sentence buries it. When a table or figure holds the results, state the pattern early, with the magnitude a reader needs to interpret it ("halves latency at batch size 1"). Point to the display for per-item scores, intervals, and p-values. A caption names what the display shows, the pattern to read from it, and what a reader needs to decode it, such as error bars or reference lines. Repeated results, setup narration, and caveats go to the text or an appendix. Round each magnitude to the precision the claim needs ("about a third", "under one point"). Do not stack precise figures in consecutive sentences, and do not restate a figure in a second form. Give a kept figure its meaning for the reader (faster, cheaper, more accurate), in the same sentence when it fits, and only for the setting that produced it. An abstract, introduction, or conclusion carries the fewest numbers of any section: the few magnitudes behind the main findings, any tie or loss that bounds them with its size in words or one rounded figure, and no intervals or p-values. When uncertainty changes the interpretation, say so beside the estimate in plain words ("within noise", "consistent across seeds") rather than by citing standard deviations or confidence intervals. Do not call an inconclusive difference a gain, even with a caveat attached. Report a difference in points or percent ("6 points of AUC", "about 11% lower error"), not as a raw decimal, and keep one unit and sign convention across text, tables, and captions. Keep numbers that change the claim or that the reader acts on. When several figures matter and no display holds them, add a table (in an appendix if space is short) and point to it. Before cutting a figure from a sentence, check that a display holds it; an appendix that serves as the record keeps exact values.
+Concrete means naming the specific finding, and a table transcribed into a sentence buries it. When a table or figure holds the results, state the pattern early, with the magnitude a reader needs to interpret it ("halves latency at batch size 1"). Point to the display for per-item scores, intervals, and p-values. Round each magnitude to the precision the claim needs ("about a third", "under one point"). Do not stack precise figures in consecutive sentences, and do not restate a figure in a second form. Give a kept figure its meaning for the reader (faster, cheaper, more accurate), in the same sentence when it fits, and only for the setting that produced it. An abstract, introduction, or conclusion carries the fewest numbers of any section: the few magnitudes behind the main findings, any tie or loss that bounds them with its size in words or one rounded figure, and no intervals or p-values. When uncertainty changes the interpretation, say so beside the estimate in plain words ("within noise", "consistent across seeds") rather than by citing standard deviations or confidence intervals. Do not call an inconclusive difference a gain, even with a caveat attached. Report a difference in points or percent ("6 points of AUC", "about 11% lower error"), not as a raw decimal, and keep one unit and sign convention across text, tables, and captions. Keep numbers that change the claim or that the reader acts on. When several figures matter and no display holds them, add a table (in an appendix if space is short) and point to it.
 
 ##### BAD → GOOD
 
@@ -60,7 +72,7 @@ Concrete means naming the specific finding, and a table transcribed into a sente
 
 Do not stretch phrases. "In order to" is "to"; "due to the fact that" is "because"; "at this point in time" is "now"; "it is important to note that" is (delete and state the fact); "may potentially" and "could possibly" are redundant hedges (use "may" or "could", not both).
 
-Cut needless sentences too: one that announces what the next sentence will do, restates the method or setup the reader already has, or repeats a finding already given. An abstract states the problem, what makes it hard, the approach, and the main findings. It defines only the terms those need and cites no table or figure. A conclusion restates the main findings and their limits in a short paragraph and does not walk through the results again.
+Cut needless sentences too: one that announces what the next sentence will do, restates the method or setup the reader already has, or repeats a finding already given. An abstract cites no table or figure, and a conclusion does not walk through the results again.
 
 ##### BAD → GOOD
 
@@ -75,8 +87,8 @@ Do not use metaphors, similes, or phrases you have seen often in print. When a p
 
 ##### BAD → GOOD
 
-- BAD: `This work pushes the boundaries of what's possible in large language model alignment.`
-- GOOD: `This work reduces harmful-completion rate on HarmBench from 14.1% to 3.2% without degrading MMLU accuracy.`
+- BAD (paper intro): `Outlier detection (OD) is no exception.`
+- GOOD (author's paper): `The same problem applies to outlier detection (OD).`
 
 #### RULE-06: Do Not Use Avoidable Jargon Where an Everyday English Word Exists
 
@@ -95,9 +107,9 @@ Do not use "leverage" where "use" fits. Do not use "utilize" where "use" fits. D
 
 ##### Directive
 
-Replace "not important" with "trivial"; "did not remember" with "forgot"; "did not pay attention to" with "ignored"; "is not often" with "rarely"; "is not large" with "small"; "does not succeed" with "fails". Prefer one affirmative word over two negating words. When the sentence genuinely negates something (the proposition is true only in the negative), a single "not" is fine and necessary.
+Prefer one affirmative word over two negating words: "trivial" for "not important", "forgot" for "did not remember", "rarely" for "is not often", "fails" for "does not succeed". A single "not" is right when the proposition is true only in the negative.
 
-The same principle applies at the clause level. Do not stage a claim as a contrast against a negated foil for emphasis: "X, not Y", "It is not X, it is Y", "Not just X, but Y", "This is not about X; it is about Y". State the claim directly. Keep the negation only when the rejected alternative is specific and ruling it out informs the reader ("The bottleneck is disk I/O, not CPU"). Drop the foil when it is vague, self-evident, or a strawman ("not a hope", "not the last", "not just a tool"), where the "not Y" tail is cadence, not content.
+Do not stage a claim against a negated foil for emphasis: "X, not Y", "It is not X, it is Y", "Not just X, but Y". State the claim directly. Keep the negation only when the rejected alternative is specific and ruling it out informs the reader ("The bottleneck is disk I/O, not CPU"); drop a vague or strawman foil ("not just a tool").
 
 ##### BAD → GOOD
 
@@ -110,12 +122,12 @@ The same principle applies at the clause level. Do not stage a claim as a contra
 
 Do not overclaim (saying "proves X" when the evidence is "suggests X") or underclaim. Underclaiming takes two forms. One is reflexive weasel (saying "it might be worth considering" when you mean "we should do X"). The other is the caveat tail: a "however", a future-work aside, or a note on what the work does not establish, attached to a result by habit. Calibrate verbs to evidence: experimental results "suggest" or "show"; theoretical derivations "imply" or "prove"; user reports "indicate"; benchmarks "measure". Use "best" only when you have compared against the strongest alternative; use "only" only when you have ruled out alternatives.
 
-Keep a qualifier when it changes what the evidence supports or what the reader should conclude. Put that scope or uncertainty inside the claim. A tie, a loss, a difference within noise, or the weakest case is a finding. Report it next to the claim it bounds, in the results and in any summary of them. Cut a qualifier that adds no information. Collect general limitations of the study design (one language, one annotator pool, a fixed compute budget) in the venue's Limitations section (Risks and Alternatives in a proposal).
+Keep a qualifier when it changes what the evidence supports, and put it inside the claim. A tie, a loss, a difference within noise, or the weakest case is a finding: report it next to the claim it bounds, in the results and in any summary. Cut a qualifier that adds no information, and collect general limitations of the study design in the venue's Limitations section (Risks and Alternatives in a proposal).
 
 ##### BAD → GOOD
 
-- BAD: `Our method revolutionizes language model alignment, although further work is needed to confirm that it generalizes beyond HarmBench.`
-- GOOD: `Our method reduces harmful-completion rate on HarmBench from 14.1% to 3.2% without degrading MMLU accuracy.`
+- BAD (paper intro): `We introduce MetaOD, a systematic meta-learning framework and the first method for UOMS.`
+- GOOD (author's paper): `We propose MetaOD, (to our knowledge) the first effort on unsupervised model selection for OD tasks.`
 
 ### Sentence Structure
 
@@ -138,8 +150,8 @@ Keep subject close to verb, verb close to object, and modifier close to modified
 
 ##### BAD → GOOD
 
-- BAD: `The model, which was pre-trained on a mixed corpus of English Wikipedia, Common Crawl, and a 400-million-token curated scientific dataset assembled by the authors over eight months, achieves 87.2% accuracy.`
-- GOOD: `The model achieves 87.2% accuracy. It was pre-trained on a mixed corpus of English Wikipedia, Common Crawl, and a 400-million-token scientific dataset the authors curated over eight months.`
+- BAD (abstract, 15 words before the verb): `Choosing an outlier detection algorithm and its hyperparameters (together, a model) for a new dataset is difficult when labels are unavailable.`
+- GOOD (author's paper): `Given an unsupervised outlier detection task on a new dataset, how can we automatically select a good outlier detection algorithm and its hyperparameter(s) (collectively called a model)?`
 
 #### RULE-11: Place New or Important Information in the Stress Position at the End of the Sentence
 
@@ -160,12 +172,12 @@ Vary sentence length: short sentences land points, and long ones carry a claim w
 
 ##### BAD → GOOD
 
-- BAD (runbook, 36 words): `If the primary database instance becomes unavailable for more than two minutes due to either a network partition or a full restart cycle, initiate failover to the replica using the promote_replica.sh script in the ops directory.`
-- GOOD (split): ``Fail over to the replica if the primary is unavailable for more than two minutes. Unavailability includes both network partition and full restart cycle. Run `ops/promote_replica.sh` to promote.``
+- BAD (18 + 13 + 10 words): `MetaOD uses the performance records of a large collection of detection models on historical outlier detection benchmark datasets. It transfers this experience to select an effective model for a new dataset. Selection needs no ground-truth labels, model evaluations, or model comparisons.`
+- GOOD (author's paper, 45 words, one thought): `MetaOD capitalizes on the performances of a large body of detection models on historical outlier detection benchmark datasets, and carries over this prior experience to automatically select an effective model to be employed on a new dataset without any labels, model evaluations or model comparisons.`
 
 ## The 9 Field-Observed Rules
 
-The nine rules RULE-A through RULE-I name patterns I saw recur in LLM output across dozens of writing projects and code releases, 2022 to 2026. No cited writing authority supplies them. They carry the same weight as the 12 canonical rules.
+RULE-A through RULE-I name patterns I saw recur in LLM output, 2022 to 2026. No writing authority supplies them, and they carry the same weight as the 12 canonical rules.
 
 ### Observed LLM Patterns
 
@@ -173,7 +185,7 @@ The nine rules RULE-A through RULE-I name patterns I saw recur in LLM output acr
 
 ##### Directive
 
-Keep prose in paragraphs when ideas connect by cause-and-effect, argument, or narrative. Use bullets only when items are genuinely parallel enumerations (API endpoints, config options, checklist steps). The test: if a reader reads only the first few words of each bullet, does the shape recover meaning? For a genuine list, yes (each bullet names a thing); for fragmented prose, no (bullets are sentence shards with connective tissue stripped). Do not force 3-item lists when 2 items or a sentence fit. Tables follow the same test: a cell holds a number, a label, or a short phrase, and content that needs a sentence belongs in the text.
+Keep prose in paragraphs when ideas connect by cause, argument, or narrative. Use bullets only for genuinely parallel items (endpoints, options, checklist steps): a reader who reads only the first words of each bullet should recover the shape. Do not force three items when two or a sentence fit. A table cell holds a number, a label, or a short phrase; content that needs a sentence belongs in the text.
 
 ##### BAD → GOOD
 
@@ -193,7 +205,7 @@ Keep prose in paragraphs when ideas connect by cause-and-effect, argument, or na
 
 ##### Directive
 
-Do not use em dashes or en dashes as casual sentence punctuation. Prefer commas for appositives, colons for expansions, and parentheses for asides. Vary how independent clauses join: a period, a comma with "and", "but", or "while", or a semicolon for two clauses too closely tied to stand apart. Keep semicolons sparing, and do not turn every one into a period; a run of short sentences reads as clipped. En dashes remain correct in numeric ranges (`1-3`, `2020-2026`), paired names ("the Stein-Strömberg theorem"), and bibliographic page ranges. Normal hyphens in compound words and technical terms (`command-line`, `co-PI`, `zero-shot`) are not dashes and should not be flagged.
+Do not use em or en dashes as casual sentence punctuation. Use commas for appositives, colons for expansions, and parentheses for asides. Join independent clauses with a period, a comma and a conjunction, or a semicolon for two clauses too closely tied to stand apart; keep semicolons sparing, but do not split every one into a period. Dashes stay in numeric ranges, paired names, and page ranges; hyphens in compounds (`zero-shot`) are not dashes.
 
 ##### BAD → GOOD
 
@@ -215,7 +227,7 @@ Do not open two or more consecutive sentences with the same word (often `This ..
 
 ##### Directive
 
-Do not open sentences with "Additionally", "Furthermore", "Moreover", "In addition", "What's more", or "Notably" when the word only announces another point. A period or `And` carries the same addition. Keep the words that mark a relation the text already establishes: contrast ("However", "Instead"), cause ("Thus", "Therefore"), sequence ("First", "Then"). A cause word is itself a claim. Do not add a reason, mechanism, or recommendation that the evidence does not show just to join two sentences.
+Do not open sentences with "Additionally", "Furthermore", "In addition", or "What's more" when the word only announces another point. A period or `And` carries the same addition. "Moreover" and "Notably" may open one sentence in a paragraph, where they mark a second ingredient or a result that stands apart. Keep the words that mark a relation the text already establishes: contrast ("However", "Instead"), cause ("Thus", "Therefore"), sequence ("First", "Then"). A cause word is itself a claim. Do not add a reason, mechanism, or recommendation that the evidence does not show just to join two sentences.
 
 ##### BAD → GOOD
 
@@ -226,12 +238,12 @@ Do not open sentences with "Additionally", "Furthermore", "Moreover", "In additi
 
 ##### Directive
 
-Do not end every paragraph with a sentence that restates the paragraph's point ("In summary, ...", "Thus, the contribution is ...", "Overall, this means ...", "In conclusion, ..."). Summary closers are correct for the final paragraph of a piece, or for a long section that the reader will skim rather than read sequentially. For body paragraphs, trust the content to land its own point; a closer that restates the same claim in different words is noise. The test: if the closer sentence is deleted, does the paragraph still make its point? If yes, delete the closer.
+Do not end every paragraph with a sentence that restates its point ("Overall, this means ...", "Thus, the contribution is ..."). A summary closer fits the final paragraph of a piece or a long section that readers skim. The test: delete the closer, and if the paragraph still makes its point, leave it deleted.
 
 ##### BAD → GOOD
 
-- BAD: `We trained the model on 50k query-passage pairs and evaluated on five benchmarks. The model reaches 0.79 recall@10 on our held-out set. Overall, these results demonstrate that our method is effective.`
-- GOOD: `We trained the model on 50k query-passage pairs and evaluated on five benchmarks. The model reaches 0.79 recall@10 on our held-out set.`
+- BAD (design doc): `We chose two-tower retrieval because query embeddings cache across sessions. Thus, the architecture is well-suited to our caching strategy.`
+- GOOD (design doc): `We chose two-tower retrieval because query embeddings cache across sessions.`
 
 #### RULE-F: Use Consistent Terms; Do Not Redefine Abbreviations Mid-Document
 
@@ -248,7 +260,7 @@ Once you introduce a term or abbreviation, keep using it. Do not alternate "larg
 
 ##### Directive
 
-Capitalize the first word, the last word, and all major words (nouns, verbs, adjectives, adverbs, pronouns) in section and subsection headings. Lowercase articles (`a`, `an`, `the`), coordinating conjunctions (`and`, `but`, `or`, `nor`), and short prepositions (`of`, `in`, `on`, `to`, `for`, `by`, `at`, `with`). This applies to Markdown, LaTeX, and reStructuredText headings. Does not apply to sentence-style titles (question-form headings or full-sentence article titles where sentence case is intended). A full sentence used as a bold run-in paragraph lead takes sentence case, as in `**Caching halves latency at small batch sizes.**`; title case stays for section and subsection headings.
+Use title case in section and subsection headings: capitalize the first, last, and major words, and lowercase articles, coordinating conjunctions, and short prepositions (`of`, `in`, `on`, `to`, `for`, `by`, `at`, `with`). Question-form and full-sentence headings are exempt, and a full-sentence bold run-in lead takes sentence case.
 
 ##### BAD → GOOD
 
@@ -270,9 +282,9 @@ When a sentence asserts a factual claim that warrants attribution (empirical res
 
 ##### Directive
 
-In formal technical prose (research papers, grant proposals, API specifications, technical documentation), prefer "it is" over "it's", "does not" over "doesn't", "cannot" over "can't", "will not" over "won't", "I am" over "I'm", "you are" over "you're". Contractions are acceptable in informal registers (blog posts, release notes, commit messages, casual documentation). Pick the register and hold it within the document.
+In formal technical prose (papers, proposals, specifications, documentation), write full forms: "it is", "does not", "cannot". Contractions suit informal registers such as blog posts and commit messages; hold one register per document.
 
 ##### BAD → GOOD
 
-- BAD (paper): `It's worth noting that the model doesn't converge when the learning rate is too high.`
-- GOOD (paper): `The model does not converge when the learning rate is too high.` (The "it is worth noting that" phrase is itself filler and should also be cut per RULE-04.)
+- BAD (technical spec): `The client shouldn't retry on 4xx errors.`
+- GOOD (technical spec): `The client should not retry on 4xx errors.`

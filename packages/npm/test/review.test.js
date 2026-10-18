@@ -3920,3 +3920,23 @@ test('RULE-08 repeats: hostile inputs are fast', () => {
     assert.ok(Date.now() - started < 5000, text.slice(0, 20));
   }
 });
+
+// RULE-E: a sentence ending in a colon leads into a list, so the House Style's
+// contribution-list opener is not a paragraph-closing summary.
+test('RULE-E skips a colon-terminated lead-in and still flags a summary closer', () => {
+  const { run } = require('../lib/review/detectors_struct');
+  const rule = { id: 'RULE-E', severity: 'medium' };
+  const leadIn = 'In summary, the key contributions of this work include:';
+  const items = '- **First approach.** We propose a method.\n- **Effectiveness.** We show gains on two testbeds.\n';
+  assert.equal(run(rule, `Model selection without labels is hard.\n\n${leadIn}\n\n${items}`, 'x.md').violations.length, 0);
+  assert.equal(run(rule, `Model selection without labels is hard. ${leadIn}\n\n${items}`, 'x.md').violations.length, 0);
+  // CommonMark lets a list follow its lead-in without a blank line.
+  assert.equal(run(rule, `${leadIn}\n${items}`, 'x.md').violations.length, 0);
+  assert.equal(run(rule, `Model selection without labels is hard. ${leadIn}\n1. We propose a method.\n2. We show gains.\n`, 'x.md').violations.length, 0);
+  for (const env of ['itemize', 'enumerate']) {
+    const tex = `${leadIn}\n\\begin{${env}}\n\\item \\textbf{Method.} We introduce a method.\n\\item \\textbf{Effectiveness.} We report measured accuracy.\n\\end{${env}}\n`;
+    assert.equal(run(rule, tex, 'x.tex').violations.length, 0);
+  }
+  const closer = run(rule, 'We trained the model on five benchmarks. In summary, the method works well.\n', 'x.md');
+  assert.equal(closer.violations.length, 1);
+});

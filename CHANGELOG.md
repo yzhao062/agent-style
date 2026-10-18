@@ -10,7 +10,19 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 ## [Unreleased]
 
-*No unreleased changes queued.*
+Minor: a House Style section ranks above the 21 rules where they conflict, and the RULE-01, RULE-03, RULE-04, RULE-07, RULE-08, RULE-A, RULE-B, RULE-D, RULE-E, RULE-G, and RULE-I directives change, which `RELEASING.md` counts as a change to the ruleset contract. The rule count, the rule IDs, and the CLI interface are unchanged, and the RULE-E detector skips a sentence that ends in a colon.
+
+### Added
+
+- **The pack carries one author's style, and says so.** A House Style section after the Escape Hatch lists habits measured from the maintainer's five first-author ML papers written before AI writing tools: the moves of an abstract, introduction, results paragraph, and conclusion, about one sentence in four past 30 words carrying parenthetical glosses, and sparing signposts. Each habit carries the rate the papers show, because a card written as instructions made agents use every habit in every paragraph. Where a rule conflicts with a habit, the habit wins; the firm rules (no invented citations, evidence, or numbers, no placeholders) still hold. The facts outrank every habit: a move they do not support, such as a claim of being first, a cause, an exception, or a code release, is left out, and needed scope or uncertainty stays. The README and every adapter say the pack starts from the classics and carries this style, and a fork can swap the section for its own author's habits.
+- **`docs/bench-house-style.md` records the evidence.** On twelve sections rewritten from fact sheets by three writers, drafts under the House Style and the author's passages moved closer to the originals on word use, sentence length, glosses, and abstract moves, though relation words stayed below the author's rate, and judged accuracy held. In a four-pair blind test of drafts from an earlier form of the habits, the author took three for the originals. With the full composed `AGENTS.md` of a consumer and the `author-voice` skill from `agent-pack`, the share of sentences over 30 words went from 3% under 0.8.0 to 22%, against 25% in the papers, and unsupported claims went from 8 to 7. Every agent loaded the skill for a paper section without being asked and never for a README or an email.
+
+### Changed
+
+- **RULE-D lets "Moreover" or "Notably" open one sentence in a paragraph**, where it marks a second ingredient or a result that stands apart. The author's papers use them at about that rate, and the guard's RULE-D detector already allowed one opener per paragraph. "Additionally", "Furthermore", "In addition", and "What's more" stay out when they only announce another point.
+- **RULE-04 hands the abstract and conclusion shape to the House Style.** It keeps the needless-sentence test, an abstract that cites no table or figure, and a conclusion that does not walk through the results again. It no longer asks a conclusion to restate its limits, which the author's conclusions do in one scoped sentence at most.
+- **Four rules lead with a pair from the author's papers.** RULE-05, RULE-08, RULE-10, and RULE-12 now show an AI draft against the author's sentence on the same point. The RULE-12 pair keeps a 45-word sentence that carries one thought, against a draft that cut it into three; the earlier first pair taught a split. RULE-E and RULE-I lead with shorter existing pairs, and the RULE-I pair now keeps the original "should".
+- **Directives say the same in fewer words, so the compact pays for the House Style.** RULE-01, RULE-07, RULE-08, RULE-A, RULE-B, RULE-E, RULE-G, RULE-I, the Escape Hatch, the field-observed introduction, and the compact introduction are shorter, and three RULE-03 sentences about captions and appendices move to its rationale. RULE-E's directive no longer lists "In summary, ...", which opens the author's contribution lists, and its detector no longer flags that line, because a sentence ending in a colon leads into what follows. `docs/rule-pack-compact.md` is 22,544 bytes, 76 fewer than in 0.8.0.
 
 ## [0.8.0] — 2026-10-17
 

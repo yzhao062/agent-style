@@ -42,7 +42,7 @@ Field-observed rules (maintainer observation of LLM output, 2022-2026):
 - **RULE-A Bullet overuse**: Keep prose in paragraphs when ideas connect; bullets only for genuine lists; avoid forced 3-item triads; table cells hold numbers or short labels.
 - **RULE-B Dash overuse**: Do not use em or en dashes as casual sentence punctuation; prefer commas, colons, parentheses, or a new sentence; keep semicolons rare.
 - **RULE-C Same-starts**: Do not open two or more consecutive sentences with the same word.
-- **RULE-D Transitions**: Do not open sentences with additive-only transitions ("Additionally", "Furthermore", "Moreover", "In addition"); keep words that mark a contrast, cause, or sequence the text already establishes ("However", "Thus", "First"), and never add a cause just to join sentences.
+- **RULE-D Transitions**: Do not open sentences with additive-only transitions ("Additionally", "Furthermore", "In addition"), and let "Moreover" or "Notably" open at most one sentence in a paragraph; keep words that mark a contrast, cause, or sequence the text already establishes ("However", "Thus", "First"), and never add a cause just to join sentences.
 - **RULE-E Summary closers**: Do not end every paragraph with a sentence that restates its point.
 - **RULE-F Term consistency**: Once you define a term or abbreviation, keep using it; do not alternate synonyms.
 - **RULE-G Title case**: Use title case for section and subsection headings; articles and short prepositions stay lowercase. A full-sentence bold run-in lead takes sentence case.
@@ -52,6 +52,10 @@ Field-observed rules (maintainer observation of LLM output, 2022-2026):
 ## Escape Hatch
 
 *"Break any of these rules sooner than say anything outright barbarous."* — George Orwell, "Politics and the English Language" (1946), Rule 6. Most rules are defaults to apply with judgment. Depart when the sentence reads better for it, not to vary the pattern. A few are firm (do not invent citations, evidence, or numbers; no placeholders in finished text). Judge a draft by its overall pattern: one that obeys every default in every sentence reads as machine-made.
+
+## House Style
+
+The rules start from classic guides and are tuned to one author, Yue Zhao. A House Style section in `RULES.md` lists that author's habits, drawn from first-author ML papers written before AI writing tools: the moves of an abstract, introduction, results paragraph, and conclusion; about one sentence in four past 30 words, carrying parenthetical glosses; and sparing signposts. Where a style rule conflicts with a habit there, follow the habit, but never against the facts or the firm rules. Read that section in `RULES.md` before drafting a paper or proposal section.
 
 ## Full Rule Bodies (Canonical)
 
