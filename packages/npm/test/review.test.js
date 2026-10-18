@@ -556,7 +556,7 @@ test('RULE-03 check B stays quiet outside an abstract or introduction', () => {
 
 test('RULE-03 ignores versions, dates, counts, references, identifiers and code', () => {
   const text =
-    'Release v0.7.0 (2026-10-16) ships 38 tests and 2,417 fixtures. ' +
+    'Release v0.8.0 (2026-10-16) ships 38 tests and 2,417 fixtures. ' +
     'It follows 0.4.2 and 0.4.1, and runs on Python 3.9-3.13 with Node 20.11.1. ' +
     'The matrix is ubuntu x 3.9/3.10/3.11/3.12/3.13 and macos x 3.12/3.13. ' +
     'See Section 3.2, Tables 4 and 5, Figure 2.1, Appendix B.3, and Eq. 7.1. ' +
@@ -1157,7 +1157,7 @@ test('RULE-03 never throws and stays fast on hostile input', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 0.7.0: RULE-03 on LaTeX (body-prose stacks, captions, excess precision) and the
+// RULE-03 on LaTeX (body-prose stacks, captions, excess precision) and the
 // hook-only RULE-A table-cell detector. Mirror of
 // packages/pypi/tests/test_rule03_displays.py and test_rule_a_tables.py.
 // Every text here is synthetic: invented sentences about caches, networks,
@@ -1427,7 +1427,7 @@ for (const caption of [
   '\\caption{Hit rate was 41.6 and 45.3 (95\\% CI).}',
   '\\caption{Hit rate was 41.6 and 45.3, with 95\\% bootstrap intervals.}',
   '\\caption{Hit rate was 41.6 and 45.3 (CI 95\\%).}',
-  '\\caption{Hit rate was 41.6 and 45.3 on v0.7.0 of the tool, run 2026-10-16.}',
+  '\\caption{Hit rate was 41.6 and 45.3 on v0.8.0 of the tool, run 2026-10-16.}',
 ]) {
   test(`RULE-03 leaves a caption below the limits quiet: ${caption.slice(0, 40)}`, () => {
     assert.deepEqual(captionHits(rule03(fig(caption), 'main.tex')), [], caption);
@@ -2159,7 +2159,7 @@ test('the 0.7.0 scans are fast on 200 KB of LaTeX with captions and tables', () 
     '\\begin{figure}\n\\caption{Hit rate was 41.6, 45.3 and 47.1 on three traces, ' +
     'with Section 3.2 and Table 4 as context.}\n\\end{figure}\n' +
     'The build gave 0.62 on the first split and 0.52 on the second, with 0.8123 and 0.8234. ' +
-    'Prefetching lowers the miss rate by 8.9 points at full load. v0.7.0 shipped on 2026-10-16.\n\n';
+    'Prefetching lowers the miss rate by 8.9 points at full load. v0.8.0 shipped on 2026-10-16.\n\n';
   const block =
     '\\begin{table}\n\\begin{tabular}{p{3cm}p{6cm}}\n\\toprule\nName & Note\\\\\n\\midrule\n' +
     `A & short\\\\\nB & ${RA_WORDS(20)} \\citep{lee2020}\\\\\n\\bottomrule\n\\end{tabular}\n\\end{table}\n\n`;

@@ -3,13 +3,13 @@
 <!-- Target path: <repo root>/.github/copilot-instructions.md -->
 <!-- Load class: single-file; install_mode: append-block -->
 
-# agent-style v0.7.0 — GitHub Copilot repo-wide adapter
+# agent-style v0.8.0 — GitHub Copilot repo-wide adapter
 
 agent-style is a literature-backed English technical-prose writing ruleset for AI agents. This adapter is appended to your existing `.github/copilot-instructions.md` inside a marker block so that future agent-style updates replace only the marker region and leave your other repo-level instructions intact. For a path-scoped variant (only attaches to prose files), use `agents/copilot-path-instructions.md` instead.
 
 ## Self-Verification Handshake
 
-When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.7.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
+When asked "is agent-style active?" or "what writing rules apply here?", answer: `agent-style v0.8.0 active: 21 rules (RULE-01..12 canonical + RULE-A..I field-observed); full bodies at .agent-style/RULES.md.`
 
 ## Load Statement
 
@@ -22,7 +22,7 @@ Canonical rules (from Strunk & White 1959, Orwell 1946, Pinker 2014, Gopen & Swa
 - **RULE-01 Curse of knowledge**: Name your intended reader; do not assume they share your tacit knowledge.
 - **RULE-02 Passive voice**: Prefer active voice when the agent is known and worth naming.
 - **RULE-03 Concrete language**: Prefer concrete, specific terms over abstract category words like "factors" or "aspects"; state a result's pattern and rounded magnitude, say in plain words whether a difference holds, and leave standard deviations, intervals, and full numbers to tables. Never call a difference within noise a gain. Do not stack figures in consecutive sentences, and keep a caption to what the display shows. Report differences in points or percent rather than raw decimals, keep one unit and sign across text, tables, and captions, and add a table when several figures matter and no display holds them.
-- **RULE-04 Needless words**: Cut filler phrases like "in order to", "due to the fact that", "may potentially".
+- **RULE-04 Needless words**: Cut filler phrases like "in order to", "due to the fact that", "may potentially", and needless sentences that announce, restate the method, or repeat a finding. An abstract goes from the problem and its challenge to the approach and findings, and a conclusion stays short.
 - **RULE-05 Dying metaphors**: Delete clichés like "pushes the boundaries", "paradigm shift", or "state of the art".
 - **RULE-06 Plain English**: Prefer "use" over "leverage", "method" over "methodology", "feature" over "functionality".
 - **RULE-07 Positive form**: Prefer "trivial" to "not important", "forgot" to "did not remember"; do not stage "X, not Y" antithesis ("not just X, but Y") for emphasis.
@@ -50,4 +50,4 @@ Field-observed rules (maintainer observation of LLM output, 2022-2026):
 
 ## Full Rule Bodies (Canonical)
 
-Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.7.0/RULES.md for the pinned canonical source.
+Full directive text, BAD/GOOD example pairs, and rationale per rule: see `.agent-style/RULES.md` in this project, or https://raw.githubusercontent.com/yzhao062/agent-style/v0.8.0/RULES.md for the pinned canonical source.

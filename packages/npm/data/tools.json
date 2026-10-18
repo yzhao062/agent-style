@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "agent_style_version": "0.7.0",
+  "agent_style_version": "0.8.0",
   "tools": {
     "claude-code": {
       "install_mode": "import-marker",
