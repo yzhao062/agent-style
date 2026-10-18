@@ -365,7 +365,7 @@ def test_measure_paths_and_summary(hb, tmp_path):
     assert report["groups"]["human"]["documents"] == 2 and report["groups"]["era"]["documents"] == 1
     stat = report["groups"]["human"]["over30_pct"]
     assert stat["min"] <= stat["median"] <= stat["max"]
-    assert report["agent_style_version"] and report["package_root"].endswith("packages/pypi")
+    assert report["agent_style_version"] and Path(report["package_root"]).parts[-2:] == ("packages", "pypi")
     json.dumps(report)  # serializable as it stands
 
 

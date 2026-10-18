@@ -34,7 +34,7 @@ The papers stay under their authors' licenses. Keep the corpus out of the reposi
 
 ## Run It
 
-```
+```sh
 python -I scripts/human-baseline/measure.py corpus --manifest scripts/human-baseline/manifest.tsv --md human-baseline.md --json human-baseline.json
 ```
 
