@@ -5,8 +5,10 @@ Tracks yzhao062/agent-style#6.
 
 The compact render keeps each rule's heading, full directive paragraph, and
 the first BAD -> GOOD example pair, dropping metadata bullets, additional
-example pairs, and rationale. Output target: less than 30 KB; current full
-RULES.md is ~89 KB.
+example pairs, and rationale. It also drops the "Severity Rubric" section,
+which only explains the per-rule severity metadata the compact omits. Output
+target: less than 30 KB; the consumers that compose it under a byte ceiling
+hold it much lower (see the anywhere-agents composed-consumer size test).
 
 markdown-it-py provides block boundaries. Output is sliced from the
 normalized original source bytes; the AST is never round-tripped to
@@ -46,12 +48,15 @@ BUNDLE_RULES_OUTPUTS = [
 ]
 
 COMPACT_INTRO = (
-    "This is the compact render of the agent-style rule pack. Each rule "
-    "shows the directive and one illustrative BAD → GOOD pair. The full "
-    "reference (5+ BAD/GOOD pairs per rule, agent-instruction evidence, "
-    "severity classification, and rationale) lives in `rule-pack.md` "
-    "(alias of repo-root `RULES.md`) at the same release."
+    "Compact render: each rule shows its directive and one BAD → GOOD pair. "
+    "The full reference (all pairs, evidence, severity, rationale) is "
+    "`rule-pack.md`, an alias of repo-root `RULES.md`, at the same release."
 )
+
+# h2 sections of RULES.md that the compact render omits. The severity rubric
+# explains metadata the compact has already dropped, so it costs bytes in every
+# consumer's always-loaded context and informs nothing there.
+COMPACT_SKIPPED_H2 = ("Severity Rubric",)
 
 EXPECTED_RULE_COUNT = 21
 
@@ -211,6 +216,8 @@ def build_compact(text: str) -> str:
         )
 
         if h["level"] in (2, 3):
+            if h["level"] == 2 and h["text"] in COMPACT_SKIPPED_H2:
+                continue
             section = raw_lines[h["line_start"] : section_end]
             section = _strip_trailing_blanks(list(section))
             out.append("")
@@ -355,6 +362,13 @@ def assert_invariants(compact_text: str, rule_headings_in_source: list[dict]) ->
     )
     if rationale_count != 0:
         _die(f"compact has {rationale_count} rationale headings, expected 0")
+
+    for skipped in COMPACT_SKIPPED_H2:
+        if any(h["level"] == 2 and h["text"] == skipped for h in headings):
+            _die(f"compact still carries the omitted section {skipped!r}")
+
+    if not any(h["level"] == 2 and h["text"].startswith("Escape Hatch") for h in headings):
+        _die("compact is missing the Escape Hatch section")
 
     # Per-rule pair completeness: in each [#### RULE- ... next h2/h3/h4) range, the
     # ##### BAD -> GOOD sub-section must hold exactly one BAD bullet and exactly one

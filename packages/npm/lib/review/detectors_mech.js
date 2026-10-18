@@ -2443,6 +2443,819 @@ function ruleAScan(text, filePath) {
   return out;
 }
 
+// ---------- RULE-12 profile and RULE-08 repeats (hook-only, document level) ----
+//
+// agent-style 0.8.0. A rule obeyed at every sentence produces a document that
+// reads as one writer's template: human-written papers keep some long sentences,
+// join clauses with ", so" and the semicolon sparingly, and say a caveat once
+// where it applies. Two detectors read the whole document for that pattern and
+// report it as a departure from the range of human-written papers, once per
+// pattern, so that the writer weighs it instead of chasing a count to zero.
+//
+//   rule12Profile  replaces `rule12` in the hook (the CLI audit keeps the
+//                  per-sentence `rule12`). (a) one sentence far longer than
+//                  human prose runs; (b) the share of sentences over 30 words,
+//                  too high or too low; (c) ", so" clause joins.
+//   rule08Repeats  the same caveat stated three or more times outside a
+//                  limitations section.
+//
+// Both take (text, filePath), report under their own rule label, never throw,
+// and skip what a document cannot answer: the share check needs
+// R12.shareMinSentences prose sentences and the ", so" check needs
+// R12.soMinWords words, so a hook that passes only an edited fragment is never
+// told its fragment is a profile.
+//
+// Prose is segmented by the RULE-03 pipeline (code, comments, display
+// environments, tables, headings and captions are blanked, then `r03Sentences`
+// cuts), with two additions that matter for a whole paper: the LaTeX preamble
+// and title-page commands are blanked, and each inline math span counts as one
+// word. A sentence of fewer than PF_MIN_WORDS words is not prose.
+//
+// Calibration: scripts/human-baseline/ measures the human-written corpus (12
+// arXiv papers, 2017-2022) and the era corpus (six 2023-2024 LLM-agent papers).
+// The basis of each threshold sits at its constant, in rounded human-corpus terms.
+
+const PF_MIN_WORDS = 3; // a sentence below this is a label or a fragment, not prose
+
+// Title-page commands and the number of brace arguments each takes. Names,
+// affiliations and e-mail addresses run together into one long "sentence" once
+// the commands around them are dropped, and a footnote body is a sentence of its
+// own that the host sentence would otherwise swallow.
+const PF_DOCUMENT_PREFIX = 'Across the document, ';
+
+const PF_FRONT_ARGS = {
+  title: 1, author: 1, date: 1, thanks: 1, affiliation: 1, affil: 1,
+  email: 1, address: 1, institute: 1, institution: 1, subtitle: 1,
+  icmltitle: 1, icmlauthor: 2, icmlaffiliation: 2,
+  icmlcorrespondingauthor: 2, icmlkeywords: 1, icmlsetsymbol: 2,
+  IEEEauthorblockN: 1, IEEEauthorblockA: 1, runningtitle: 1,
+  titlerunning: 1, authorrunning: 1, orcid: 1,
+  footnote: 1, footnotetext: 1,
+};
+const PF_FRONT_SRC =
+  String.raw`\\(` +
+  Object.keys(PF_FRONT_ARGS).sort((a, b) => b.length - a.length).join('|') +
+  String.raw`)\*?(?![A-Za-z@])`;
+const PF_NOTE_COMMANDS = new Set(['footnote', 'footnotetext', 'thanks']);
+const PF_NOTE_MAX = 3000;
+const PF_FRONT_ENV_SRC = String.raw`\\begin\{(icmlauthorlist|IEEEkeywords|keywords)\}`;
+const PF_ACK_ENV_SRC = String.raw`\\begin\{(ack|acks|acknowledg[a-z]*\*?)\}`;
+const PF_ACK_CMD_SRC = String.raw`\\(?:acks|acknowledg(?:e)?ments?)(?![A-Za-z@])`;
+const PF_ACK_WORDS = new Set(['acknowledgment', 'acknowledgments', 'acknowledgement', 'acknowledgements']);
+// Line breaks may sit between the command, its options and the class name, and
+// inside the option list (`\documentclass[\n  aspectratio=169\n]{beamer}`).
+const PF_CLASS_SRC = String.raw`\\documentclass[ \t\r\n]*(?:\[[^\]]{0,400}\])?[ \t\r\n]*\{([^{}\n]{0,100})\}`;
+const PF_NOT_PAPER_CLASSES = new Set([
+  'beamer', 'powerdot', 'prosper', 'slides', 'foils', 'seminar', 'tikzposter', 'baposter',
+  'a0poster', 'letter', 'scrlttr2', 'newlfm', 'moderncv', 'altacv', 'awesome-cv', 'currvita',
+  'europecv', 'res', 'resume',
+]);
+const PF_YAML_OPEN_SRC = String.raw`^\ufeff?---[ \t]*\r?\n(?=[ \t]*[A-Za-z_][\p{L}\p{N}_.-]*[ \t]*:)`;
+const PF_YAML_CLOSE_SRC = String.raw`(?<![^\n])(?:---|\.\.\.)[ \t]*\r?(?=\n|$)`;
+const PF_ALNUM_RE = /[\p{L}\p{N}]/u;
+const PF_EMPHASIS_SRC = String.raw`(?<![*_\p{L}\p{N}])[*_]+|(?<![*_])[*_]+(?![\p{L}\p{N}_])`;
+const PF_TAG_SRC = String.raw`</?[A-Za-z][A-Za-z0-9]*[^>\n]{0,200}>`;
+// A command that pulls another file into the text. In the body of a LaTeX file it
+// means the prose sits elsewhere: the file is a main file, not a complete paper.
+const PF_INCLUDE_SRC = String.raw`\\(?:input|include|subfile|subfileinclude)(?![A-Za-z@])`;
+// A Markdown footnote definition opens a line (at most three spaces in) with
+// `[^label]:`; the same marker in running text is a reference. The label has no
+// whitespace or bracket, at most 100 characters. A run of `[^` therefore stays linear.
+const PF_FN_DEF_SRC = String.raw`^[ ]{0,3}\[\^[^[\]` + R03_PY_SPACE + String.raw`]{1,100}\]:`;
+const PF_FN_REF_SRC = String.raw`\[\^[^[\]` + R03_PY_SPACE + String.raw`]{1,100}\]`;
+
+// (start, end, level, title) for each LaTeX sectioning command or Markdown heading.
+function pfHeadings(stageOne, latex) {
+  const out = [];
+  if (latex) {
+    for (const m of r03Matches(R03_TEX_HEADING_SRC, stageOne)) {
+      out.push([m.index, m.index + m[0].length, R03_HEADING_LEVELS[m[1]], m[2]]);
+    }
+  } else {
+    for (const m of r03Matches(R03_MD_HEADING_SRC, stageOne)) {
+      out.push([m.index, m.index + m[0].length, m[1].length, m[2]]);
+    }
+  }
+  return out;
+}
+
+// Spans from each heading whose title holds a word of `words` to the next heading of its level or higher.
+function pfTitledSpans(headings, words, size) {
+  const spans = [];
+  let openLevel = -1;
+  let openStart = 0;
+  for (const [start, end, level, title] of headings) {
+    if (openLevel >= 0 && level <= openLevel) {
+      spans.push([openStart, start]);
+      openLevel = -1;
+    }
+    if (openLevel < 0) {
+      let hit = false;
+      for (const m of r03Matches(String.raw`[A-Za-z]+`, title.toLowerCase(), 'g')) {
+        if (words.has(m[0])) {
+          hit = true;
+          break;
+        }
+      }
+      if (hit) {
+        openLevel = level;
+        openStart = end;
+      }
+    }
+  }
+  if (openLevel >= 0) spans.push([openStart, size]);
+  return spans;
+}
+
+// Spans of acknowledgment sections: not prose for any profile check.
+function pfAckSpans(stageOne, latex, headings) {
+  const spans = pfTitledSpans(headings, PF_ACK_WORDS, stageOne.length);
+  if (latex) {
+    for (const s of r03EnvSpans(stageOne, PF_ACK_ENV_SRC)) spans.push(s);
+    const starts = headings.map((h) => h[0]);
+    for (const m of r03Matches(PF_ACK_CMD_SRC, stageOne)) {
+      const slot = r03BisectLeft(starts, m.index + m[0].length);
+      spans.push([m.index, slot < starts.length ? starts[slot] : stageOne.length]);
+    }
+  }
+  return spans;
+}
+
+// [0, end] of a leading YAML front-matter block, or null.
+function pfYamlSpan(text) {
+  const openRe = r03Cached(PF_YAML_OPEN_SRC, 'u');
+  const opened = openRe.exec(text);
+  if (!opened) return null;
+  const closeRe = r03Cached(PF_YAML_CLOSE_SRC, 'gu');
+  closeRe.lastIndex = opened[0].length;
+  const closed = closeRe.exec(text);
+  return closed ? [0, closed.index + closed[0].length] : null;
+}
+
+// True when the LaTeX document class is for slides, posters, letters or CVs.
+function pfSlideOrLetter(stageOne) {
+  const m = r03Cached(PF_CLASS_SRC, 'u').exec(stageOne);
+  if (!m) return false;
+  const name = m[1].trim().split(/[\\/]/).pop().toLowerCase();
+  return PF_NOT_PAPER_CLASSES.has(name);
+}
+
+// True for a paper: a LaTeX source whose class is not for slides or a letter.
+//
+// Markdown and text are never read as papers. An Abstract or Introduction
+// heading also opens design notes, which carry ", so" joins at 2 to 11 per
+// 1,000 words by design. A heading cannot carry the paper calibration.
+function pfPaperContext(doc) {
+  return doc.latex && !pfSlideOrLetter(doc.stageOne);
+}
+
+// True when `doc` is a complete paper rather than a section file or a fragment.
+//
+// LaTeX only: `\begin{document}` and a later `\end{document}`, a class that
+// is not for slides, posters, letters or CVs, and no `\input`, `\include` or
+// `\subfile` in the body outside a display environment (a main file that pulls
+// its sections in holds no complete prose). Markdown and text are never complete:
+// a heading or a file name does not show that a file is whole, or what genre it is.
+function pfWholeDocument(doc) {
+  if (!doc.latex) return false;
+  const src = doc.stageOne;
+  const begin = src.indexOf('\\begin{document}');
+  if (begin < 0 || src.indexOf('\\end{document}', begin) < 0) return false;
+  return !doc.bodyIncludes && !pfSlideOrLetter(src);
+}
+
+// True when `stageOne.slice(start, end)` holds an include command outside a display span.
+//
+// A table or a figure may `\input` a generated file and the paper stays whole;
+// an `\input` between paragraphs means the prose is in another file.
+function pfBodyIncludes(stageOne, start, end, display) {
+  const re = r03Cached(PF_INCLUDE_SRC, 'u');
+  if (!re.test(stageOne.slice(start, end))) return false;
+  return re.test(r03Blank(stageOne, display).slice(start, end));
+}
+
+// Spans of Markdown footnote definitions and of their inline markers.
+//
+// A definition is a line that opens with `[^label]:` (at most three spaces in).
+// It runs through the lines that follow without a blank line, up to the next
+// definition, and through each further paragraph indented four columns or more
+// after a blank line. A marker in running text (`[^label]`) is blanked as well:
+// it counts as a word otherwise, and it keeps a sentence from ending before it.
+function pfFootnoteSpans(stageOne) {
+  const spans = [];
+  for (const m of r03Matches(PF_FN_REF_SRC, stageOne)) {
+    spans.push([m.index, m.index + m[0].length]);
+  }
+  const lines = lineSpans(stageOne);
+  const count = lines.length;
+
+  function blank(i) {
+    return !/[^ \t]/.test(stageOne.slice(lines[i][0], lines[i][1]));
+  }
+
+  function definition(i) {
+    return r03Cached(PF_FN_DEF_SRC, 'u').test(stageOne.slice(lines[i][0], lines[i][1]));
+  }
+
+  let i = 0;
+  while (i < count) {
+    if (!definition(i)) {
+      i++;
+      continue;
+    }
+    let last = i + 1;
+    while (last < count && !blank(last) && !definition(last)) {
+      last++;
+    }
+    while (true) {
+      let nxt = last;
+      while (nxt < count && blank(nxt)) {
+        nxt++;
+      }
+      if (
+        nxt === last ||
+        nxt >= count ||
+        !(stageOne.startsWith('    ', lines[nxt][0]) || stageOne.startsWith('\t', lines[nxt][0]))
+      ) {
+        break;
+      }
+      last = nxt + 1;
+      while (last < count && !blank(last) && !definition(last)) {
+        last++;
+      }
+    }
+    spans.push([lines[i][0], lines[last - 1][1]]);
+    i = last;
+  }
+  return spans;
+}
+
+// Spans of title-page and note commands with their brace arguments, and of author lists.
+function pfFrontSpans(src) {
+  const spans = r03EnvSpans(src, PF_FRONT_ENV_SRC);
+  let braces = null;
+  const n = src.length;
+  for (const m of r03Matches(PF_FRONT_SRC, src)) {
+    if (braces === null) braces = r03BraceMap(src);
+    let i = m.index + m[0].length;
+    let end = i;
+    const mEnd = i;
+    for (let a = 0; a < PF_FRONT_ARGS[m[1]]; a++) {
+      i = r03SkipBlanks(src, i);
+      if (i < n && src[i] === '[') {
+        const k = r03FindBounded(src, ']', i, i + 200);
+        if (k < 0) break;
+        i = r03SkipBlanks(src, k + 1);
+      }
+      if (i < n && src[i] === '{' && braces.has(i)) {
+        end = braces.get(i) + 1;
+        i = end;
+      } else {
+        break;
+      }
+    }
+    if (end > mEnd && !(PF_NOTE_COMMANDS.has(m[1]) && end - m.index > PF_NOTE_MAX)) {
+      spans.push([m.index, end]);
+    }
+  }
+  return spans;
+}
+
+// `raw` with each inline math span ($..$ or \(..\)) replaced by one word.
+function pfMathWords(raw) {
+  const marks = [];
+  for (const m of r03Matches(R03_DOLLAR_SRC, raw)) marks.push(m.index);
+  const spans = [];
+  for (let i = 0; i < marks.length - 1; i += 2) spans.push([marks[i], marks[i + 1] + 1]);
+  for (const s of r03Pairs(raw, '\\(', '\\)')) spans.push(s);
+  if (spans.length === 0) return raw;
+  spans.sort((x, y) => x[0] - y[0] || x[1] - y[1]);
+  const parts = [];
+  let pos = 0;
+  for (let [start, end] of spans) {
+    start = Math.max(start, pos);
+    if (end <= start) continue;
+    parts.push(raw.slice(pos, start));
+    parts.push(' M ');
+    pos = end;
+  }
+  parts.push(raw.slice(pos));
+  return parts.join('');
+}
+
+// The words of one sentence: no commands, citations or tags, whitespace collapsed.
+function pfPlain(raw, latex) {
+  let t;
+  if (latex) {
+    t = r03PlainText(pfMathWords(raw));
+  } else {
+    t = raw.replace(r03Cached(PF_TAG_SRC, 'gu'), ' ').replace(r03Cached(PF_EMPHASIS_SRC, 'gu'), '');
+  }
+  return r03PyStrip(t.replace(r03Cached(R03_PY_SPACE_RUN_G_SRC, 'gu'), ' '));
+}
+
+// Whitespace-separated tokens that hold a letter or a digit.
+function pfCountWords(plain) {
+  let n = 0;
+  for (const token of plain.split(' ')) if (PF_ALNUM_RE.test(token)) n++;
+  return n;
+}
+
+// A document cut into prose sentences, for the document-level detectors.
+// `masked` is the text with everything that is not prose blanked and every
+// offset kept. `sentences` holds [start, end, words, plain] for each prose
+// sentence, in order: offsets into `text`, the word count, and the sentence
+// with markup removed and whitespace collapsed. `headings` holds [start, end,
+// level, title] for each LaTeX sectioning command or Markdown heading.
+function pfDocument(text, filePath) {
+  const base = String(filePath || '').split(/[\\/]/).pop().toLowerCase();
+  const latex = r03IsLatex(base, text);
+  const markdown = r03IsMarkdown(base, text, latex);
+  let stageOne = r03StageOne(text, latex, markdown);
+  if (!latex) {
+    const frontMatter = pfYamlSpan(text);
+    if (frontMatter !== null) {
+      stageOne = r03Blank(stageOne, [frontMatter]);
+    }
+  }
+  const headings = pfHeadings(stageOne, latex);
+  const captions = latex ? r03Captions(stageOne) : [];
+  let [masked, display] = r03StageTwo(stageOne, latex, captions.map((c) => [c[0], c[3]]));
+  const notProse = pfAckSpans(stageOne, latex, headings);
+  let bodyIncludes = false;
+  if (latex) {
+    // Outside \begin{document}..\end{document} is preamble and trailer; the
+    // title page inside it is not prose either, and neither are the arguments
+    // of a footnote, which are no part of the sentence that carries it.
+    const [docStart, docEnd] = r03DocumentRange(stageOne);
+    notProse.push([0, docStart], [docEnd, masked.length], ...pfFrontSpans(stageOne));
+    bodyIncludes = pfBodyIncludes(stageOne, docStart, docEnd, display);
+  } else {
+    // A Markdown footnote definition is a note, as \footnote{..} is in LaTeX.
+    notProse.push(...pfFootnoteSpans(stageOne));
+  }
+  masked = r03Blank(masked, notProse);
+  const cuts = display.map((s) => s[0]).concat(display.map((s) => s[1]));
+  const sentences = [];
+  for (const [start, end] of r03Sentences(masked, cuts)) {
+    const plain = pfPlain(masked.slice(start, end), latex);
+    const words = pfCountWords(plain);
+    if (words >= PF_MIN_WORDS) sentences.push([start, end, words, plain]);
+  }
+  const locateUnits = r03MakeLocate(text);
+  // Python's column counts code points; r03MakeLocate counts UTF-16 units, which
+  // differ by one for each astral character before the offset on its line.
+  const locate = (offset) => {
+    const [lineNo, col, line] = locateUnits(offset);
+    return [lineNo, r03CodePointLength(line.slice(0, col - 1)) + 1, line];
+  };
+  return { text, base, latex, markdown, stageOne, masked, sentences, locate, headings, bodyIncludes };
+}
+
+// Python's _excerpt counts code points; `excerpt` counts UTF-16 units, which only
+// differ on a line with an astral character, so only such a line takes the slow path.
+function pfExcerpt(line, col) {
+  if (!/[\ud800-\udfff]/.test(line)) return excerpt(line, [col - 1, col - 1 + 80]);
+  const cps = Array.from(line);
+  const start = Math.max(0, col - 1 - 20);
+  const end = Math.min(cps.length, start + 120);
+  let out = r03PyStrip(cps.slice(start, end).join(''));
+  if (start > 0) out = '\u2026' + out;
+  if (end < cps.length) out = out + '\u2026';
+  return out;
+}
+
+// ---- RULE-12 profile ------------------------------------------------------
+
+// Measured in 2026-10 on the LaTeX sources of 12 human-written arXiv papers from
+// 2017-2022 (about 137,000 prose words; the "human corpus") and of six 2023-2024
+// LLM-agent papers (about 87,000 words; the "era corpus"), with this module's own
+// segmentation, each source wrapped as a whole document. Footnote bodies and
+// acknowledgment sections are not prose words here. Rounded figures, human | era:
+//
+//   sentences over 80 words     1 per 9,750 words | 1 per 12,500 words
+//   sentences over 70 words     1 per 4,400 words | 1 per 6,700 words
+//   share of sentences > 30     9% to 33%, median 15% | 7% to 32%
+//   ", so" joins per 1,000 words   0 to 0.5 | 0 to 0.5
+//
+// The Python module holds these as _R12_* constants; a test reads a field the way
+// a Python test reads the constant.
+const R12 = {
+  longWords: 30, // RULES.md RULE-12: a sentence over this many words is long
+  extremeWords: 80,
+  shareMinSentences: 40,
+  shareHigh: 0.45,
+  shareLow: 0.06,
+  humanShare: '10% to 35%', // the range the messages quote
+  soDensity: 1.5,
+  soMinCount: 6,
+  soMinWords: 1000,
+};
+
+// ", so" followed by a clause. The words that make "so" part of a phrase rather
+// than a clause join are excluded: "so that", "so far", "so on", "so forth",
+// "so as", "so much", "so many", "so long", "so few", "so little", "so often",
+// "so well". "so-called" has a hyphen and never matches. The lookahead takes
+// the next word, empty when the clause opens with math, a quote or a bracket.
+const R12_SO_SRC = String.raw`,[ \t\r\n]+so[ \t\r\n]+(?=(?<next>[A-Za-z]*))`;
+const R12_SO_NOT_CLAUSE = new Set([
+  'that', 'far', 'on', 'forth', 'as', 'much', 'many', 'long', 'few', 'little',
+  'often', 'well', 'called',
+]);
+
+// Offsets of the ", so" clause joins in the prose of `doc`.
+function r12SoJoins(doc) {
+  const found = [];
+  for (const [start, end] of doc.sentences) {
+    // Python's finditer(text, start, end): the slice is the visible text.
+    const piece = doc.masked.slice(start, end);
+    for (const m of r03Matches(R12_SO_SRC, piece)) {
+      if (!R12_SO_NOT_CLAUSE.has(m.groups.next.toLowerCase())) found.push(start + m.index);
+    }
+  }
+  return found;
+}
+
+// Python's format(x, '.1f'): correctly rounded, ties to even. Number.prototype.toFixed
+// breaks a tie upward (2.25 gives 2.3 where Python gives 2.2); a tie needs x to be an
+// odd multiple of 0.25, which a double holds exactly.
+function pyFixed1(x) {
+  const q = x * 4;
+  if (Number.isInteger(q) && Math.abs(q % 2) === 1) {
+    const floor = Math.floor(x * 10);
+    return ((floor % 2 === 0 ? floor : floor + 1) / 10).toFixed(1);
+  }
+  return x.toFixed(1);
+}
+
+// Report where a document's sentence lengths and clause joins leave the human range.
+//
+// Hook-only, document level. It replaces the per-sentence `rule12` in the hook,
+// which flags every sentence over 30 words, and reports under the same label.
+// Three checks, each worded as a departure from human-written papers and never as
+// a violation. The findings come back in this order: share, then ", so", then extreme:
+//
+// * in a complete LaTeX document (`pfWholeDocument`) with R12.shareMinSentences prose
+//   sentences or more, once, when the share
+//   of sentences over R12.longWords words is above R12.shareHigh or below
+//   R12.shareLow (a clipped draft);
+// * in a paper context (`pfPaperContext`) with R12.soMinWords words or more, once,
+//   when ", so" clause joins number R12.soMinCount or more at R12.soDensity per
+//   1,000 words or more;
+// * once for the document, when sentences run over R12.extremeWords words, anchored
+//   at the first of them. This check reads any prose.
+//
+// Never throws: the guard treats an exception from any advisory detector as a
+// broken package.
+function rule12Profile(text, filePath = '') {
+  try {
+    return rule12ProfileScan(text, filePath);
+  } catch (err) {
+    return [];
+  }
+}
+
+// [kind, offset, detail] for each profile finding of `doc`. `kind` is "share-high",
+// "share-low", "so" or "extreme", and the list holds them in that order. The offset
+// is where the finding sits in the text; the "extreme" finding is one for the whole
+// document, at its first sentence. Split from the detector so a harness can count
+// the checks apart.
+function r12ProfileFindings(doc) {
+  const found = [];
+  const count = doc.sentences.length;
+  if (count >= R12.shareMinSentences && pfWholeDocument(doc)) {
+    let longCount = 0;
+    for (const s of doc.sentences) if (s[2] > R12.longWords) longCount++;
+    const share = longCount / count;
+    const rounded = Math.floor(share * 20 + 0.5) * 5;
+    if (share > R12.shareHigh) {
+      found.push([
+        'share-high',
+        doc.sentences[0][0],
+        `${PF_DOCUMENT_PREFIX}about ${rounded}% of the ${count} sentences run past ${R12.longWords} ` +
+          `words, above the ${R12.humanShare} range of human-written papers; consider ending some ` +
+          'where the thought turns',
+      ]);
+    } else if (share < R12.shareLow) {
+      let lead;
+      if (longCount === 0) lead = 'none of';
+      else if (rounded === 0) lead = 'fewer than 5% of';
+      else lead = `only about ${rounded}% of`;
+      found.push([
+        'share-low',
+        doc.sentences[0][0],
+        `${PF_DOCUMENT_PREFIX}${lead} the ${count} sentences run past ${R12.longWords} words, below ` +
+          `the ${R12.humanShare} range of human-written papers, which can read clipped; ` +
+          'consider joining related sentences where one idea carries over',
+      ]);
+    }
+  }
+
+  const paper = pfPaperContext(doc);
+  let wordsTotal = 0;
+  for (const s of doc.sentences) wordsTotal += s[2];
+  if (paper && wordsTotal >= R12.soMinWords) {
+    const joins = r12SoJoins(doc);
+    const density = (joins.length * 1000.0) / wordsTotal;
+    if (joins.length >= R12.soMinCount && density >= R12.soDensity) {
+      found.push([
+        'so',
+        joins[0],
+        `${PF_DOCUMENT_PREFIX}${joins.length} sentences join clauses with ", so" (about ` +
+          `${pyFixed1(density)} per 1,000 words; human-written papers rarely pass 1); consider a ` +
+          'period, or a word such as "thus" or "because", in some of them',
+      ]);
+    }
+  }
+
+  const extreme = [];
+  for (const s of doc.sentences) if (s[2] > R12.extremeWords) extreme.push(s);
+  if (extreme.length > 0) {
+    const register = paper ? 'papers' : 'prose';
+    let what;
+    let fix;
+    if (extreme.length === 1) {
+      what = `a sentence of ${extreme[0][2]} words`;
+      fix = 'consider whether it carries one connected thought, and split it where a separate claim begins';
+    } else {
+      const lineNo = doc.locate(extreme[0][0])[0];
+      what = `${extreme.length} sentences over ${R12.extremeWords} words, the first at line ${lineNo}`;
+      fix = 'consider whether each carries one connected thought, and split where a separate claim begins';
+    }
+    found.push([
+      'extreme',
+      extreme[0][0],
+      `${what}, a length that is uncommon in human-written ${register}; ${fix}`,
+    ]);
+  }
+  return found;
+}
+
+function rule12ProfileScan(text, filePath) {
+  if (typeof text !== 'string' || text.length === 0) return [];
+  const doc = pfDocument(text, filePath);
+  const out = [];
+  for (const [, offset, detail] of r12ProfileFindings(doc)) {
+    const [lineNo, col, line] = doc.locate(offset);
+    out.push({
+      rule: 'RULE-12',
+      line: lineNo,
+      column: col,
+      excerpt: pfExcerpt(line, col),
+      detail,
+    });
+  }
+  return out;
+}
+
+// ---- RULE-08 repeats --------------------------------------------------------
+
+// Measured on the same 18 papers (human and era corpora). Outside limitations and
+// appendix text, 17 of them hold 0 to 6 caveat sentences each and the 214-page report
+// holds 34. No two of them group: the closest pair, two long sentences about different
+// open problems, shares 45% of the smaller stem set (overlap) and 20% of the union
+// (Jaccard). A group needs 3 members, 3 shared stems, overlap 0.6 and Jaccard 0.3,
+// which keeps a margin over that pair and still joins a caveat restated in other
+// words (a paraphrase shares most of its subject stems). Change a value only with
+// a new measurement.
+const R08 = {
+  repeats: 3, // members a group needs to be reported
+  minShared: 3, // content stems two caveats must share, and a caveat must hold
+  overlap: 0.6, // shared stems over the smaller stem set
+  jaccard: 0.3, // shared stems over the union
+  quoteWords: 10, // words of the first instance the message quotes
+  linesShown: 4, // other locations the message lists
+};
+
+// A sentence that states a scope or a limitation. A modal or a "do" before "not"
+// and up to two words before the verb ("does not directly establish"). The
+// patterns are built once: the cue loop below runs them on every prose sentence.
+// Python's \b is NOT_W_BEFORE before a word character and NOT_W_AFTER after one,
+// and its \s is the Python-whitespace class.
+const R08_CUE_RES = (() => {
+  const NB = R03_NOT_W_BEFORE;
+  const NA = R03_NOT_W_AFTER;
+  const S = '[' + R03_PY_SPACE + ']';
+  const W2 = `(?:[a-z]+${S}+){0,2}?`;
+  return [
+    `${NB}(?:does|do|did|can|could|will|would|may|might|should)${S}+not${S}+${W2}` +
+      `(?:establish|show|test|imply|prove|demonstrate|measure|identify|determine|address|settle|` +
+      `generali[sz]e|speak${S}+to|capture|tell${S}+us)${NA}`,
+    `${NB}(?:cannot|can${S}+not|could${S}+not|is${S}+unable${S}+to|are${S}+unable${S}+to)${S}+${W2}` +
+      `(?:rule${S}+out|distinguish|establish|determine|separate|exclude|say|tell|show|identify|` +
+      `attribute|conclude)${NA}`,
+    `${NB}we${S}+(?:do${S}+not|did${S}+not|have${S}+not|make${S}+no)${S}+${W2}` +
+      `(?:claims?|test|tested|measure|measured|evaluate|evaluated|study|studied|examine|examined|` +
+      `investigate|investigated|establish|assess|assessed|explore|explored|address|attempt|show)${NA}`,
+    `${NB}(?:is|are|was|were)${S}+limited${S}+to${NA}`,
+    `${NB}(?:remains?|remained)${S}+${W2}` +
+      `(?:untested|unknown|unclear|unexplored|unresolved|unverified|open)${NA}`,
+    `${NB}(?:is|are)${S}+(?:still${S}+)?(?:untested|unknown|unexplored|unresolved|unverified)${NA}`,
+    `${NB}(?:is|are)${S}+an${S}+open${S}+question${NA}`,
+    `${NB}(?:beyond|outside)${S}+(?:of${S}+)?the${S}+scope${NA}`,
+    `${NB}leaves?${NA}[^.;]{0,100}?${NB}(?:to|for)${S}+future${S}+(?:work|research|stud(?:y|ies)|investigation)${NA}`,
+    `${NB}left${S}+(?:to|for)${S}+future${S}+(?:work|research|stud(?:y|ies)|investigation)${NA}`,
+    `${NB}it${S}+is${S}+(?:unclear|unknown|not${S}+clear)${S}+(?:whether|if|how|why)${NA}`,
+    `${NB}should${S}+not${S}+be${S}+(?:read|interpreted|taken|construed)${S}+as${NA}`,
+    `${NB}(?:one|a|an|another|the${S}+main|a${S}+key|an${S}+important)${S}+(?:limitation|caveat)${NA}`,
+  ].map((p) => new RegExp(p, 'iu'));
+})();
+
+// Words that carry no part of what a caveat is about: function words and the
+// vocabulary of the cues themselves, so two caveats match on their subject.
+const R08_STOP = new Set(
+  (
+    'a an the of to in on for with by at from as is are was were be been being this that these ' +
+    'those it its we our us they their them and or but nor so yet if then than such not no do ' +
+    'does did can could may might must will would should shall have has had there here also ' +
+    'only just more most very which who whom whose what when where while whether into onto over ' +
+    'under about above between among across through per via within without each both all any ' +
+    'some other another same one two use used using see seen show shown shows claim claims ' +
+    'establish test tests tested measure measured imply implies prove proves demonstrate ' +
+    'limited limitation limitations scope beyond outside future work works leave leaves left ' +
+    'untested unknown unclear unexplored unresolved unverified open question rule cannot ' +
+    'distinguish evidence paper study studies result results finding findings here still ' +
+    'however thus therefore note notes yet again further'
+  ).split(' ')
+);
+const R08_TOKEN_SRC = '[a-z][a-z0-9]*';
+
+// A heading that opens a section where caveats belong. Words of the title, lowercased.
+const R08_SECTION_WORDS = new Set([
+  'limitation', 'limitations', 'caveat', 'caveats', 'threat', 'threats',
+  'shortcoming', 'shortcomings', 'weakness', 'weaknesses', 'limits',
+]);
+
+// A crude stem: `ies` to `y`, then one of `ing`, `ed`, `es`, `s`, then a final `e`.
+// Enough to bring "raise", "raises" and "raised", or "variety" and "varieties", to
+// one form.
+function r08Stem(token) {
+  let stem;
+  if (token.endsWith('ies') && token.length >= 5) {
+    stem = token.slice(0, -3) + 'y';
+  } else {
+    stem = token;
+    for (const [suffix, keep] of [['ing', 4], ['ed', 4], ['es', 4], ['s', 3]]) {
+      if (token.endsWith(suffix) && token.length - suffix.length >= keep) {
+        stem = token.slice(0, token.length - suffix.length);
+        break;
+      }
+    }
+  }
+  if (stem.endsWith('e') && stem.length > 4) stem = stem.slice(0, -1);
+  return stem;
+}
+
+// Content stems of a caveat sentence: lowercase, stop words dropped, inflection trimmed.
+function r08Signature(plain) {
+  const out = new Set();
+  for (const m of r03Matches(R08_TOKEN_SRC, plain.toLowerCase(), 'g')) {
+    const token = m[0];
+    const stem = r08Stem(token);
+    if (stem.length < 3 || R08_STOP.has(token) || R08_STOP.has(stem)) continue;
+    out.add(stem);
+  }
+  return out;
+}
+
+function r08Similar(a, b) {
+  let shared = 0;
+  for (const x of a) if (b.has(x)) shared++;
+  if (shared < R08.minShared) return false;
+  const union = a.size + b.size - shared;
+  return shared / Math.min(a.size, b.size) >= R08.overlap && shared / union >= R08.jaccard;
+}
+
+// A paragraph that opens with a bold or italic run-in lead: \textbf{Limitations.},
+// \noindent\textbf{Limitations}, **Limitations.**. The lead sits at the start of a
+// line, and the paragraph runs to the next blank line.
+const R08_LEAD_SRC =
+  String.raw`^[ \t]*(?:\\noindent[ \t]*)?(?:\\(?:textbf|textit|emph|textsc)[ \t]*\{([^{}\n]{1,80})\}` +
+  String.raw`|\*\*([^*\n]{1,80})\*\*|__([^_\n]{1,80})__)`;
+const R08_PARAGRAPH_END_SRC = String.raw`\n[ \t\r]*(?=\n)`;
+
+// Spans of the places where caveats belong.
+// A limitations-style heading to the next heading of its level, or the whole file
+// when it is named for one, or a paragraph whose bold run-in lead holds a
+// limitations-style word, to the end of that paragraph.
+function r08LimitSpans(doc) {
+  const tokens = doc.base.split(/[-_. ]+/);
+  if (tokens.some((t) => R08_SECTION_WORDS.has(t))) return [[0, doc.stageOne.length]];
+  const spans = pfTitledSpans(doc.headings, R08_SECTION_WORDS, doc.stageOne.length);
+  let covered = 0;
+  for (const m of r03Matches(R08_LEAD_SRC, doc.stageOne, 'gmu')) {
+    if (m.index < covered) continue;
+    const lead = m[1] || m[2] || m[3];
+    let hit = false;
+    for (const wm of r03Matches(String.raw`[A-Za-z]+`, lead.toLowerCase(), 'g')) {
+      if (R08_SECTION_WORDS.has(wm[0])) {
+        hit = true;
+        break;
+      }
+    }
+    if (!hit) continue;
+    const stopRe = r03Cached(R08_PARAGRAPH_END_SRC, 'gu');
+    stopRe.lastIndex = m.index + m[0].length;
+    const stop = stopRe.exec(doc.stageOne);
+    covered = stop !== null ? stop.index : doc.stageOne.length;
+    spans.push([m.index, covered]);
+  }
+  return spans;
+}
+
+// Report a caveat stated three or more times outside a limitations section.
+//
+// Hook-only, document level. A sentence is a caveat when it matches one of the
+// scope and limitation cues in R08_CUE_RES ("does not establish", "we do not
+// claim", "cannot rule out", "is limited to", "remains untested", "beyond the
+// scope", "we leave ... to future work"). Caveats are reduced to content stems and
+// grouped by overlap (`r08Similar`); a group of R08.repeats or more is reported
+// once, at its first instance, with a quote of that sentence's first
+// R08.quoteWords words and the lines of the others. A sentence under a
+// limitations-style heading (or in a file named for one), in a paragraph that
+// opens with a bold run-in lead such as \textbf{Limitations.}, in an appendix,
+// or in an appendix-named file is not counted, so a limitation stated once in the
+// text and once under Limitations stays quiet. The finding begins with
+// PF_DOCUMENT_PREFIX: it describes the document, not one place in it.
+//
+// Never throws: the guard treats an exception from any advisory detector as a
+// broken package.
+function rule08Repeats(text, filePath = '') {
+  try {
+    return rule08RepeatsScan(text, filePath);
+  } catch (err) {
+    return [];
+  }
+}
+
+function rule08RepeatsScan(text, filePath) {
+  if (typeof text !== 'string' || text.length === 0) return [];
+  const doc = pfDocument(text, filePath);
+  if (doc.sentences.length < R08.repeats) return [];
+  if (r03AppendixNamed(doc.base)) return [];
+  const skip = [];
+  const raw = r08LimitSpans(doc).concat(r03AppendixSpans(doc.stageOne, doc.latex));
+  raw.sort((x, y) => x[0] - y[0] || x[1] - y[1]);
+  for (const [start, end] of raw) {
+    if (skip.length > 0 && start <= skip[skip.length - 1][1]) {
+      skip[skip.length - 1] = [skip[skip.length - 1][0], Math.max(skip[skip.length - 1][1], end)];
+    } else {
+      skip.push([start, end]);
+    }
+  }
+  const skipStarts = skip.map((s) => s[0]);
+
+  const skipped = (offset) => {
+    const slot = r03BisectRight(skipStarts, offset) - 1;
+    return slot >= 0 && offset < skip[slot][1];
+  };
+
+  const groups = []; // [signature of the first member, [[offset, plain], ...]]
+  for (const [start, , , plain] of doc.sentences) {
+    if (skipped(start) || !R08_CUE_RES.some((p) => p.test(plain))) continue;
+    const sig = r08Signature(plain);
+    if (sig.size < R08.minShared) continue;
+    let placed = false;
+    for (const group of groups) {
+      if (r08Similar(group[0], sig)) {
+        group[1].push([start, plain]);
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) groups.push([sig, [[start, plain]]]);
+  }
+
+  const out = [];
+  for (const [, members] of groups) {
+    if (members.length < R08.repeats) continue;
+    const [firstOffset, firstPlain] = members[0];
+    const [lineNo, col, line] = doc.locate(firstOffset);
+    const quoted = firstPlain.split(' ');
+    const quote = quoted.slice(0, R08.quoteWords).join(' ') + (quoted.length > R08.quoteWords ? ' ...' : '');
+    const others = [];
+    for (const [offset] of members.slice(1)) {
+      const other = doc.locate(offset)[0];
+      if (!others.includes(other)) others.push(other);
+    }
+    const shown = others.slice(0, R08.linesShown).join(', ');
+    const more = others.length > R08.linesShown ? ` and ${others.length - R08.linesShown} more` : '';
+    const where = others.length === 1 ? 'line' : 'lines';
+    out.push({
+      rule: 'RULE-08',
+      line: lineNo,
+      column: col,
+      excerpt: pfExcerpt(line, col),
+      detail:
+        `${PF_DOCUMENT_PREFIX}the same caveat framing is stated ${members.length} times outside a limitations section ` +
+        `("${quote}"; also on ${where} ${shown}${more}); consider cutting the ` +
+        'copies that add nothing, and keep the scope with every claim and summary it bounds',
+    });
+  }
+  out.sort((x, y) => x.line - y.line || x.column - y.column);
+  return out;
+}
+
 // ---------- Dispatch -------------------------------------------------------
 
 const DISPATCH = {
@@ -2480,7 +3293,18 @@ const FILE_PATH_RULES = new Set(['RULE-03', 'RULE-A']);
 // the catch-all, so a never-throws test cannot hide a bug behind the wrapper, as
 // the Python tests call _rule_03_scan and _rule_a_scan. r03Significant is the
 // significant-digit count of check D, which the Python tests call as
-// _r03_significant.
+// _r03_significant. rule12Profile and rule08Repeats are the 0.8.0 hook-only
+// detectors, exported the way a hook imports ruleA; they are not in DISPATCH or
+// FILE_PATH_RULES, as _rule_12_profile and _rule_08_repeats are not in the Python
+// _DISPATCH, so the audit never runs them. r12Tuning and r08Tuning hold the
+// _R12_* and _R08_* constants a test reads; rule12ProfileScan and rule08RepeatsScan
+// are the scans without the catch-all; r08Signature and r08Similar are the
+// helpers the Python tests call as _r08_signature and _r08_similar.
 module.exports = {
   run, lineSpans, rule03, ruleA, rule03Scan, ruleAScan, r03Tuning: R03_TUNING, r03Significant,
+  rule12Profile, rule08Repeats, rule12ProfileScan, rule08RepeatsScan, r12Tuning: R12, r08Tuning: R08,
+  r08Signature, r08Similar,
+  pfDocumentPrefix: PF_DOCUMENT_PREFIX, _PF_DOCUMENT_PREFIX: PF_DOCUMENT_PREFIX,
+  pfDocument, pfEmphasisSrc: PF_EMPHASIS_SRC,
+  pfWholeDocument,
 };

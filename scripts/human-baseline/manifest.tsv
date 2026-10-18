@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: CC-BY-4.0
+id	group	first_author	year	title
+1702.08608	human	Doshi-Velez	2017	Towards A Rigorous Science of Interpretable Machine Learning
+1803.09010	human	Gebru	2018	Datasheets for Datasets
+1810.03993	human	Mitchell	2018	Model Cards for Model Reporting
+1901.01588	human	Zhao	2019	PyOD: A Python Toolbox for Scalable Outlier Detection
+2003.05731	human	Zhao	2020	SUOD: Accelerating Large-Scale Unsupervised Heterogeneous Outlier Detection
+2009.09463	human	Li	2020	COPOD: Copula-Based Outlier Detection
+2009.10606	human	Zhao	2020	Automating Outlier Detection via Meta-Learning
+2107.03374	human	Chen	2021	Evaluating Large Language Models Trained on Code
+2108.07258	human	Bommasani	2021	On the Opportunities and Risks of Foundation Models
+2201.00382	human	Li	2022	ECOD: Unsupervised Outlier Detection Using Empirical Cumulative Distribution Functions
+2206.09426	human	Han	2022	ADBench: Anomaly Detection Benchmark
+2206.10071	human	Liu	2022	BOND: Benchmarking Unsupervised Outlier Node Detection on Static Attributed Graphs
+2307.13854	era	Zhou	2023	WebArena: A Realistic Web Environment for Building Autonomous Agents
+2308.03688	era	Liu	2023	AgentBench: Evaluating LLMs as Agents
+2310.06770	era	Jimenez	2023	SWE-bench: Can Language Models Resolve Real-World GitHub Issues?
+2401.05566	era	Hubinger	2024	Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training
+2406.12045	era	Yao	2024	τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains
+2412.14093	era	Greenblatt	2024	Alignment faking in large language models

@@ -40,13 +40,13 @@ Field-observed (maintainer observation of LLM output, 2022-2026):
 - RULE-D: Transition-word overuse.
 - RULE-E: Paragraph-closing summary sentences.
 - RULE-F: Inconsistent terms / abbreviation redefinition.
-- RULE-G: Sentence-case section headings.
+- RULE-G: Title case for headings; sentence case for full-sentence bold run-in leads.
 - **RULE-H: Handwavy claims and fabricated citations (critical).**
 - RULE-I: Contractions in formal technical prose.
 
 ## Escape Hatch
 
-*"Break any of these rules sooner than say anything outright barbarous."* — George Orwell, "Politics and the English Language" (1946), Rule 6. Rules are guides to clarity, not ends in themselves.
+*"Break any of these rules sooner than say anything outright barbarous."* — George Orwell, "Politics and the English Language" (1946), Rule 6. Most rules are defaults to apply with judgment. Depart when the sentence reads better for it, not to vary the pattern. A few are firm (do not invent citations, evidence, or numbers; no placeholders in finished text). Judge a draft by its overall pattern: one that obeys every default in every sentence reads as machine-made.
 
 ## Full Rule Bodies (Canonical)
 

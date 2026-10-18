@@ -23,6 +23,14 @@ Rules covered (see ``skills/style-review/references/rule-detectors.md``):
   RULE-06 avoidable jargon (regex against a 54-entry list: the 45-word banned
           AI-tell list adjacent to RULE-06 plus 9 forms of 3 RULE-06 callouts)
   RULE-12 sentence length > 30 words
+  RULE-12 (hook-only, ``_rule_12_profile``) the document-level reading of sentence
+          length that replaces ``_rule_12`` in a hook: the share of sentences over
+          30 words outside the human range (too many or too few) in a whole LaTeX
+          paper, ", so" clause joins in a paper, and sentences over 80 words, once per
+          document. Takes the file path; the CLI audit keeps ``_rule_12``
+  RULE-08 (hook-only, ``_rule_08_repeats``) the same caveat framing stated three or
+          more times outside a limitations section; takes the file path. The audit
+          never calls it: it classifies RULE-08 as semantic
 
 Plus a single "banned AI-tell list" detector which is covered under RULE-06's
 mechanical pass (the banned list IS the jargon surface we check against).
@@ -2561,6 +2569,800 @@ def _rule_a_scan(text: str, file_path: str) -> list[Violation]:
     return out
 
 
+# ---------- RULE-12 profile and RULE-08 repeats (hook-only, document level) ----
+#
+# agent-style 0.8.0. A rule obeyed at every sentence produces a document that
+# reads as one writer's template: human-written papers keep some long sentences,
+# join clauses with ", so" and the semicolon sparingly, and say a caveat once
+# where it applies. Two detectors read the whole document for that pattern and
+# report it as a departure from the range of human-written papers, once per
+# pattern, so that the writer weighs it instead of chasing a count to zero.
+#
+#   _rule_12_profile  replaces `_rule_12` in the hook (the CLI audit keeps the
+#                     per-sentence `_rule_12`). (a) sentences far longer than
+#                     human prose runs, reported once per document; (b) the share
+#                     of sentences over 30 words, too high or too low, in a whole
+#                     paper; (c) ", so" clause joins, in a paper.
+#   _rule_08_repeats  the same caveat framing stated three or more times outside
+#                     a limitations section.
+#
+# Both take (text, file_path=None), report under their own rule label, never
+# raise, and skip what a document cannot answer. The share check runs on a complete
+# LaTeX document only (_pf_whole_document): \begin{document} and \end{document}
+# both present, a class that is not for slides or letters, and no \input, \include
+# or \subfile of a body file left unexpanded. A section file, a fragment, a main
+# file that pulls its sections in, and every Markdown or text file are never read as
+# a profile: nothing in Markdown shows that a file is whole or what genre it is, and
+# a design note with an Introduction and a Conclusion is written under the 30-word
+# rule on purpose. The ", so" check needs a paper context (any LaTeX file that is not
+# a slide deck or a letter, or Markdown or text with an abstract or an introduction)
+# and _R12_SO_MIN_WORDS words.
+#
+# A finding about the document as a whole (share, ", so", a repeated caveat) begins
+# with _PF_DOCUMENT_PREFIX. A consumer can tell it from a finding about one place
+# and keep it when only part of the file changed. The profile emits those
+# first and the extreme-sentence finding last, because a hook caps the findings it
+# shows.
+#
+# Prose is segmented by the RULE-03 pipeline (code, comments, display
+# environments, tables, headings and captions are blanked, then ``_r03_sentences``
+# cuts), with additions that matter for a whole paper: the LaTeX preamble and
+# title-page commands are blanked, the arguments of \footnote, \footnotetext and
+# \thanks are not part of the sentence that carries them, Markdown footnote
+# definitions and their markers are not prose, acknowledgment sections and a
+# leading YAML front-matter block are not prose, and each inline math span counts
+# as one word. A sentence of fewer than _PF_MIN_WORDS words is not prose.
+#
+# Calibration: scripts/human-baseline/ measures the human-written corpus (12
+# arXiv papers, 2017-2022) and the era corpus (six 2023-2024 LLM-agent papers).
+# The basis of each threshold sits at its constant, in rounded human-corpus terms.
+
+_PF_MIN_WORDS = 3   # a sentence below this is a label or a fragment, not prose
+
+# The start of every finding about the document as a whole. A consumer that keeps
+# document-level findings when a revision touches other lines matches on it.
+_PF_DOCUMENT_PREFIX = "Across the document, "
+
+# Commands whose brace arguments are not part of the prose sentence around them,
+# and the number of brace arguments each takes. Names, affiliations and e-mail
+# addresses of the title page run together into one long "sentence" once the
+# commands around them are dropped, and a footnote body is a sentence of its own
+# that the host sentence would otherwise swallow.
+_PF_FRONT_ARGS = {
+    "title": 1, "author": 1, "date": 1, "thanks": 1, "affiliation": 1, "affil": 1,
+    "email": 1, "address": 1, "institute": 1, "institution": 1, "subtitle": 1,
+    "icmltitle": 1, "icmlauthor": 2, "icmlaffiliation": 2,
+    "icmlcorrespondingauthor": 2, "icmlkeywords": 1, "icmlsetsymbol": 2,
+    "IEEEauthorblockN": 1, "IEEEauthorblockA": 1, "runningtitle": 1,
+    "titlerunning": 1, "authorrunning": 1, "orcid": 1,
+    "footnote": 1, "footnotetext": 1,
+}
+_PF_FRONT_RE = re.compile(
+    r"\\(" + "|".join(sorted(_PF_FRONT_ARGS, key=len, reverse=True)) + r")\*?(?![A-Za-z@])"
+)
+# A footnote runs a few hundred words at most. A longer match means a brace in the
+# source is unbalanced and the closing one found is far off. The match is then left
+# alone and the rest of the paper stays in the count.
+_PF_NOTE_COMMANDS = frozenset({"footnote", "footnotetext", "thanks"})
+_PF_NOTE_MAX = 3000
+_PF_FRONT_ENV_RE = re.compile(r"\\begin\{(icmlauthorlist|IEEEkeywords|keywords)\}")
+# Acknowledgments: an environment (`ack`, `acks`, `acknowledgments`), a bare
+# command that opens the section (`\acks`, `\acknowledgments`), or a heading.
+_PF_ACK_ENV_RE = re.compile(r"\\begin\{(ack|acks|acknowledg[a-z]*\*?)\}")
+_PF_ACK_CMD_RE = re.compile(r"\\(?:acks|acknowledg(?:e)?ments?)(?![A-Za-z@])")
+_PF_ACK_WORDS = frozenset({"acknowledgment", "acknowledgments", "acknowledgement", "acknowledgements"})
+# A document class for slides, posters, letters and CVs: not a paper.
+# Line breaks may sit between the command, its options and the class name, and
+# inside the option list (`\documentclass[\n  aspectratio=169\n]{beamer}`).
+_PF_CLASS_RE = re.compile(r"\\documentclass[ \t\r\n]*(?:\[[^\]]{0,400}\])?[ \t\r\n]*\{([^{}\n]{0,100})\}")
+_PF_NOT_PAPER_CLASSES = frozenset({
+    "beamer", "powerdot", "prosper", "slides", "foils", "seminar", "tikzposter", "baposter",
+    "a0poster", "letter", "scrlttr2", "newlfm", "moderncv", "altacv", "awesome-cv", "currvita",
+    "europecv", "res", "resume",
+})
+# A leading YAML front-matter block: `---`, a first line that is a `key:`, and a
+# closing `---` or `...` line.
+_PF_YAML_OPEN_RE = re.compile(r"\A\ufeff?---[ \t]*\r?\n(?=[ \t]*[A-Za-z_][\w.-]*[ \t]*:)")
+_PF_YAML_CLOSE_RE = re.compile(r"^(?:---|\.\.\.)[ \t]*\r?$", re.MULTILINE)
+_PF_WS_RE = re.compile(r"\s+")
+_PF_ALNUM_RE = re.compile(r"[^\W_]")
+# A run of emphasis markers is removed when a non-word character flanks it on
+# either side. Each alternative starts a run at its left edge only. A run is
+# tried once, and a line of underscores costs linear time.
+_PF_EMPHASIS_RE = re.compile(r"(?<![*_\w])[*_]+|(?<![*_])[*_]+(?!\w)")
+_PF_TAG_RE = re.compile(r"</?[A-Za-z][A-Za-z0-9]*[^>\n]{0,200}>")
+# A command that pulls another file into the text. In the body of a LaTeX file it
+# means the prose sits elsewhere: the file is a main file, not a complete paper.
+_PF_INCLUDE_RE = re.compile(r"\\(?:input|include|subfile|subfileinclude)(?![A-Za-z@])")
+# A Markdown footnote definition opens a line (at most three spaces in) with
+# `[^label]:`; the same marker in running text is a reference. The label has no
+# whitespace or bracket, at most 100 characters. A run of `[^` therefore stays linear.
+_PF_FN_DEF_RE = re.compile(r"[ ]{0,3}\[\^[^\[\]\s]{1,100}\]:")
+_PF_FN_REF_RE = re.compile(r"\[\^[^\[\]\s]{1,100}\]")
+
+
+@dataclass
+class _PfDocument:
+    """A document cut into prose sentences, for the document-level detectors.
+
+    ``masked`` is the text with everything that is not prose blanked and every
+    offset kept. ``sentences`` holds (start, end, words, plain) for each prose
+    sentence, in order: offsets into ``text``, the word count, and the sentence
+    with markup removed and whitespace collapsed. ``headings`` holds (start, end,
+    level, title) for each LaTeX sectioning command or Markdown heading.
+    ``body_includes`` is True for a LaTeX file whose body holds an ``\\input``,
+    ``\\include`` or ``\\subfile`` outside a display environment.
+    """
+
+    text: str
+    base: str
+    latex: bool
+    markdown: bool
+    stage_one: str
+    masked: str
+    sentences: list
+    locate: Callable
+    headings: list
+    body_includes: bool = False
+
+
+def _pf_headings(stage_one: str, latex: bool) -> list:
+    """(start, end, level, title) for each LaTeX sectioning command or Markdown heading."""
+    out: list = []
+    if latex:
+        for m in _R03_TEX_HEADING_RE.finditer(stage_one):
+            out.append((m.start(), m.end(), _R03_HEADING_LEVELS[m.group(1)], m.group(2)))
+    else:
+        for m in _R03_MD_HEADING_RE.finditer(stage_one):
+            out.append((m.start(), m.end(), len(m.group(1)), m.group(2)))
+    return out
+
+
+def _pf_titled_spans(headings: list, words: frozenset, size: int) -> list:
+    """Spans from each heading whose title holds a word of ``words`` to the next heading of its level or higher."""
+    spans: list = []
+    open_level = -1
+    open_start = 0
+    for start, end, level, title in headings:
+        if open_level >= 0 and level <= open_level:
+            spans.append((open_start, start))
+            open_level = -1
+        if open_level < 0 and words & set(_R03_TITLE_WORD_RE.findall(title.lower())):
+            open_level, open_start = level, end
+    if open_level >= 0:
+        spans.append((open_start, size))
+    return spans
+
+
+def _pf_ack_spans(stage_one: str, latex: bool, headings: list) -> list:
+    """Spans of acknowledgment sections: not prose for any profile check."""
+    spans = _pf_titled_spans(headings, _PF_ACK_WORDS, len(stage_one))
+    if latex:
+        spans.extend(_r03_env_spans(stage_one, _PF_ACK_ENV_RE))
+        starts = [h[0] for h in headings]
+        for m in _PF_ACK_CMD_RE.finditer(stage_one):
+            slot = bisect.bisect_left(starts, m.end())
+            spans.append((m.start(), starts[slot] if slot < len(starts) else len(stage_one)))
+    return spans
+
+
+def _pf_yaml_span(text: str):
+    """(0, end) of a leading YAML front-matter block, or None."""
+    opened = _PF_YAML_OPEN_RE.match(text)
+    if opened is None:
+        return None
+    closed = _PF_YAML_CLOSE_RE.search(text, opened.end())
+    return None if closed is None else (0, closed.end())
+
+
+def _pf_slide_or_letter(stage_one: str) -> bool:
+    """True when the LaTeX document class is for slides, posters, letters or CVs."""
+    m = _PF_CLASS_RE.search(stage_one)
+    if m is None:
+        return False
+    name = re.split(r"[\\/]", m.group(1).strip())[-1].lower()
+    return name in _PF_NOT_PAPER_CLASSES
+
+
+def _pf_paper_context(doc: "_PfDocument") -> bool:
+    """True for a paper: a LaTeX source whose class is not for slides or a letter.
+
+    Markdown and text are never read as papers. An Abstract or Introduction
+    heading also opens design notes, which carry ", so" joins at 2 to 11 per
+    1,000 words by design. A heading cannot carry the paper calibration.
+    """
+    return doc.latex and not _pf_slide_or_letter(doc.stage_one)
+
+
+def _pf_whole_document(doc: "_PfDocument") -> bool:
+    """True when ``doc`` is a complete paper rather than a section file or a fragment.
+
+    LaTeX only: ``\\begin{document}`` and a later ``\\end{document}``, a class that
+    is not for slides, posters, letters or CVs, and no ``\\input``, ``\\include`` or
+    ``\\subfile`` in the body outside a display environment (a main file that pulls
+    its sections in holds no complete prose). Markdown and text are never complete:
+    a heading or a file name does not show that a file is whole, or what genre it is.
+    """
+    if not doc.latex:
+        return False
+    src = doc.stage_one
+    begin = src.find("\\begin{document}")
+    if begin < 0 or src.find("\\end{document}", begin) < 0:
+        return False
+    return not doc.body_includes and not _pf_slide_or_letter(src)
+
+
+def _pf_body_includes(stage_one: str, start: int, end: int, display: list) -> bool:
+    """True when ``stage_one[start:end]`` holds an include command outside a display span.
+
+    A table or a figure may ``\\input`` a generated file and the paper stays whole;
+    an ``\\input`` between paragraphs means the prose is in another file.
+    """
+    if _PF_INCLUDE_RE.search(stage_one, start, end) is None:
+        return False
+    return _PF_INCLUDE_RE.search(_r03_blank(stage_one, display), start, end) is not None
+
+
+def _pf_footnote_spans(stage_one: str) -> list:
+    """Spans of Markdown footnote definitions and of their inline markers.
+
+    A definition is a line that opens with ``[^label]:`` (at most three spaces in).
+    It runs through the lines that follow without a blank line, up to the next
+    definition, and through each further paragraph indented four columns or more
+    after a blank line. A marker in running text (``[^label]``) is blanked as well:
+    it counts as a word otherwise, and it keeps a sentence from ending before it.
+    """
+    spans: list = [m.span() for m in _PF_FN_REF_RE.finditer(stage_one)]
+    lines = _line_spans(stage_one)
+    count = len(lines)
+
+    def blank(i: int) -> bool:
+        return not stage_one[lines[i][0]:lines[i][1]].strip(" \t")
+
+    def definition(i: int) -> bool:
+        return _PF_FN_DEF_RE.match(stage_one, lines[i][0], lines[i][1]) is not None
+
+    i = 0
+    while i < count:
+        if not definition(i):
+            i += 1
+            continue
+        last = i + 1
+        while last < count and not blank(last) and not definition(last):
+            last += 1
+        while True:
+            nxt = last
+            while nxt < count and blank(nxt):
+                nxt += 1
+            if nxt == last or nxt >= count or not stage_one.startswith(("    ", "\t"), lines[nxt][0]):
+                break
+            last = nxt + 1
+            while last < count and not blank(last) and not definition(last):
+                last += 1
+        spans.append((lines[i][0], lines[last - 1][1]))
+        i = last
+    return spans
+
+
+def _pf_front_spans(src: str) -> list:
+    """Spans of title-page and note commands with their brace arguments, and of author lists."""
+    spans: list = list(_r03_env_spans(src, _PF_FRONT_ENV_RE))
+    braces = None
+    n = len(src)
+    for m in _PF_FRONT_RE.finditer(src):
+        if braces is None:
+            braces = _r03_brace_map(src)
+        i = m.end()
+        end = m.end()
+        for _ in range(_PF_FRONT_ARGS[m.group(1)]):
+            i = _r03_skip_blanks(src, i)
+            if i < n and src[i] == "[":
+                k = src.find("]", i, i + 200)
+                if k < 0:
+                    break
+                i = _r03_skip_blanks(src, k + 1)
+            if i < n and src[i] == "{" and i in braces:
+                end = braces[i] + 1
+                i = end
+            else:
+                break
+        if end > m.end() and not (m.group(1) in _PF_NOTE_COMMANDS and end - m.start() > _PF_NOTE_MAX):
+            spans.append((m.start(), end))
+    return spans
+
+
+def _pf_math_words(raw: str) -> str:
+    """``raw`` with each inline math span (``$..$`` or ``\\(..\\)``) replaced by one word."""
+    marks = [m.start() for m in _R03_DOLLAR_RE.finditer(raw)]
+    spans = [(marks[i], marks[i + 1] + 1) for i in range(0, len(marks) - 1, 2)]
+    spans.extend(_r03_pairs(raw, "\\(", "\\)"))
+    if not spans:
+        return raw
+    parts: list = []
+    pos = 0
+    for start, end in sorted(spans):
+        start = max(start, pos)
+        if end <= start:
+            continue
+        parts.append(raw[pos:start])
+        parts.append(" M ")
+        pos = end
+    parts.append(raw[pos:])
+    return "".join(parts)
+
+
+def _pf_plain(raw: str, latex: bool) -> str:
+    """The words of one sentence: no commands, citations or tags, whitespace collapsed."""
+    if latex:
+        t = _r03_plain_text(_pf_math_words(raw))
+    else:
+        t = _PF_EMPHASIS_RE.sub("", _PF_TAG_RE.sub(" ", raw))
+    return _PF_WS_RE.sub(" ", t).strip()
+
+
+def _pf_count_words(plain: str) -> int:
+    """Whitespace-separated tokens that hold a letter or a digit."""
+    return sum(1 for token in plain.split(" ") if _PF_ALNUM_RE.search(token))
+
+
+def _pf_document(text: str, file_path=None) -> _PfDocument:
+    base = re.split(r"[\\/]", str(file_path or ""))[-1].lower()
+    latex = _r03_is_latex(base, text)
+    markdown = _r03_is_markdown(base, text, latex)
+    stage_one = _r03_stage_one(text, latex, markdown)
+    if not latex:
+        front_matter = _pf_yaml_span(text)
+        if front_matter is not None:
+            stage_one = _r03_blank(stage_one, [front_matter])
+    headings = _pf_headings(stage_one, latex)
+    captions = _r03_captions(stage_one) if latex else []
+    masked, display = _r03_stage_two(stage_one, latex, tuple((c[0], c[3]) for c in captions))
+    not_prose = _pf_ack_spans(stage_one, latex, headings)
+    body_includes = False
+    if latex:
+        # Outside \begin{document}..\end{document} is preamble and trailer; the
+        # title page inside it is not prose either, and neither are the arguments
+        # of a footnote, which are no part of the sentence that carries it.
+        doc_start, doc_end = _r03_document_range(stage_one)
+        not_prose += [(0, doc_start), (doc_end, len(masked))] + _pf_front_spans(stage_one)
+        body_includes = _pf_body_includes(stage_one, doc_start, doc_end, display)
+    else:
+        # A Markdown footnote definition is a note, as \footnote{..} is in LaTeX.
+        not_prose += _pf_footnote_spans(stage_one)
+    masked = _r03_blank(masked, not_prose)
+    cuts = [s for s, _e in display] + [e for _s, e in display]
+    sentences: list = []
+    for start, end in _r03_sentences(masked, cuts):
+        plain = _pf_plain(masked[start:end], latex)
+        words = _pf_count_words(plain)
+        if words >= _PF_MIN_WORDS:
+            sentences.append((start, end, words, plain))
+    return _PfDocument(
+        text=text, base=base, latex=latex, markdown=markdown, stage_one=stage_one,
+        masked=masked, sentences=sentences, locate=_r03_make_locate(text), headings=headings,
+        body_includes=body_includes,
+    )
+
+
+# ---- RULE-12 profile ---------------------------------------------------------
+
+# Measured in 2026-10 on the LaTeX sources of 12 human-written arXiv papers from
+# 2017-2022 (about 137,000 prose words; the "human corpus") and of six 2023-2024
+# LLM-agent papers (about 87,000 words; the "era corpus"), with this module's own
+# segmentation, each source wrapped as a whole document. Footnote bodies and
+# acknowledgment sections are not prose words here. Rounded figures, human | era:
+#
+#   sentences over 80 words     1 per 9,750 words | 1 per 12,500 words
+#   sentences over 70 words     1 per 4,400 words | 1 per 6,700 words
+#   share of sentences > 30     9% to 33%, median 15% | 7% to 32%
+#   ", so" joins per 1,000 words   0 to 0.5 | 0 to 0.5
+#
+# Most sentences over 80 words are enumerations ("(i) ..., (ii) ...") or lists of
+# names. An earlier pass over the PDF text of the same human papers gave 18% to 46%
+# over 30 words (tables and captions included, another count). The two scales
+# differ, and only the LaTeX figures set a threshold here. Change a value only with
+# a new measurement.
+
+_R12_LONG_WORDS = 30            # RULES.md RULE-12: a sentence over this many words is long
+# Sentences over 80 words, reported once per document. The check reads any prose, so
+# it flags only the far tail. Pooled over both corpora a sentence over 80 words comes
+# once per 10,700 words, and 8 of the 18 papers have one; at 60 words 15 of the 18
+# would get a finding, which makes it a note on almost every paper rather than on an
+# outlier. Footnote bodies are not part of the host sentence: in a first measurement
+# about half of the sentences over 70 words were a footnote merged into its host.
+_R12_EXTREME_WORDS = 80
+# Enough sentences to judge a share: the shortest human paper holds about 50. Below
+# this a short document, such as a note with a \begin{document}, is not read. The
+# share check reads complete LaTeX documents only. Markdown and text are left out
+# because no signal in them shows that a file is whole: a design note carries an
+# Introduction and a Conclusion as a paper does, and sits at 0% to 8% by design.
+_R12_SHARE_MIN_SENTENCES = 40
+# The share of long sentences is reported above 45% and below 6%. The human range is
+# 9% to 33% (the highest are long reports); the era papers run 7% to 32%. The upper
+# bound is 12 points over the human maximum, the lower one under the lowest era paper.
+_R12_SHARE_HIGH = 0.45
+_R12_SHARE_LOW = 0.06
+_R12_HUMAN_SHARE = "10% to 35%"   # the range the messages quote, rounded to 5 points
+# ", so" joins: 3 times the human maximum (0.5 per 1,000 words), and at least 6 of
+# them in at least 1,000 words. A short fragment cannot reach the density.
+_R12_SO_DENSITY = 1.5
+_R12_SO_MIN_COUNT = 6
+_R12_SO_MIN_WORDS = 1000
+
+# ", so" followed by a clause. The words that make "so" part of a phrase rather
+# than a clause join are excluded: "so that", "so far", "so on", "so forth",
+# "so as", "so much", "so many", "so long", "so few", "so little", "so often",
+# "so well". "so-called" has a hyphen and never matches. The lookahead takes
+# the next word, empty when the clause opens with math, a quote or a bracket.
+_R12_SO_RE = re.compile(r",[ \t\r\n]+so[ \t\r\n]+(?=(?P<next>[A-Za-z]*))")
+_R12_SO_NOT_CLAUSE = frozenset({
+    "that", "far", "on", "forth", "as", "much", "many", "long", "few", "little",
+    "often", "well", "called",
+})
+
+
+def _r12_so_joins(doc: _PfDocument) -> list:
+    """Offsets of the ``, so`` clause joins in the prose of ``doc``."""
+    found: list = []
+    for start, end, _words, _plain in doc.sentences:
+        for m in _R12_SO_RE.finditer(doc.masked, start, end):
+            if m.group("next").lower() not in _R12_SO_NOT_CLAUSE:
+                found.append(m.start())
+    return found
+
+
+def _rule_12_profile(text: str, file_path=None) -> list[Violation]:
+    """Report where a document's sentence lengths and clause joins leave the human range.
+
+    Hook-only, document level. It replaces the per-sentence ``_rule_12`` in the
+    hook, which flags every sentence over 30 words, and reports under the same
+    label. Three checks, each worded as a departure from human-written prose
+    and never as a violation. The findings come back in this order. A hook
+    that caps what it shows then keeps the document-level ones:
+
+    * in a complete LaTeX document (``_pf_whole_document``) with
+      ``_R12_SHARE_MIN_SENTENCES`` prose sentences or more, once, when the share
+      of sentences over ``_R12_LONG_WORDS`` words is above ``_R12_SHARE_HIGH`` or
+      below ``_R12_SHARE_LOW`` (a clipped draft). Markdown and text, a section
+      file, a fragment and a main file that pulls in its sections are not read;
+    * in a paper context (``_pf_paper_context``) with ``_R12_SO_MIN_WORDS`` words
+      or more, once, when ", so" clause joins number ``_R12_SO_MIN_COUNT`` or more
+      at ``_R12_SO_DENSITY`` per 1,000 words or more;
+    * once for the document, when sentences run over ``_R12_EXTREME_WORDS`` words,
+      anchored at the first of them. This check reads any prose.
+
+    The share and ", so" findings begin with ``_PF_DOCUMENT_PREFIX``.
+
+    Never raises: the guard treats an exception from any advisory detector as a
+    broken package.
+    """
+    try:
+        return _rule_12_profile_scan(text, file_path)
+    except Exception:
+        return []
+
+
+def _r12_profile_findings(doc: _PfDocument) -> list:
+    """(kind, offset, detail) for each profile finding of ``doc``.
+
+    ``kind`` is "share-high", "share-low", "so" or "extreme", and the list holds
+    them in that order. The offset is where the finding sits in the text; the
+    "extreme" finding is one for the whole document, at its first sentence. Split
+    from the detector so a harness can count the checks apart.
+    """
+    found: list = []
+    count = len(doc.sentences)
+    # A share is read only in a complete LaTeX document. Agent notes and design
+    # documents are written under the 30-word rule on purpose and mostly sit at 0%
+    # to 8%, which is their register and not a clipped draft; a section file holds
+    # one part of a paper, whose share varies by section.
+    if count >= _R12_SHARE_MIN_SENTENCES and _pf_whole_document(doc):
+        long_count = sum(1 for s in doc.sentences if s[2] > _R12_LONG_WORDS)
+        share = long_count / count
+        rounded = int(share * 20 + 0.5) * 5
+        if share > _R12_SHARE_HIGH:
+            found.append((
+                "share-high",
+                doc.sentences[0][0],
+                f"{_PF_DOCUMENT_PREFIX}about {rounded}% of the {count} sentences run past {_R12_LONG_WORDS} "
+                f"words, above the {_R12_HUMAN_SHARE} range of human-written papers; consider ending some "
+                "where the thought turns",
+            ))
+        elif share < _R12_SHARE_LOW:
+            if long_count == 0:
+                lead = "none of"
+            elif rounded == 0:
+                lead = "fewer than 5% of"
+            else:
+                lead = f"only about {rounded}% of"
+            found.append((
+                "share-low",
+                doc.sentences[0][0],
+                f"{_PF_DOCUMENT_PREFIX}{lead} the {count} sentences run past {_R12_LONG_WORDS} words, below "
+                f"the {_R12_HUMAN_SHARE} range of human-written papers, which can read clipped; "
+                "consider joining related sentences where one idea carries over",
+            ))
+
+    paper = _pf_paper_context(doc)
+    words_total = sum(s[2] for s in doc.sentences)
+    if paper and words_total >= _R12_SO_MIN_WORDS:
+        joins = _r12_so_joins(doc)
+        density = len(joins) * 1000.0 / words_total
+        if len(joins) >= _R12_SO_MIN_COUNT and density >= _R12_SO_DENSITY:
+            found.append((
+                "so",
+                joins[0],
+                f"{_PF_DOCUMENT_PREFIX}{len(joins)} sentences join clauses with \", so\" (about "
+                f"{density:.1f} per 1,000 words; human-written papers rarely pass 1); consider a "
+                "period, or a word such as \"thus\" or \"because\", in some of them",
+            ))
+
+    extreme = [s for s in doc.sentences if s[2] > _R12_EXTREME_WORDS]
+    if extreme:
+        register = "papers" if paper else "prose"
+        if len(extreme) == 1:
+            what = f"a sentence of {extreme[0][2]} words"
+            fix = "consider whether it carries one connected thought, and split it where a separate claim begins"
+        else:
+            line_no = doc.locate(extreme[0][0])[0]
+            what = f"{len(extreme)} sentences over {_R12_EXTREME_WORDS} words, the first at line {line_no}"
+            fix = "consider whether each carries one connected thought, and split where a separate claim begins"
+        found.append((
+            "extreme",
+            extreme[0][0],
+            f"{what}, a length that is uncommon in human-written {register}; {fix}",
+        ))
+    return found
+
+
+def _rule_12_profile_scan(text: str, file_path) -> list[Violation]:
+    if not isinstance(text, str) or not text:
+        return []
+    doc = _pf_document(text, file_path)
+    out: list[Violation] = []
+    for _kind, offset, detail in _r12_profile_findings(doc):
+        line_no, col, line = doc.locate(offset)
+        out.append(Violation(
+            rule="RULE-12",
+            line=line_no,
+            column=col,
+            excerpt=_excerpt(line, (col - 1, col - 1 + 80)),
+            detail=detail,
+        ))
+    return out
+
+
+# ---- RULE-08 repeats -----------------------------------------------------------
+
+# Measured on the same 18 papers (human and era corpora). Outside limitations and
+# appendix text, 17 of them hold 0 to 6 caveat sentences each and the 214-page report
+# holds 34. No two of them group: the closest pair, two long sentences about different
+# open problems, shares 45% of the smaller stem set (overlap) and 20% of the union
+# (Jaccard). A group needs 3 members, 3 shared stems, overlap 0.6 and Jaccard 0.3,
+# which keeps a margin over that pair and still joins a caveat restated in other
+# words (a paraphrase shares most of its subject stems). Change a value only with
+# a new measurement.
+_R08_REPEATS = 3        # members a group needs to be reported
+_R08_MIN_SHARED = 3     # content stems two caveats must share, and a caveat must hold
+_R08_OVERLAP = 0.6      # shared stems over the smaller stem set
+_R08_JACCARD = 0.3      # shared stems over the union
+_R08_QUOTE_WORDS = 10   # words of the first instance the message quotes
+_R08_LINES_SHOWN = 4    # other locations the message lists
+
+# A sentence that states a scope or a limitation. A modal or a "do" before "not"
+# and up to two words before the verb ("does not directly establish").
+_R08_CUE_RES = tuple(
+    re.compile(p, re.IGNORECASE)
+    for p in (
+        r"\b(?:does|do|did|can|could|will|would|may|might|should)\s+not\s+(?:[a-z]+\s+){0,2}?"
+        r"(?:establish|show|test|imply|prove|demonstrate|measure|identify|determine|address|settle|"
+        r"generali[sz]e|speak\s+to|capture|tell\s+us)\b",
+        r"\b(?:cannot|can\s+not|could\s+not|is\s+unable\s+to|are\s+unable\s+to)\s+(?:[a-z]+\s+){0,2}?"
+        r"(?:rule\s+out|distinguish|establish|determine|separate|exclude|say|tell|show|identify|"
+        r"attribute|conclude)\b",
+        r"\bwe\s+(?:do\s+not|did\s+not|have\s+not|make\s+no)\s+(?:[a-z]+\s+){0,2}?"
+        r"(?:claims?|test|tested|measure|measured|evaluate|evaluated|study|studied|examine|examined|"
+        r"investigate|investigated|establish|assess|assessed|explore|explored|address|attempt|show)\b",
+        r"\b(?:is|are|was|were)\s+limited\s+to\b",
+        r"\b(?:remains?|remained)\s+(?:[a-z]+\s+){0,2}?"
+        r"(?:untested|unknown|unclear|unexplored|unresolved|unverified|open)\b",
+        r"\b(?:is|are)\s+(?:still\s+)?(?:untested|unknown|unexplored|unresolved|unverified)\b",
+        r"\b(?:is|are)\s+an\s+open\s+question\b",
+        r"\b(?:beyond|outside)\s+(?:of\s+)?the\s+scope\b",
+        r"\bleaves?\b[^.;]{0,100}?\b(?:to|for)\s+future\s+(?:work|research|stud(?:y|ies)|investigation)\b",
+        r"\bleft\s+(?:to|for)\s+future\s+(?:work|research|stud(?:y|ies)|investigation)\b",
+        r"\bit\s+is\s+(?:unclear|unknown|not\s+clear)\s+(?:whether|if|how|why)\b",
+        r"\bshould\s+not\s+be\s+(?:read|interpreted|taken|construed)\s+as\b",
+        r"\b(?:one|a|an|another|the\s+main|a\s+key|an\s+important)\s+(?:limitation|caveat)\b",
+    )
+)
+
+# Words that carry no part of what a caveat is about: function words and the
+# vocabulary of the cues themselves. Two caveats then match on their subject.
+_R08_STOP = frozenset(
+    "a an the of to in on for with by at from as is are was were be been being this that these "
+    "those it its we our us they their them and or but nor so yet if then than such not no do "
+    "does did can could may might must will would should shall have has had there here also "
+    "only just more most very which who whom whose what when where while whether into onto over "
+    "under about above between among across through per via within without each both all any "
+    "some other another same one two use used using see seen show shown shows claim claims "
+    "establish test tests tested measure measured imply implies prove proves demonstrate "
+    "limited limitation limitations scope beyond outside future work works leave leaves left "
+    "untested unknown unclear unexplored unresolved unverified open question rule cannot "
+    "distinguish evidence paper study studies result results finding findings here still "
+    "however thus therefore note notes yet again further".split()
+)
+_R08_TOKEN_RE = re.compile(r"[a-z][a-z0-9]*")
+
+# A heading that opens a section where caveats belong. Words of the title, lowercased.
+_R08_SECTION_WORDS = frozenset({
+    "limitation", "limitations", "caveat", "caveats", "threat", "threats",
+    "shortcoming", "shortcomings", "weakness", "weaknesses", "limits",
+})
+
+
+def _r08_stem(token: str) -> str:
+    """A crude stem: ``ies`` to ``y``, then one of ``ing``, ``ed``, ``es``, ``s``, then a final ``e``.
+
+    Enough to bring "raise", "raises" and "raised", or "variety" and "varieties", to one form.
+    """
+    if token.endswith("ies") and len(token) >= 5:
+        stem = token[:-3] + "y"
+    else:
+        stem = token
+        for suffix, keep in (("ing", 4), ("ed", 4), ("es", 4), ("s", 3)):
+            if token.endswith(suffix) and len(token) - len(suffix) >= keep:
+                stem = token[:-len(suffix)]
+                break
+    if stem.endswith("e") and len(stem) > 4:
+        stem = stem[:-1]
+    return stem
+
+
+def _r08_signature(plain: str) -> frozenset:
+    """Content stems of a caveat sentence: lowercase, stop words dropped, inflection trimmed."""
+    out = set()
+    for token in _R08_TOKEN_RE.findall(plain.lower()):
+        stem = _r08_stem(token)
+        if len(stem) < 3 or token in _R08_STOP or stem in _R08_STOP:
+            continue
+        out.add(stem)
+    return frozenset(out)
+
+
+def _r08_similar(a: frozenset, b: frozenset) -> bool:
+    shared = len(a & b)
+    if shared < _R08_MIN_SHARED:
+        return False
+    return shared / min(len(a), len(b)) >= _R08_OVERLAP and shared / len(a | b) >= _R08_JACCARD
+
+
+# A paragraph that opens with a bold or italic run-in lead: \textbf{Limitations.},
+# \noindent\textbf{Limitations}, **Limitations.**. The lead sits at the start of a
+# line, and the paragraph runs to the next blank line.
+_R08_LEAD_RE = re.compile(
+    r"^[ \t]*(?:\\noindent[ \t]*)?(?:\\(?:textbf|textit|emph|textsc)[ \t]*\{([^{}\n]{1,80})\}"
+    r"|\*\*([^*\n]{1,80})\*\*|__([^_\n]{1,80})__)",
+    re.MULTILINE,
+)
+_R08_PARAGRAPH_END_RE = re.compile(r"\n[ \t\r]*(?=\n)")
+
+
+def _r08_limit_spans(doc: _PfDocument) -> list:
+    """Spans of the places where caveats belong.
+
+    A limitations-style heading to the next heading of its level, or the whole
+    file when it is named for one, or a paragraph whose bold run-in lead holds a
+    limitations-style word, to the end of that paragraph.
+    """
+    tokens = _R03_APPENDIX_NAME_SPLIT_RE.split(doc.base)
+    if any(t in _R08_SECTION_WORDS for t in tokens):
+        return [(0, len(doc.stage_one))]
+    spans = _pf_titled_spans(doc.headings, _R08_SECTION_WORDS, len(doc.stage_one))
+    covered = 0
+    for m in _R08_LEAD_RE.finditer(doc.stage_one):
+        if m.start() < covered:
+            continue
+        lead = m.group(1) or m.group(2) or m.group(3)
+        if not _R08_SECTION_WORDS & set(_R03_TITLE_WORD_RE.findall(lead.lower())):
+            continue
+        stop = _R08_PARAGRAPH_END_RE.search(doc.stage_one, m.end())
+        covered = stop.start() if stop is not None else len(doc.stage_one)
+        spans.append((m.start(), covered))
+    return spans
+
+
+def _rule_08_repeats(text: str, file_path=None) -> list[Violation]:
+    """Report a caveat stated three or more times outside a limitations section.
+
+    Hook-only, document level. A sentence is a caveat when it matches one of the
+    scope and limitation cues in ``_R08_CUE_RES`` ("does not establish", "we do
+    not claim", "cannot rule out", "is limited to", "remains untested", "beyond
+    the scope", "we leave ... to future work"). Caveats are reduced to content
+    stems and grouped by overlap (``_r08_similar``); a group of
+    ``_R08_REPEATS`` or more is reported once, at its first instance, with a
+    quote of that sentence's first ``_R08_QUOTE_WORDS`` words and the lines of
+    the others. A sentence under a limitations-style heading (or in a file named
+    for one), in a paragraph that opens with a bold run-in lead such as
+    ``\\textbf{Limitations.}``, in an appendix, or in an appendix-named file is not
+    counted. A limitation stated once in the text and once under Limitations
+    stays quiet. The finding begins with ``_PF_DOCUMENT_PREFIX``: it describes the
+    document, not one place in it.
+
+    Never raises: the guard treats an exception from any advisory detector as a
+    broken package.
+    """
+    try:
+        return _rule_08_scan(text, file_path)
+    except Exception:
+        return []
+
+
+def _rule_08_scan(text: str, file_path) -> list[Violation]:
+    if not isinstance(text, str) or not text:
+        return []
+    doc = _pf_document(text, file_path)
+    if len(doc.sentences) < _R08_REPEATS:
+        return []
+    if _r03_appendix_named(doc.base):
+        return []
+    skip: list = []
+    for start, end in sorted(_r08_limit_spans(doc) + _r03_appendix_spans(doc.stage_one, doc.latex)):
+        if skip and start <= skip[-1][1]:
+            skip[-1] = (skip[-1][0], max(skip[-1][1], end))
+        else:
+            skip.append((start, end))
+    skip_starts = [s for s, _e in skip]
+
+    def skipped(offset: int) -> bool:
+        slot = bisect.bisect_right(skip_starts, offset) - 1
+        return slot >= 0 and offset < skip[slot][1]
+
+    groups: list = []   # [signature of the first member, [(offset, plain), ...]]
+    for start, _end, _words, plain in doc.sentences:
+        if skipped(start) or not any(p.search(plain) for p in _R08_CUE_RES):
+            continue
+        sig = _r08_signature(plain)
+        if len(sig) < _R08_MIN_SHARED:
+            continue
+        for group in groups:
+            if _r08_similar(group[0], sig):
+                group[1].append((start, plain))
+                break
+        else:
+            groups.append([sig, [(start, plain)]])
+
+    out: list[Violation] = []
+    for _sig, members in groups:
+        if len(members) < _R08_REPEATS:
+            continue
+        first_offset, first_plain = members[0]
+        line_no, col, line = doc.locate(first_offset)
+        quoted = first_plain.split(" ")
+        quote = " ".join(quoted[:_R08_QUOTE_WORDS]) + (" ..." if len(quoted) > _R08_QUOTE_WORDS else "")
+        others: list = []
+        for offset, _plain in members[1:]:
+            other = doc.locate(offset)[0]
+            if other not in others:
+                others.append(other)
+        shown = ", ".join(str(n) for n in others[:_R08_LINES_SHOWN])
+        more = f" and {len(others) - _R08_LINES_SHOWN} more" if len(others) > _R08_LINES_SHOWN else ""
+        where = "line" if len(others) == 1 else "lines"
+        out.append(Violation(
+            rule="RULE-08",
+            line=line_no,
+            column=col,
+            excerpt=_excerpt(line, (col - 1, col - 1 + 80)),
+            detail=(
+                f"{_PF_DOCUMENT_PREFIX}the same caveat framing is stated {len(members)} times outside a "
+                f"limitations section (\"{quote}\"; also on {where} {shown}{more}); consider cutting the "
+                "copies that add nothing, and keep the scope with every claim and summary it bounds"
+            ),
+        ))
+    out.sort(key=lambda v: (v.line, v.column))
+    return out
+
+
 # ---------- Dispatch table --------------------------------------------------
 
 
@@ -2586,4 +3388,9 @@ _DISPATCH: dict[str, Callable[..., list[Violation]]] = {
 # "mechanical". The structural RULE-A (bullet overuse) stays what `agent-style
 # review` reports under that id, and the mechanical scope the benchmark pins
 # (`EXPECTED_MECHANICAL`) does not change. RULE-03 is registered the same way.
+#
+# `_rule_12_profile` and `_rule_08_repeats` are not registered. `_DISPATCH["RULE-12"]`
+# stays the per-sentence `_rule_12` that the audit and the benchmark score, and
+# RULE-08 is semantic for the audit. A hook reaches the two new detectors by name,
+# as it reaches `_rule_03`, and passes the file path to both.
 _FILE_PATH_RULES = frozenset({"RULE-03", "RULE-A"})

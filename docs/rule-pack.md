@@ -32,7 +32,7 @@ Each rule has a severity from this four-level scale:
 > *"Break any of these rules sooner than say anything outright barbarous."*
 > — George Orwell, "Politics and the English Language" (1946), Rule 6
 
-Rules are guides to clarity, not ends in themselves. When a rule fights the sentence, drop the rule.
+Most rules here are defaults to apply with judgment. Human writers depart from any single one now and then, and that variety is part of why their prose reads as written by a person. Depart when the sentence reads better for it, not to vary the pattern. A few are firm: do not invent citations, evidence, or numbers, and do not leave placeholders in finished text. Judge a draft by its overall pattern. A draft that obeys every default in every sentence (every sentence cut under 30 words, every connective removed, every paragraph opened the same way) reads as machine-made. When a rule fights the sentence, drop the rule.
 
 ## The 12 Rules
 
@@ -123,7 +123,7 @@ LLMs trained on formal technical prose (abstracts, RFCs, corporate documentation
 
 Do not use abstract nouns when concrete ones exist. "The system has performance issues" says nothing; "the checkout endpoint p95 latency rose from 120ms to 450ms at 14:00 UTC" names what, when, and how much. Replace category words ("factors", "aspects", "considerations", "issues", "elements") with the specific items they refer to. If you reach for a category word, ask: what exactly? If the answer takes longer than one clause to give, the sentence was hiding the work.
 
-Concrete means naming the specific finding, and a table transcribed into a sentence buries it. When a table or figure holds the results, state the pattern with the magnitude a reader needs to interpret it ("halves latency at batch size 1"). Point to the display for per-item scores, intervals, and p-values. A caption names what the display shows, the pattern to read from it, and what a reader needs to decode it, such as error bars or reference lines. Repeated results, setup narration, and caveats go to the text or an appendix. Round each magnitude to the precision the claim needs ("about a third", "under one point"). Do not stack precise figures in consecutive sentences; after a sentence that carries them, say what they mean. An abstract or introduction carries the fewest numbers of any section: the few magnitudes behind the main findings, and no intervals or p-values. When uncertainty changes the interpretation, state it beside the estimate ("within noise"), and do not call an inconclusive difference a gain. Keep numbers that change the claim, that the reader acts on, or that no display holds.
+Concrete means naming the specific finding, and a table transcribed into a sentence buries it. When a table or figure holds the results, state the pattern early, with the magnitude a reader needs to interpret it ("halves latency at batch size 1"). Point to the display for per-item scores, intervals, and p-values. A caption names what the display shows, the pattern to read from it, and what a reader needs to decode it, such as error bars or reference lines. Repeated results, setup narration, and caveats go to the text or an appendix. Round each magnitude to the precision the claim needs ("about a third", "under one point"). Do not stack precise figures in consecutive sentences; after a sentence that carries them, say what they mean for the reader (faster, cheaper, more accurate). An abstract or introduction carries the fewest numbers of any section: the few magnitudes behind the main findings, and no intervals or p-values. When uncertainty changes the interpretation, say so beside the estimate in plain words ("within noise", "consistent across seeds") rather than by citing standard deviations or confidence intervals. Do not call an inconclusive difference a gain, even with a caveat attached. Report a difference in points or percent ("6 points of AUC", "about 11% lower error"), not as a raw decimal the reader must convert, and keep one unit and sign convention across text, tables, and captions. Keep numbers that change the claim or that the reader acts on. When several figures matter and no display holds them, add a table (in an appendix if space is short) and point to it. Before cutting a figure from a sentence, check that a display holds it; an appendix that serves as the record keeps exact values.
 
 ##### BAD → GOOD
 
@@ -167,6 +167,8 @@ Abstracts and introductions show the failure most. In a 2026 blind comparison, t
 
 Captions and results paragraphs carry the same transcription. Against 169 captions from twelve pre-2023 human-written papers, the 345 captions of 2026 agent-assisted drafts ran twice as long at the median (55 words against 26). One in eight draft captions carried three or more precise figures, against fewer than one in fifty human captions. In body prose, none of 1,306 human paragraphs stacked figures across three consecutive sentences; 52 of 1,992 draft paragraphs did. A caption labels the display: it says what is plotted, what to look for, and how to read the marks, and the display holds the results.
 
+A result that no display holds invites a stack of figures in the paragraph, because no table exists to point to. The remedy is the table, placed in an appendix when space is short, with the paragraph pointing to it. Two further habits make a headline number hard to read. One is a gain stated without its base rate or relative size. Without it, the reader cannot tell a large effect from a small one. The other is a unit or sign that changes between text and table, such as a 2-point gain in the text that reads 0.02 in the table. A reader who has to reconcile the two stops trusting both.
+
 #### RULE-04: Do Not Include Needless Words
 
 - **source**: Strunk & White §II.17: *"Omit needless words. Vigorous writing is concise."* Orwell 1946 Rule 3: *"If it is possible to cut a word out, always cut it out."*
@@ -177,7 +179,7 @@ Captions and results paragraphs carry the same transcription. Against 169 captio
 
 ##### Directive
 
-Do not stretch phrases. "In order to" is "to"; "due to the fact that" is "because"; "at this point in time" is "now"; "it is important to note that" is (delete and state the fact); "may potentially" and "could possibly" are redundant hedges (use "may" or "could", not both). Every filler phrase signals to the reader that substance is about to arrive; delete the phrase and let the substance arrive directly.
+Do not stretch phrases. "In order to" is "to"; "due to the fact that" is "because"; "at this point in time" is "now"; "it is important to note that" is (delete and state the fact); "may potentially" and "could possibly" are redundant hedges (use "may" or "could", not both).
 
 ##### BAD → GOOD
 
@@ -201,7 +203,7 @@ Do not stretch phrases. "In order to" is "to"; "due to the fact that" is "becaus
 
 ##### Rationale for AI Agent
 
-LLM training rewards formal-sounding, hedge-laden completions because they sit closer to the modal output of the training corpus (press releases, whitepapers, academic abstracts, corporate documentation) than terse technical writing does. The specific filler phrases ("in order to", "due to the fact that", "it is important to note", "may potentially", "could possibly") are consensus cliché of that register. They lengthen sentences without carrying information. Human readers skim past them and infer the writer had little to say; downstream consumers (search indices, RAG pipelines, summarization chains) also suffer from the diluted signal-per-token ratio. The exact-phrase deny list is mechanically enforceable (Tier-1) because these phrases have no legitimate technical function: "in order to" is always replaceable by "to" with no loss of meaning, so denying the phrase outright has near-zero false-positive risk. Strunk & White §II.17 gives the principle; Orwell 1946 Rule 3 gives the cut-if-possible operational test.
+LLM training rewards formal-sounding, hedge-laden completions because they sit closer to the modal output of the training corpus (press releases, whitepapers, academic abstracts, corporate documentation) than terse technical writing does. The specific filler phrases ("in order to", "due to the fact that", "it is important to note", "may potentially", "could possibly") are consensus cliché of that register. They lengthen sentences without carrying information. Every filler phrase signals to the reader that substance is about to arrive; deleting the phrase lets the substance arrive directly. Human readers skim past them and infer the writer had little to say; downstream consumers (search indices, RAG pipelines, summarization chains) also suffer from the diluted signal-per-token ratio. The exact-phrase deny list is mechanically enforceable (Tier-1) because these phrases have no legitimate technical function: "in order to" is always replaceable by "to" with no loss of meaning. Denying the phrase outright therefore has near-zero false-positive risk. Strunk & White §II.17 gives the principle; Orwell 1946 Rule 3 gives the cut-if-possible operational test.
 
 #### RULE-05: Do Not Use Dying Metaphors or Prefabricated Phrases
 
@@ -249,7 +251,7 @@ LLMs trained on web text — press releases, blog posts, grant introductions, pa
 
 ##### Directive
 
-Do not use "leverage" where "use" fits. Do not use "utilize" where "use" fits. Do not use "methodology" where "method" fits. Do not use "functionality" where "function" or "feature" fits. Reserve the longer word for when it carries information the shorter word does not. Technical jargon with distinct meaning ("backpropagation", "quantization", "deserialization") is fine and often necessary. Corporate-speak jargon ("leverage", "utilize", "operationalize") is substitutable by shorter everyday words without loss of meaning.
+Do not use "leverage" where "use" fits. Do not use "utilize" where "use" fits. Do not use "methodology" where "method" fits. Do not use "functionality" where "function" or "feature" fits. Reserve the longer word for when it carries information the shorter word does not. Technical jargon with distinct meaning ("backpropagation", "quantization", "deserialization") is fine and often necessary.
 
 ##### BAD → GOOD
 
@@ -273,7 +275,7 @@ Do not use "leverage" where "use" fits. Do not use "utilize" where "use" fits. D
 
 ##### Rationale for AI Agent
 
-LLMs reproduce the corporate-technical register disproportionately because it is over-represented in training corpora (whitepapers, blog posts, grant abstracts, vendor documentation). Words like "leverage", "utilize", "operationalize", "methodology", "functionality" do not carry more information than "use", "use", "start", "method", "feature"; they signal a register rather than refine meaning. Readers experienced in technical prose mentally substitute the shorter word as they read, which means the longer word has bought nothing and has cost reading time. The rule does not ban polysyllabic terms outright. Technical terms with distinct meaning are fine and necessary. The rule bans substitutions where a shorter everyday word carries the same information and the longer word adds only register.
+LLMs reproduce the corporate-technical register disproportionately because it is over-represented in training corpora (whitepapers, blog posts, grant abstracts, vendor documentation). Words like "leverage", "utilize", "operationalize", "methodology", "functionality" do not carry more information than "use", "use", "start", "method", "feature"; they signal a register rather than refine meaning. Corporate-speak jargon ("leverage", "utilize", "operationalize") is substitutable by shorter everyday words without loss of meaning. Readers experienced in technical prose mentally substitute the shorter word as they read, which means the longer word has bought nothing and has cost reading time. The rule does not ban polysyllabic terms outright. Technical terms with distinct meaning are fine and necessary. The rule bans substitutions where a shorter everyday word carries the same information and the longer word adds only register.
 
 ### Claims and Calibration
 
@@ -420,7 +422,7 @@ LLMs often produce lists where the first one or two items set a structure, then 
 
 ##### Directive
 
-Keep subject close to verb, verb close to object, and modifier close to modified. When a long parenthetical or relative clause must appear between subject and verb, move the clause to the end of the sentence or split into two sentences. The operational test: count words between subject and verb; if the gap exceeds 8, split. Readers hold the subject in working memory until the verb arrives; every intervening clause costs memory slots and increases misparsing risk.
+Keep subject close to verb, verb close to object, and modifier close to modified. When a long parenthetical or relative clause must appear between subject and verb, move the clause to the end of the sentence or split into two sentences. The operational test: count words between subject and verb; if the gap exceeds 8, split.
 
 ##### BAD → GOOD
 
@@ -441,7 +443,7 @@ Keep subject close to verb, verb close to object, and modifier close to modified
 
 ##### Rationale for AI Agent
 
-LLMs generate text token-by-token conditional on prior context, which encourages completeness (every qualifier added inline) over readability (qualifiers deferred until the main clause lands). The result: sentences where the subject and verb are separated by 20+ words of parenthetical qualification. Readers experience this as working-memory overflow. By the time the verb arrives, the reader has lost the subject and must backtrack. The same logic applies to verb-object and modifier-modified pairs. Gopen & Swan 1990 frame long subject-to-verb gaps as one of the most common causes of unreadable scientific prose; Strunk & White §II.20 give the principle in general form. For AI generation specifically, the practical remedy is to split the sentence: the main claim lands in the first sentence, supporting qualifications follow in a second sentence.
+LLMs generate text token-by-token conditional on prior context, which encourages completeness (every qualifier added inline) over readability (qualifiers deferred until the main clause lands). The result: sentences where the subject and verb are separated by 20+ words of parenthetical qualification. Readers hold the subject in working memory until the verb appears. Every intervening clause costs memory slots and raises the risk of misparsing. A long enough gap overflows working memory: the reader has lost the subject by the time the verb arrives and must backtrack. The same logic applies to verb-object and modifier-modified pairs. Gopen & Swan 1990 frame long subject-to-verb gaps as one of the most common causes of unreadable scientific prose; Strunk & White §II.20 give the principle in general form. For AI generation specifically, the practical remedy is to split the sentence: the main claim lands in the first sentence, supporting qualifications follow in a second sentence.
 
 #### RULE-11: Place New or Important Information in the Stress Position at the End of the Sentence
 
@@ -476,17 +478,17 @@ End sentences with the information you want the reader to remember. The beginnin
 
 Gopen & Swan 1990 show empirically (American Scientist study of sentence clarity) that readers unconsciously expect the stress position for new information. When a sentence front-loads the new information and tails off into background, readers experience the sentence as flat and re-read to recover the claim. LLMs often produce the BAD pattern because token-by-token generation rewards completing the sentence with whatever is most fluent, frequently a prepositional phrase that restates topic material already established rather than introducing new information. The operational rewrite: identify the sentence's key claim, then rebuild the sentence so that the claim lands at the end. For multi-sentence units (paragraphs), the same logic applies at the paragraph level: the opening sentence frames; the final sentence lands the main point; middle sentences support.
 
-#### RULE-12: Break Long Sentences; Vary Length (Split Sentences over 30 Words)
+#### RULE-12: Break Long Sentences; Vary Length
 
 - **source**: Strunk & White §II.18 (arrangement of sentences; varied length across a paragraph). Pinker 2014 Ch. 4 (syntax and working-memory limits; long sentences with nested clauses tax the reader's parsing budget).
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; RULE-12 carries a positive directive because sentence-splitting and length-variation are constructive structural choices rather than anti-patterns to flag. Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow.
-- **severity**: high. Long sentences are a recurring AI tell and a recurring clarity failure; time-constrained technical readers (on-call engineers, reviewers, release-note skimmers) cannot parse 40+ word sentences reliably.
+- **severity**: high. A sentence that holds several clauses open before its point is a recurring clarity failure for time-constrained technical readers (on-call engineers, reviewers, release-note skimmers). A draft in which every sentence is cut short reads clipped, which is a tell of its own.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
-- **enforcement**: Tier-1 `ask` (sentence > 30 words; suggest split) + Tier-2 variance-of-sentence-length metric + Tier-3 agent self-check.
+- **enforcement**: Tier-1 `ask` (sentence > 30 words; suggest split) + Tier-2 variance-of-sentence-length metric + Tier-3 agent self-check. The CLI detector keeps its fixed 30-word threshold so that bench results stay comparable across releases. A hook that imports the detectors, such as the anywhere-agents guard, runs a document-level profile in its place. The profile reports a departure from the human range and leaves an ordinary long sentence unflagged.
 
 ##### Directive
 
-Split any sentence over 30 words into two or more sentences. Vary sentence length across a paragraph: a paragraph of five 25-word sentences reads less well than the same content in sentences of 8, 18, 22, 14, 30 words. Short sentences land points; long sentences carry qualification and detail. A paragraph that does only one of these reads as monotone. When a long sentence is unavoidable (single logical unit that resists splitting), make the previous and following sentences short to balance.
+Vary sentence length: short sentences land points, and long ones carry a claim with its conditions. Split a sentence when the reader must hold more than one open clause to reach its point. A long sentence that carries one connected thought can stay, and a draft with no long sentences reads clipped. Paragraphs of only short or only long sentences read as monotone.
 
 ##### BAD → GOOD
 
@@ -505,13 +507,18 @@ Split any sentence over 30 words into two or more sentences. Vary sentence lengt
 - BAD (changelog, monotone): `This release adds support for OAuth 2.0 device flow authentication. This release also adds a new audit log for all API requests. This release introduces rate limiting on the free tier at 100 requests per minute. This release fixes a crash in CSV export when a cell contains an embedded newline.`
 - GOOD (varied): `OAuth 2.0 device flow authentication ships in this release. A new audit log now captures all API requests. Free-tier clients see rate limiting at 100 req/min. CSV export no longer crashes on cells containing embedded newlines.`
 
+- BAD (paper, clipped: every sentence under 12 words): `Prefetching cuts tail latency on the read-heavy trace. This holds only with a large cache. The cache must hold a tenth of the working set. A smaller cache evicts prefetched blocks. The application has not read them yet.`
+- GOOD (34 words, one connected thought): `Prefetching cuts tail latency on the read-heavy trace, but only when the cache holds at least a tenth of the working set, because a smaller cache evicts prefetched blocks before the application reads them.`
+
 ##### Rationale for AI Agent
 
-LLM decoding rewards well-formed completions; the next-token objective encourages sentences to continue with qualifications rather than stop and restart. The result is a tendency toward 30+ word sentences with multiple subordinate clauses. Readers, especially time-constrained readers of technical prose, read in chunks; chunks larger than working-memory capacity cause comprehension failure and re-reading. Short sentences also carry emphasis that long sentences dilute; a paragraph that never shifts sentence length reads as a flat surface, and the reader skims over the points that were meant to land. The operational guide for AI generation: after drafting, count words per sentence in each paragraph of technical prose; split anything over 30 words; vary lengths across the paragraph (no five similarly-sized sentences in a row). Pinker 2014 Ch. 4 frames the syntax/working-memory tradeoff; Strunk & White §II.18 give the variation principle.
+LLM decoding rewards well-formed completions; the next-token objective encourages sentences to continue with qualifications rather than stop and restart. The result is a tendency toward 30+ word sentences with multiple subordinate clauses. Readers, especially time-constrained readers of technical prose, read in chunks; chunks larger than working-memory capacity cause comprehension failure and re-reading. Short sentences also carry emphasis that long sentences dilute; a paragraph that never shifts sentence length reads as a flat surface, and the reader skims over the points that were meant to land. The operational guide for AI generation: after drafting, check each sentence over 30 words in a paragraph of technical prose. Split it when the reader must hold more than one open clause to reach its point, and keep one that carries a single connected thought. Vary lengths across the paragraph (no five similarly-sized sentences in a row). Pinker 2014 Ch. 4 frames the syntax/working-memory tradeoff; Strunk & White §II.18 give the variation principle.
+
+A fixed cap has a failure of its own. An agent that treats 30 words as a hard limit cuts every sentence short and strips the connectives that held its clauses together. The prose then reads clipped. In the twelve pre-2023 human-written papers I measured on their LaTeX sources, about one sentence in six ran past 30 words (10% to 35% across the papers). The number of open clauses taxes the reader, and word count only approximates it.
 
 ## The 9 Field-Observed Rules
 
-The nine rules RULE-A through RULE-I name patterns I saw recur in LLM output across dozens of writing projects and code releases, 2022 to 2026. No cited writing authority supplies them. They bind as fully as the 12 canonical rules.
+The nine rules RULE-A through RULE-I name patterns I saw recur in LLM output across dozens of writing projects and code releases, 2022 to 2026. No cited writing authority supplies them. They carry the same weight as the 12 canonical rules.
 
 ### Observed LLM Patterns
 
@@ -605,7 +612,7 @@ Tables invite the same failure in another shape. Asked to organize a comparison,
 
 #### RULE-B: Do Not Use Em or En Dashes as Casual Sentence Punctuation
 
-- **source**: My observation of LLM output across dozens of writing projects and code releases, 2022–2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Avoid heavy dash use. Do not use em dashes or en dashes as casual sentence punctuation. Prefer commas, semicolons, colons, or parentheses instead."
+- **source**: My observation of LLM output across dozens of writing projects and code releases, 2022–2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Do not use em or en dashes as casual sentence punctuation; prefer commas, colons, parentheses, or a new sentence; keep semicolons rare."
 - **agent-instruction evidence**: Zhang et al. 2026 supports negative phrasing for anti-pattern directives in coding-agent instruction files; the dash-as-punctuation regex flag is our separate mechanical enforcement choice (Zhang does not validate mechanical enforcement). Bohr 2025 supports pairing directives with examples for stronger initial style control over a paired two-turn code-generation workflow (not open-ended prose).
 - **severity**: medium. Recurring and externally visible AI-tell; LLMs produce em dashes at substantially higher rates than skilled human technical writers, producing a cadence that human readers recognize as AI-paced.
 - **scope**: `.md`, `.tex`, `.rst`, `.txt`, and prose sections of source files.
@@ -613,7 +620,7 @@ Tables invite the same failure in another shape. Asked to organize a comparison,
 
 ##### Directive
 
-Do not use em dashes or en dashes as casual sentence punctuation. Prefer commas for appositives, semicolons for linked independent clauses, colons for expansions, and parentheses for asides. En dashes remain correct in numeric ranges (`1-3`, `2020-2026`), paired names ("the Stein-Strömberg theorem"), and bibliographic page ranges. Normal hyphens in compound words and technical terms (`command-line`, `co-PI`, `zero-shot`) are not dashes and should not be flagged.
+Do not use em dashes or en dashes as casual sentence punctuation. Prefer commas for appositives, colons for expansions, and parentheses for asides. Vary how independent clauses join: a period, a comma with "and", "but", or "while", or a semicolon for two clauses too closely tied to stand apart. Keep semicolons sparing, and do not turn every one into a period; a run of short sentences reads as clipped. En dashes remain correct in numeric ranges (`1-3`, `2020-2026`), paired names ("the Stein-Strömberg theorem"), and bibliographic page ranges. Normal hyphens in compound words and technical terms (`command-line`, `co-PI`, `zero-shot`) are not dashes and should not be flagged.
 
 ##### BAD → GOOD
 
@@ -636,6 +643,8 @@ Do not use em dashes or en dashes as casual sentence punctuation. Prefer commas 
 
 LLMs absorb the em dash as a favored connector from long-form journalism and essay prose (the register of magazine essays and essay-heavy blogs), where it carries rhythm and emphasis. In dense technical prose, every em dash is a pause the reader must hold in working memory while the parenthetical completes; two em dashes per sentence approach the working-memory ceiling for most readers. The recent public awareness of em dash overuse as an AI-tell is partly because LLMs produce them at several times the rate of skilled human technical writers, producing a cadence human readers recognize as AI-paced. Commas, semicolons, colons, and parentheses each carry a clearer semantic signal (list-separator, independent-clause break, expansion, aside); replacing em dashes with the punctuation that actually matches the relationship makes the sentence's logical structure explicit rather than rhythm-dependent. Normal hyphenation in compound words and technical terms remains correct; the rule targets dashes acting as punctuation, not hyphens joining words.
 
+Semicolons need the same care. A directive that offers the semicolon as the dash's replacement invites more of them. Agent-assisted drafts I measured in 2026 used semicolons at or above the top of the human range. That range runs from none to about four per 1,000 words in the twelve pre-2023 papers I measured. A period separates two independent clauses without the extra weight. The semicolon is kept for a pair of clauses that would lose their link if split.
+
 #### RULE-C: Do Not Start Consecutive Sentences with the Same Word or Phrase
 
 - **source**: My observation of LLM output across dozens of writing projects and code releases, 2022–2026. Adjacent to `agent-config` / `anywhere-agents` AGENTS.md Formatting Defaults: "Prefer not to start several consecutive sentences with the same word or phrase."
@@ -646,7 +655,7 @@ LLMs absorb the em dash as a favored connector from long-form journalism and ess
 
 ##### Directive
 
-Do not open two or more consecutive sentences with the same word. The pattern signals a drafting template that the generation process locked into (often `This ... This ... This ...`, `The ... The ... The ...`, or `We ... We ... We ...`). Vary the opener: topic-fronted versus subject-fronted versus connective. Pronoun subjects (`It`, `We`, `They`) are the most common offenders in LLM output because the model samples the next sentence conditional on the topic and re-picks the most fluent subject.
+Do not open two or more consecutive sentences with the same word (often `This ... This ... This ...`, `The ... The ... The ...`, or `We ... We ... We ...`). Vary the opener: topic-fronted versus subject-fronted versus connective. Pronoun subjects (`It`, `We`, `They`) are the most common offenders in LLM output.
 
 ##### BAD → GOOD
 
@@ -667,7 +676,7 @@ Do not open two or more consecutive sentences with the same word. The pattern si
 
 ##### Rationale for AI Agent
 
-LLMs producing text token-by-token often lock into a successful opener and repeat it. Once `The method ...` works, the next-token distribution for the following sentence frequently starts with `The method ...` again because the prefix has become conditionally likely given the topic. The result: paragraphs with three or four identically-opened sentences. Human readers read these as template-filled rather than argued; even when the content is correct, the form signals a machine pattern. The fix at generation time: after a sentence is drafted, the next sentence's opener should vary, either by moving the new information to the subject position, combining the two sentences, or using a connective. This rule interacts with RULE-12 (sentence length variation); both aim at paragraph-level rhythm.
+LLMs producing text token-by-token often lock into a successful opener and repeat it. Once `The method ...` works, the next-token distribution for the following sentence frequently starts with `The method ...` again because the prefix has become conditionally likely given the topic. The result: paragraphs with three or four identically-opened sentences. The pattern signals a drafting template that the generation process locked into. Pronoun subjects are the most common offenders because the model samples the next sentence conditional on the topic and re-picks the most fluent subject. Human readers read these as template-filled rather than argued; even when the content is correct, the form signals a machine pattern. The fix at generation time: after a sentence is drafted, the next sentence's opener should vary, either by moving the new information to the subject position, combining the two sentences, or using a connective. This rule interacts with RULE-12 (sentence length variation); both aim at paragraph-level rhythm.
 
 #### RULE-D: Do Not Overuse Transition Words ("Additionally", "Furthermore", "Moreover")
 
@@ -679,9 +688,12 @@ LLMs producing text token-by-token often lock into a successful opener and repea
 
 ##### Directive
 
-Do not open sentences with "Additionally", "Furthermore", "Moreover", "In addition", "What's more", or "Notably" unless the sentence genuinely builds on the preceding clause in a way that a period or `And` would not convey. In most cases, a period ends the prior sentence and the next sentence makes the connection by content alone. Reserve explicit transitions for the rare case where the logical move (addition, contrast, concession) needs to be flagged for the reader.
+Do not open sentences with "Additionally", "Furthermore", "Moreover", "In addition", "What's more", or "Notably" when the word only announces another point. A period or `And` carries the same addition. Keep the words that mark a relation the text already establishes: contrast ("However", "Instead"), cause ("Thus", "Therefore"), sequence ("First", "Then"). A cause word is itself a claim. Do not add a reason, mechanism, or recommendation that the evidence does not show just to join two sentences.
 
 ##### BAD → GOOD
+
+- BAD (paper, additive openers on a contrast): `Batching raises throughput on the large model. Additionally, it lowers throughput on the small model. Furthermore, it adds queueing delay on both.`
+- GOOD (paper, the contrast word stays): `Batching raises throughput on the large model. However, it lowers throughput on the small model and adds queueing delay on both.`
 
 - BAD (paper): `The model outperforms BM25 on MS MARCO. Additionally, it outperforms DPR on Natural Questions. Furthermore, it reaches state-of-the-art on BEIR.`
 - GOOD (paper): `The model outperforms BM25 on MS MARCO and DPR on Natural Questions, and reaches state-of-the-art on BEIR.`
@@ -700,7 +712,7 @@ Do not open sentences with "Additionally", "Furthermore", "Moreover", "In additi
 
 ##### Rationale for AI Agent
 
-LLM training on formal essay corpora (academic prose, Wikipedia, editorial writing) over-represents explicit transitions. "Additionally", "Furthermore", "Moreover" appear at higher frequency in LLM output than in skilled technical prose, producing the distinctive sentence-initial cadence AI-generated text is recognized by. The fix: connective tissue should usually be implicit (the next sentence is obviously an addition because of its content) rather than marked. Explicit transitions remain legitimate where the logical move is non-obvious, or where a paragraph-level contrast needs flagging for the reader. Related: RULE-04 catches word-level filler phrases ("in order to", "due to the fact that"); RULE-D catches the specific sentence-initial transition pattern that RULE-04's phrase list does not target. Both rules cut needless words; they target different positions in the sentence.
+LLM training on formal essay corpora (academic prose, Wikipedia, editorial writing) over-represents explicit transitions. "Additionally", "Furthermore", "Moreover" appear at higher frequency in LLM output than in skilled technical prose, producing the distinctive sentence-initial cadence AI-generated text is recognized by. The fix is selective. Additive openers announce another point without saying how it relates to the last one. They go, and a period or `And` does their work. The words that name a relation stay: contrast, cause, and sequence. In the twelve pre-2023 human-written papers I measured, sentence-initial relation words such as "However", "Thus", "Instead", and "First" ran from about one to six per 1,000 words. Agent-assisted drafts I measured in 2026 used almost none. The reader had to infer whether a sentence contrasted with the last, followed from it, or came after it. A relation word belongs only where the relation holds, because "Thus" asserts a cause that the text may not have. Related: RULE-04 catches word-level filler phrases ("in order to", "due to the fact that"); RULE-D catches the specific sentence-initial transition pattern that RULE-04's phrase list does not target. Both rules cut needless words; they target different positions in the sentence.
 
 #### RULE-E: Do Not Close Every Paragraph with a Summary Sentence
 
@@ -745,7 +757,7 @@ LLMs often add paragraph-closing summaries because academic and expository corpo
 
 ##### Directive
 
-Once you introduce a term or abbreviation, keep using it. Do not alternate "large language model", "LLM", "language model", "LM", "neural language model", "foundation model" as synonyms for the same thing. Do not redefine an abbreviation: if `LLM` was defined as `large language model` in the introduction, do not expand it again in section 3. For the reader, a consistent term signals "this is the same concept I saw earlier"; varied terms signal "I should check whether this is something new."
+Once you introduce a term or abbreviation, keep using it. Do not alternate "large language model", "LLM", "language model", "LM", "neural language model", "foundation model" as synonyms for the same thing. Do not redefine an abbreviation: if `LLM` was defined as `large language model` in the introduction, do not expand it again in section 3.
 
 ##### BAD → GOOD
 
@@ -766,7 +778,7 @@ Once you introduce a term or abbreviation, keep using it. Do not alternate "larg
 
 ##### Rationale for AI Agent
 
-LLMs often vary terminology within a document because variety is mildly rewarded in the training distribution (reviewers and editors mark repetitive vocabulary as prose to be varied, and LLMs learn to alternate). But in technical writing, variety across terminology for the same entity masks the entity's identity and forces the reader to check whether each new term refers to the same concept. RULE-01 covers the first-use introduction of terms; RULE-F covers keeping them consistent thereafter. Gopen & Swan 1990 discuss this under "topic continuity", where subjects and entities should reappear as the same linguistic form across sentences. For documents produced in multi-turn generation, the risk is especially high because the model samples each new paragraph without guaranteed visibility into earlier-introduced terms, leading to drift. The fix at generation time: after defining a term, the agent should maintain a running glossary for the document and re-use the defined form consistently.
+LLMs often vary terminology within a document because variety is mildly rewarded in the training distribution (reviewers and editors mark repetitive vocabulary as prose to be varied, and LLMs learn to alternate). But in technical writing, variety across terminology for the same entity masks the entity's identity and forces the reader to check whether each new term refers to the same concept. For the reader, a consistent term signals "this is the same concept I saw earlier"; varied terms signal "I should check whether this is something new." RULE-01 covers the first-use introduction of terms; RULE-F covers keeping them consistent thereafter. Gopen & Swan 1990 discuss this under "topic continuity", where subjects and entities should reappear as the same linguistic form across sentences. For documents produced in multi-turn generation, the risk is especially high because the model samples each new paragraph without guaranteed visibility into earlier-introduced terms, leading to drift. The fix at generation time: after defining a term, the agent should maintain a running glossary for the document and re-use the defined form consistently.
 
 #### RULE-G: Use Title Case for Section and Subsection Headings
 
@@ -778,7 +790,7 @@ LLMs often vary terminology within a document because variety is mildly rewarded
 
 ##### Directive
 
-Capitalize the first word, the last word, and all major words (nouns, verbs, adjectives, adverbs, pronouns) in section and subsection headings. Lowercase articles (`a`, `an`, `the`), coordinating conjunctions (`and`, `but`, `or`, `nor`), and short prepositions (`of`, `in`, `on`, `to`, `for`, `by`, `at`, `with`). This applies in Markdown (H1 through H6), LaTeX (`\section`, `\subsection`, `\subsubsection`), reStructuredText, and similar structural-heading surfaces. Does not apply to sentence-style titles (question-form headings or full-sentence article titles where sentence case is intended).
+Capitalize the first word, the last word, and all major words (nouns, verbs, adjectives, adverbs, pronouns) in section and subsection headings. Lowercase articles (`a`, `an`, `the`), coordinating conjunctions (`and`, `but`, `or`, `nor`), and short prepositions (`of`, `in`, `on`, `to`, `for`, `by`, `at`, `with`). This applies in Markdown (H1 through H6), LaTeX (`\section`, `\subsection`, `\subsubsection`), reStructuredText, and similar structural-heading surfaces. Does not apply to sentence-style titles (question-form headings or full-sentence article titles where sentence case is intended). A full sentence used as a bold run-in paragraph lead takes sentence case, as in `**Caching halves latency at small batch sizes.**`; title case stays for section and subsection headings.
 
 ##### BAD → GOOD
 
@@ -797,9 +809,14 @@ Capitalize the first word, the last word, and all major words (nouns, verbs, adj
 - BAD: `## Evaluating on out-of-distribution data`
 - GOOD: `## Evaluating on Out-of-Distribution Data`
 
+- BAD (bold run-in paragraph lead, a full sentence in title case): `**Caching Halves Latency at Small Batch Sizes.** At batch size 1 the cache removes most of the model load time, and the gap closes as batches grow.`
+- GOOD (sentence case): `**Caching halves latency at small batch sizes.** At batch size 1 the cache removes most of the model load time, and the gap closes as batches grow.`
+
 ##### Rationale for AI Agent
 
 LLMs default to sentence case for Markdown and LaTeX headings because their training data includes a substantial amount of modern blog and docs-site Markdown where sentence case is the convention (large platform developer documentation and docs-site prose). But academic and engineering venues (most conferences, most IEEE and ACM journals, most research groups' README conventions) use title case. A document with sentence-case headings inside a title-case context reads as machine-generated or unedited. The fix is mechanical: apply title case at heading write time. This rule is low-severity in terms of comprehension (readers recover meaning regardless) but high-visibility in terms of AI-tell detection, because headings are the first thing a skimmer sees, and miscased headings signal inattention.
+
+An agent can stretch the rule from headings to every bold phrase. A bold run-in lead that is a full sentence states a finding, and in title case it reads as a label. In the twelve pre-2023 human-written papers I compared, such leads, where present, used sentence case. Agent-assisted drafts I measured in 2026 set many of them in title case. The directive therefore limits title case to headings.
 
 #### RULE-H: Support Factual Claims with Citation or Concrete Evidence; Do Not Be Handwavy
 
@@ -847,7 +864,7 @@ LLMs produce handwavy, citation-free claims as a default register absorbed from 
 
 ##### Directive
 
-In formal technical prose (research papers, grant proposals, API specifications, technical documentation), prefer "it is" over "it's", "does not" over "doesn't", "cannot" over "can't", "will not" over "won't", "I am" over "I'm", "you are" over "you're". Contractions are acceptable in informal registers (blog posts, release notes, commit messages, casual documentation), but even there, be deliberate: a contraction sets a register, and if the surrounding prose is formal, the contraction reads as a tonal break. The operational test: if the surrounding sentences use full forms, the contraction stands out; if the surrounding sentences use contractions, the full form stands out. Pick the register and hold it within the document.
+In formal technical prose (research papers, grant proposals, API specifications, technical documentation), prefer "it is" over "it's", "does not" over "doesn't", "cannot" over "can't", "will not" over "won't", "I am" over "I'm", "you are" over "you're". Contractions are acceptable in informal registers (blog posts, release notes, commit messages, casual documentation). Pick the register and hold it within the document.
 
 ##### BAD → GOOD
 
@@ -868,4 +885,4 @@ In formal technical prose (research papers, grant proposals, API specifications,
 
 ##### Rationale for AI Agent
 
-LLMs produce contractions in technical prose at higher rates than skilled human writers do, because the training corpus mixes formal registers (papers, specifications, government documents) and informal registers (blog posts, forum answers, release notes), and LLMs sample across them without register-matching the surrounding prose. The effect: within a single formal paragraph, one or two contractions appear where a careful writer would have used full forms. Contractions are not wrong; they are register markers. In formal technical prose (the target scope of this ruleset), full forms are the expected register. In informal surfaces (release notes, blog posts, commit messages), contractions are acceptable and sometimes preferred for voice. The rule is about consistency with the surrounding register: pick one and hold it within a document, rather than drifting mid-paragraph.
+LLMs produce contractions in technical prose at higher rates than skilled human writers do, because the training corpus mixes formal registers (papers, specifications, government documents) and informal registers (blog posts, forum answers, release notes), and LLMs sample across them without register-matching the surrounding prose. The effect: within a single formal paragraph, one or two contractions appear where a careful writer would have used full forms. Contractions are not wrong; they are register markers. A contraction sets a register, and if the surrounding prose is formal, the contraction reads as a tonal break. The operational test: if the surrounding sentences use full forms, the contraction stands out; if the surrounding sentences use contractions, the full form stands out. In formal technical prose (the target scope of this ruleset), full forms are the expected register. Informal surfaces (release notes, blog posts, commit messages) accept contractions and sometimes prefer them for voice. The rule is about consistency with the surrounding register: pick one and hold it within a document, rather than drifting mid-paragraph.

@@ -2,23 +2,14 @@
 
 # The Elements of Agent Style — Rules
 
-This is the compact render of the agent-style rule pack. Each rule shows the directive and one illustrative BAD → GOOD pair. The full reference (5+ BAD/GOOD pairs per rule, agent-instruction evidence, severity classification, and rationale) lives in `rule-pack.md` (alias of repo-root `RULES.md`) at the same release.
-
-## Severity Rubric
-
-Each rule has a severity from this four-level scale:
-
-- **critical** — reader cannot understand or trust the prose if the rule is violated.
-- **high** — externally visible AI-tell, or a recurring clarity failure that breaks skim-reading.
-- **medium** — local readability cost, felt by the reader but not a trust issue.
-- **low** — polish or preference; flagged for consistency rather than comprehension.
+Compact render: each rule shows its directive and one BAD → GOOD pair. The full reference (all pairs, evidence, severity, rationale) is `rule-pack.md`, an alias of repo-root `RULES.md`, at the same release.
 
 ## Escape Hatch (Meta-Principle)
 
 > *"Break any of these rules sooner than say anything outright barbarous."*
 > — George Orwell, "Politics and the English Language" (1946), Rule 6
 
-Rules are guides to clarity, not ends in themselves. When a rule fights the sentence, drop the rule.
+Most rules here are defaults to apply with judgment. Human writers depart from any single one now and then, and that variety is part of why their prose reads as written by a person. Depart when the sentence reads better for it, not to vary the pattern. A few are firm: do not invent citations, evidence, or numbers, and do not leave placeholders in finished text. Judge a draft by its overall pattern. A draft that obeys every default in every sentence (every sentence cut under 30 words, every connective removed, every paragraph opened the same way) reads as machine-made. When a rule fights the sentence, drop the rule.
 
 ## The 12 Rules
 
@@ -56,7 +47,7 @@ Do not write "X was done by Y" when "Y did X" fits. Active voice names the agent
 
 Do not use abstract nouns when concrete ones exist. "The system has performance issues" says nothing; "the checkout endpoint p95 latency rose from 120ms to 450ms at 14:00 UTC" names what, when, and how much. Replace category words ("factors", "aspects", "considerations", "issues", "elements") with the specific items they refer to. If you reach for a category word, ask: what exactly? If the answer takes longer than one clause to give, the sentence was hiding the work.
 
-Concrete means naming the specific finding, and a table transcribed into a sentence buries it. When a table or figure holds the results, state the pattern with the magnitude a reader needs to interpret it ("halves latency at batch size 1"). Point to the display for per-item scores, intervals, and p-values. A caption names what the display shows, the pattern to read from it, and what a reader needs to decode it, such as error bars or reference lines. Repeated results, setup narration, and caveats go to the text or an appendix. Round each magnitude to the precision the claim needs ("about a third", "under one point"). Do not stack precise figures in consecutive sentences; after a sentence that carries them, say what they mean. An abstract or introduction carries the fewest numbers of any section: the few magnitudes behind the main findings, and no intervals or p-values. When uncertainty changes the interpretation, state it beside the estimate ("within noise"), and do not call an inconclusive difference a gain. Keep numbers that change the claim, that the reader acts on, or that no display holds.
+Concrete means naming the specific finding, and a table transcribed into a sentence buries it. When a table or figure holds the results, state the pattern early, with the magnitude a reader needs to interpret it ("halves latency at batch size 1"). Point to the display for per-item scores, intervals, and p-values. A caption names what the display shows, the pattern to read from it, and what a reader needs to decode it, such as error bars or reference lines. Repeated results, setup narration, and caveats go to the text or an appendix. Round each magnitude to the precision the claim needs ("about a third", "under one point"). Do not stack precise figures in consecutive sentences; after a sentence that carries them, say what they mean for the reader (faster, cheaper, more accurate). An abstract or introduction carries the fewest numbers of any section: the few magnitudes behind the main findings, and no intervals or p-values. When uncertainty changes the interpretation, say so beside the estimate in plain words ("within noise", "consistent across seeds") rather than by citing standard deviations or confidence intervals. Do not call an inconclusive difference a gain, even with a caveat attached. Report a difference in points or percent ("6 points of AUC", "about 11% lower error"), not as a raw decimal the reader must convert, and keep one unit and sign convention across text, tables, and captions. Keep numbers that change the claim or that the reader acts on. When several figures matter and no display holds them, add a table (in an appendix if space is short) and point to it. Before cutting a figure from a sentence, check that a display holds it; an appendix that serves as the record keeps exact values.
 
 ##### BAD → GOOD
 
@@ -67,7 +58,7 @@ Concrete means naming the specific finding, and a table transcribed into a sente
 
 ##### Directive
 
-Do not stretch phrases. "In order to" is "to"; "due to the fact that" is "because"; "at this point in time" is "now"; "it is important to note that" is (delete and state the fact); "may potentially" and "could possibly" are redundant hedges (use "may" or "could", not both). Every filler phrase signals to the reader that substance is about to arrive; delete the phrase and let the substance arrive directly.
+Do not stretch phrases. "In order to" is "to"; "due to the fact that" is "because"; "at this point in time" is "now"; "it is important to note that" is (delete and state the fact); "may potentially" and "could possibly" are redundant hedges (use "may" or "could", not both).
 
 ##### BAD → GOOD
 
@@ -89,7 +80,7 @@ Do not use metaphors, similes, or phrases you have seen often in print. When a p
 
 ##### Directive
 
-Do not use "leverage" where "use" fits. Do not use "utilize" where "use" fits. Do not use "methodology" where "method" fits. Do not use "functionality" where "function" or "feature" fits. Reserve the longer word for when it carries information the shorter word does not. Technical jargon with distinct meaning ("backpropagation", "quantization", "deserialization") is fine and often necessary. Corporate-speak jargon ("leverage", "utilize", "operationalize") is substitutable by shorter everyday words without loss of meaning.
+Do not use "leverage" where "use" fits. Do not use "utilize" where "use" fits. Do not use "methodology" where "method" fits. Do not use "functionality" where "function" or "feature" fits. Reserve the longer word for when it carries information the shorter word does not. Technical jargon with distinct meaning ("backpropagation", "quantization", "deserialization") is fine and often necessary.
 
 ##### BAD → GOOD
 
@@ -141,7 +132,7 @@ Write coordinate ideas in the same grammatical form. In a list of three items, i
 
 ##### Directive
 
-Keep subject close to verb, verb close to object, and modifier close to modified. When a long parenthetical or relative clause must appear between subject and verb, move the clause to the end of the sentence or split into two sentences. The operational test: count words between subject and verb; if the gap exceeds 8, split. Readers hold the subject in working memory until the verb arrives; every intervening clause costs memory slots and increases misparsing risk.
+Keep subject close to verb, verb close to object, and modifier close to modified. When a long parenthetical or relative clause must appear between subject and verb, move the clause to the end of the sentence or split into two sentences. The operational test: count words between subject and verb; if the gap exceeds 8, split.
 
 ##### BAD → GOOD
 
@@ -159,11 +150,11 @@ End sentences with the information you want the reader to remember. The beginnin
 - BAD: `A 3.2-point improvement in F1 over the previous best model was demonstrated by the new architecture on the SQuAD 2.0 test set.`
 - GOOD: `On the SQuAD 2.0 test set, the new architecture improves F1 by 3.2 points over the previous best model.`
 
-#### RULE-12: Break Long Sentences; Vary Length (Split Sentences over 30 Words)
+#### RULE-12: Break Long Sentences; Vary Length
 
 ##### Directive
 
-Split any sentence over 30 words into two or more sentences. Vary sentence length across a paragraph: a paragraph of five 25-word sentences reads less well than the same content in sentences of 8, 18, 22, 14, 30 words. Short sentences land points; long sentences carry qualification and detail. A paragraph that does only one of these reads as monotone. When a long sentence is unavoidable (single logical unit that resists splitting), make the previous and following sentences short to balance.
+Vary sentence length: short sentences land points, and long ones carry a claim with its conditions. Split a sentence when the reader must hold more than one open clause to reach its point. A long sentence that carries one connected thought can stay, and a draft with no long sentences reads clipped. Paragraphs of only short or only long sentences read as monotone.
 
 ##### BAD → GOOD
 
@@ -172,7 +163,7 @@ Split any sentence over 30 words into two or more sentences. Vary sentence lengt
 
 ## The 9 Field-Observed Rules
 
-The nine rules RULE-A through RULE-I name patterns I saw recur in LLM output across dozens of writing projects and code releases, 2022 to 2026. No cited writing authority supplies them. They bind as fully as the 12 canonical rules.
+The nine rules RULE-A through RULE-I name patterns I saw recur in LLM output across dozens of writing projects and code releases, 2022 to 2026. No cited writing authority supplies them. They carry the same weight as the 12 canonical rules.
 
 ### Observed LLM Patterns
 
@@ -200,7 +191,7 @@ Keep prose in paragraphs when ideas connect by cause-and-effect, argument, or na
 
 ##### Directive
 
-Do not use em dashes or en dashes as casual sentence punctuation. Prefer commas for appositives, semicolons for linked independent clauses, colons for expansions, and parentheses for asides. En dashes remain correct in numeric ranges (`1-3`, `2020-2026`), paired names ("the Stein-Strömberg theorem"), and bibliographic page ranges. Normal hyphens in compound words and technical terms (`command-line`, `co-PI`, `zero-shot`) are not dashes and should not be flagged.
+Do not use em dashes or en dashes as casual sentence punctuation. Prefer commas for appositives, colons for expansions, and parentheses for asides. Vary how independent clauses join: a period, a comma with "and", "but", or "while", or a semicolon for two clauses too closely tied to stand apart. Keep semicolons sparing, and do not turn every one into a period; a run of short sentences reads as clipped. En dashes remain correct in numeric ranges (`1-3`, `2020-2026`), paired names ("the Stein-Strömberg theorem"), and bibliographic page ranges. Normal hyphens in compound words and technical terms (`command-line`, `co-PI`, `zero-shot`) are not dashes and should not be flagged.
 
 ##### BAD → GOOD
 
@@ -211,7 +202,7 @@ Do not use em dashes or en dashes as casual sentence punctuation. Prefer commas 
 
 ##### Directive
 
-Do not open two or more consecutive sentences with the same word. The pattern signals a drafting template that the generation process locked into (often `This ... This ... This ...`, `The ... The ... The ...`, or `We ... We ... We ...`). Vary the opener: topic-fronted versus subject-fronted versus connective. Pronoun subjects (`It`, `We`, `They`) are the most common offenders in LLM output because the model samples the next sentence conditional on the topic and re-picks the most fluent subject.
+Do not open two or more consecutive sentences with the same word (often `This ... This ... This ...`, `The ... The ... The ...`, or `We ... We ... We ...`). Vary the opener: topic-fronted versus subject-fronted versus connective. Pronoun subjects (`It`, `We`, `They`) are the most common offenders in LLM output.
 
 ##### BAD → GOOD
 
@@ -222,12 +213,12 @@ Do not open two or more consecutive sentences with the same word. The pattern si
 
 ##### Directive
 
-Do not open sentences with "Additionally", "Furthermore", "Moreover", "In addition", "What's more", or "Notably" unless the sentence genuinely builds on the preceding clause in a way that a period or `And` would not convey. In most cases, a period ends the prior sentence and the next sentence makes the connection by content alone. Reserve explicit transitions for the rare case where the logical move (addition, contrast, concession) needs to be flagged for the reader.
+Do not open sentences with "Additionally", "Furthermore", "Moreover", "In addition", "What's more", or "Notably" when the word only announces another point. A period or `And` carries the same addition. Keep the words that mark a relation the text already establishes: contrast ("However", "Instead"), cause ("Thus", "Therefore"), sequence ("First", "Then"). A cause word is itself a claim. Do not add a reason, mechanism, or recommendation that the evidence does not show just to join two sentences.
 
 ##### BAD → GOOD
 
-- BAD (paper): `The model outperforms BM25 on MS MARCO. Additionally, it outperforms DPR on Natural Questions. Furthermore, it reaches state-of-the-art on BEIR.`
-- GOOD (paper): `The model outperforms BM25 on MS MARCO and DPR on Natural Questions, and reaches state-of-the-art on BEIR.`
+- BAD (paper, additive openers on a contrast): `Batching raises throughput on the large model. Additionally, it lowers throughput on the small model. Furthermore, it adds queueing delay on both.`
+- GOOD (paper, the contrast word stays): `Batching raises throughput on the large model. However, it lowers throughput on the small model and adds queueing delay on both.`
 
 #### RULE-E: Do Not Close Every Paragraph with a Summary Sentence
 
@@ -244,7 +235,7 @@ Do not end every paragraph with a sentence that restates the paragraph's point (
 
 ##### Directive
 
-Once you introduce a term or abbreviation, keep using it. Do not alternate "large language model", "LLM", "language model", "LM", "neural language model", "foundation model" as synonyms for the same thing. Do not redefine an abbreviation: if `LLM` was defined as `large language model` in the introduction, do not expand it again in section 3. For the reader, a consistent term signals "this is the same concept I saw earlier"; varied terms signal "I should check whether this is something new."
+Once you introduce a term or abbreviation, keep using it. Do not alternate "large language model", "LLM", "language model", "LM", "neural language model", "foundation model" as synonyms for the same thing. Do not redefine an abbreviation: if `LLM` was defined as `large language model` in the introduction, do not expand it again in section 3.
 
 ##### BAD → GOOD
 
@@ -255,7 +246,7 @@ Once you introduce a term or abbreviation, keep using it. Do not alternate "larg
 
 ##### Directive
 
-Capitalize the first word, the last word, and all major words (nouns, verbs, adjectives, adverbs, pronouns) in section and subsection headings. Lowercase articles (`a`, `an`, `the`), coordinating conjunctions (`and`, `but`, `or`, `nor`), and short prepositions (`of`, `in`, `on`, `to`, `for`, `by`, `at`, `with`). This applies in Markdown (H1 through H6), LaTeX (`\section`, `\subsection`, `\subsubsection`), reStructuredText, and similar structural-heading surfaces. Does not apply to sentence-style titles (question-form headings or full-sentence article titles where sentence case is intended).
+Capitalize the first word, the last word, and all major words (nouns, verbs, adjectives, adverbs, pronouns) in section and subsection headings. Lowercase articles (`a`, `an`, `the`), coordinating conjunctions (`and`, `but`, `or`, `nor`), and short prepositions (`of`, `in`, `on`, `to`, `for`, `by`, `at`, `with`). This applies in Markdown (H1 through H6), LaTeX (`\section`, `\subsection`, `\subsubsection`), reStructuredText, and similar structural-heading surfaces. Does not apply to sentence-style titles (question-form headings or full-sentence article titles where sentence case is intended). A full sentence used as a bold run-in paragraph lead takes sentence case, as in `**Caching halves latency at small batch sizes.**`; title case stays for section and subsection headings.
 
 ##### BAD → GOOD
 
@@ -277,7 +268,7 @@ When a sentence asserts a factual claim that warrants attribution (empirical res
 
 ##### Directive
 
-In formal technical prose (research papers, grant proposals, API specifications, technical documentation), prefer "it is" over "it's", "does not" over "doesn't", "cannot" over "can't", "will not" over "won't", "I am" over "I'm", "you are" over "you're". Contractions are acceptable in informal registers (blog posts, release notes, commit messages, casual documentation), but even there, be deliberate: a contraction sets a register, and if the surrounding prose is formal, the contraction reads as a tonal break. The operational test: if the surrounding sentences use full forms, the contraction stands out; if the surrounding sentences use contractions, the full form stands out. Pick the register and hold it within the document.
+In formal technical prose (research papers, grant proposals, API specifications, technical documentation), prefer "it is" over "it's", "does not" over "doesn't", "cannot" over "can't", "will not" over "won't", "I am" over "I'm", "you are" over "you're". Contractions are acceptable in informal registers (blog posts, release notes, commit messages, casual documentation). Pick the register and hold it within the document.
 
 ##### BAD → GOOD
 

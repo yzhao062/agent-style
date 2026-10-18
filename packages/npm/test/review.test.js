@@ -2606,3 +2606,1317 @@ test('the 0.7.0 scans take odd argument types', () => {
   assert.notEqual(ruleA(raTable([`A & ${RA_WORDS(16)}`]), null), null);
   assert.equal(ruleA(raTable([`A & ${RA_WORDS(16)}`]), { toString: () => 'main.tex' }).length, 1);
 });
+
+// ---------- RULE-12 profile and RULE-08 repeats (hook-only, document level) ----------
+// Mirror of packages/pypi/tests/test_rule12_profile.py and
+// packages/pypi/tests/test_rule08_repeats.py. Every text here is synthetic: invented
+// words, generated sentence lengths. The Python cases that test Python-only plumbing
+// are left out: the `_DISPATCH` and `_FILE_PATH_RULES` identity checks (the JS
+// registries are not exported; `run` covers the same behaviour below) and the
+// benchmark-scope check, which reads scripts/bench/rescore.py.
+
+
+const {
+  run: runMechProfile,
+  rule12Profile,
+  rule08Repeats,
+  rule12ProfileScan,
+  rule08RepeatsScan,
+  r12Tuning,
+  r08Tuning,
+  r08Signature,
+  r08Similar,
+  pfDocumentPrefix,
+  _PF_DOCUMENT_PREFIX,
+  pfDocument,
+  pfEmphasisSrc,
+  pfWholeDocument,
+} = require('../lib/review/detectors_mech');
+
+const PF_WORDS = ['gadget', 'river', 'lantern', 'orchard', 'ribbon', 'harbor', 'meadow', 'copper'];
+
+function pfSentence(n, seed = 0) {
+  assert.ok(n >= 2);
+  const words = [];
+  for (let i = 0; i < n - 1; i++) words.push(PF_WORDS[(seed + i) % PF_WORDS.length]);
+  return 'The ' + words.join(' ') + '.';
+}
+
+function pfParagraphs(sentences, perParagraph = 8) {
+  const chunks = [];
+  for (let i = 0; i < sentences.length; i += perParagraph) chunks.push(sentences.slice(i, i + perParagraph).join(' '));
+  return chunks.join('\n\n') + '\n';
+}
+
+function pfTex(sentences) {
+  return '\\section{Results}\n' + pfParagraphs(sentences);
+}
+
+function pfPaper(sentences, documentclass = 'article') {
+  return (
+    `\\documentclass{${documentclass}}\n\\begin{document}\n\\section{Results}\n` +
+    pfParagraphs(sentences) +
+    '\\end{document}\n'
+  );
+}
+
+function pfMdPaper(sentences, heading = '# Abstract') {
+  return heading + '\n\n' + pfParagraphs(sentences);
+}
+
+function pfWithShare(total, longCount, longWords = 35, shortWords = 12) {
+  const out = [];
+  for (let i = 0; i < total; i++) {
+    const isLong = Math.floor((i * longCount) / total) !== Math.floor(((i + 1) * longCount) / total);
+    out.push(pfSentence(isLong ? longWords : shortWords, i));
+  }
+  assert.equal(out.filter((s) => s.split(' ').length > 30).length, longCount);
+  return out;
+}
+
+function pfLengths(text, name = 'paper.tex') {
+  return pfDocument(text, name).sentences.map((s) => s[2]);
+}
+
+function pfKindsOf(found) {
+  return found.map((v) =>
+    v.detail.includes('a sentence of') || v.detail.includes('sentences over')
+      ? 'extreme'
+      : v.detail.includes('join clauses')
+        ? 'so'
+        : 'share'
+  );
+}
+
+function pfWhole(body) {
+  return '\\documentclass{article}\n\\begin{document}\n' + body + '\n\\end{document}\n';
+}
+
+function pfOnlySo(found) {
+  return found.filter((v) => v.detail.includes('join clauses'));
+}
+
+const pfRepeat = (word, n) => Array(n).fill(word).join(' ');
+const pfWordsOf = (n, word = 'gadget') => Array(n).fill(word).join(' ');
+
+function pfLatexDoc(body, preamble = '', end = true) {
+  return '\\documentclass{article}\n' + preamble + '\\begin{document}\n' + body + (end ? '\\end{document}\n' : '');
+}
+
+// ---------- sentences over 80 words, one finding per document ----------
+
+test('RULE-12 profile: a sentence over eighty words is reported', () => {
+  assert.equal(r12Tuning.extremeWords, 80);
+  const text = pfTex([pfSentence(12), pfSentence(r12Tuning.extremeWords + 1), pfSentence(12)]);
+  const found = rule12Profile(text, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.equal(found[0].rule, 'RULE-12');
+  assert.ok(found[0].detail.startsWith('a sentence of 81 words, a length that is uncommon in human-written papers;'));
+  assert.equal(found[0].line, 2);
+  assert.ok(found[0].column > 1);
+});
+
+test('RULE-12 profile: eighty words and the per sentence nag stay quiet', () => {
+  assert.deepEqual(rule12Profile(pfTex([pfSentence(80)]), 'paper.tex'), []);
+  const text = Array.from({ length: 10 }, (_, i) => pfSentence(35, i)).join('\n\n') + '\n';
+  assert.deepEqual(rule12Profile(text, 'notes.md'), []);
+});
+
+test('RULE-12 profile: extreme sentences collapse into one finding per document', () => {
+  const text = pfTex([pfSentence(100), pfSentence(10), pfSentence(110), pfSentence(10)]);
+  const found = rule12Profile(text, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.startsWith('2 sentences over 80 words, the first at line 2, a length that is uncommon'));
+  assert.ok(found[0].detail.includes('consider whether each carries one connected thought, and split where a separate claim begins'));
+  assert.equal(found[0].line, 2);
+});
+
+test('RULE-12 profile: thirty extreme sentences are still one finding', () => {
+  const text = pfTex(Array.from({ length: 30 }, (_, i) => pfSentence(85 + (i % 5), i)));
+  const found = rule12Profile(text, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('30 sentences over 80 words, the first at line 2'));
+});
+
+test('RULE-12 profile: the first line is where the first extreme sentence starts', () => {
+  const text = '\\section{A}\n' + pfSentence(10) + '\n\n' + pfSentence(10) + '\n\n' + pfSentence(90) + ' ' + pfSentence(95) + '\n';
+  const found = rule12Profile(text, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.equal(found[0].line, 6);
+  assert.ok(found[0].detail.includes('the first at line 6'));
+});
+
+test('RULE-12 profile: an extreme sentence is found in a fragment too', () => {
+  const found = rule12Profile(pfSentence(95), 'notes.md');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('95 words'));
+});
+
+test('RULE-12 profile: extreme message names papers in paper and prose elsewhere', () => {
+  for (const text of [pfTex([pfSentence(95)]), pfPaper([pfSentence(95)])]) {
+    assert.ok(rule12Profile(text, 'paper.tex')[0].detail.includes('uncommon in human-written papers;'));
+  }
+  // Markdown and text compare with prose, even under an Abstract heading.
+  for (const [text, name] of [
+    [pfSentence(95), 'notes.md'],
+    ['# Notes\n\n' + pfSentence(95), 'CHANGELOG.md'],
+    [pfSentence(95), 'log.txt'],
+    [pfMdPaper([pfSentence(95)]), 'draft.md'],
+  ]) {
+    const detail = rule12Profile(text, name)[0].detail;
+    assert.ok(detail.includes('uncommon in human-written prose;') && !detail.includes('papers'), name);
+  }
+  // Slides and letters are not papers, however the class declaration is laid out.
+  for (const head of [
+    '\\documentclass{beamer}\n',
+    '\\documentclass[\n  aspectratio=169\n]{beamer}\n',
+    '\\documentclass\n  [11pt]\n  {letter}\n',
+  ]) {
+    const slides = head + '\\begin{document}\n' + pfParagraphs([pfSentence(95)]) + '\\end{document}\n';
+    assert.ok(rule12Profile(slides, 'talk.tex')[0].detail.includes('human-written prose;'), head);
+  }
+});
+
+test('RULE-12 profile: latex commands citations and comments are not words', () => {
+  const limit = r12Tuning.extremeWords;
+  const raw =
+    'The ' + pfRepeat('gadget', limit - 32) + ' \\cite{alpha,beta} \\label{fig:x} ' +
+    '\\textbf{' + pfRepeat('river', 30) + '} % ' + pfRepeat('lantern', 50) + '\n';
+  assert.ok(raw.split('%')[0].trim().split(/\s+/).length > limit);
+  assert.deepEqual(rule12Profile(raw, 'paper.tex'), []);
+  const longer = raw.replace('\\textbf{', '\\textbf{river river ');
+  const found = rule12Profile(longer, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes(`${limit + 1} words`));
+});
+
+test('RULE-12 profile: inline math counts as one word', () => {
+  const body = Array.from({ length: 91 }, (_, i) => `$x_{${i}}$`).join(' ');
+  const found = rule12Profile('The ' + body + '.\n', 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('92 words'));
+});
+
+test('RULE-12 profile: markdown extreme sentence and code are read like prose', () => {
+  const long = pfSentence(92);
+  const text = '# Notes\n\n' + long + '\n\n```\n' + pfRepeat('gadget', 90) + '.\n```\n';
+  const found = rule12Profile(text, 'notes.md');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('92 words'));
+  assert.equal(found[0].line, 3);
+});
+
+// ---------- footnotes and acknowledgments ----------
+
+test('RULE-12 profile: a footnote body is not part of the sentence that carries it', () => {
+  const host = 'The ' + pfRepeat('gadget', 34) + '.';
+  const note = '\\footnote{' + pfRepeat('gadget', 20) + '. ' + pfRepeat('river', 20) + '.}';
+  const text = pfWhole(host + note + ' Next steps follow here.');
+  assert.deepEqual(pfLengths(text), [35, 4]);
+  assert.deepEqual(rule12Profile(text, 'paper.tex'), []);
+  const merged = pfWhole(host.slice(0, -1) + ' ' + pfRepeat('gadget', 20) + ' ' + pfRepeat('river', 20) + '.');
+  assert.deepEqual(pfLengths(merged), [75]);
+});
+
+for (const opening of [
+  '\\footnote{', '\\footnote[2]{', '\\footnotetext{', '\\footnotetext[3]{', '\\thanks{', '\\footnote {',
+]) {
+  test(`RULE-12 profile: every note command leaves host sentence alone: ${opening}`, () => {
+    const host = 'The ' + pfRepeat('lantern', 19) + '.';
+    const text = pfWhole(host + opening + pfRepeat('copper', 80) + '} Next steps follow here.');
+    assert.deepEqual(pfLengths(text), [20, 4], opening);
+  });
+}
+
+test('RULE-12 profile: footnote inside sentence is dropped and sentence stays whole', () => {
+  const text = pfWhole('The gadget\\footnote{see the ' + pfRepeat('river', 90) + '} moved the meadow today.');
+  assert.deepEqual(pfLengths(text), [6]);
+});
+
+test('RULE-12 profile: footnote with nested commands and braces is dropped whole', () => {
+  const note = '\\footnote{\\textbf{' + pfRepeat('gadget', 40) + '} and \\emph{' + pfRepeat('river', 40) + '}.}';
+  const text = pfWhole('The harbor moved quietly again.' + note + ' Done now, really.');
+  assert.deepEqual(pfLengths(text), [5, 3]);
+});
+
+test('RULE-12 profile: footnote mark without body is not a note', () => {
+  const text = pfWhole('The gadget moved\\footnotemark[1] across the harbor today.');
+  assert.deepEqual(pfLengths(text), [7]);
+});
+
+test('RULE-12 profile: a url with a slash in a footnote does not swallow the text after it', () => {
+  const text = pfWhole(
+    'The harbor moved quietly again\\footnote{Code: \\url{https://example.org/a/b.py}}.\n\n' +
+    pfParagraphs(pfWithShare(50, 10))
+  );
+  assert.ok(pfLengths(text).length >= 51);
+});
+
+test('RULE-12 profile: footnote longer than 3000 chars is left in count', () => {
+  const fits = pfWhole('The harbor moved. \\footnote{' + pfRepeat('gadget', 350) + '}');
+  assert.deepEqual(pfLengths(fits), [3]);
+  const longText = pfWhole('The harbor moved. \\footnote{' + pfRepeat('gadget', 450) + '}');
+  assert.equal(pfLengths(longText)[pfLengths(longText).length - 1], 450);
+});
+
+for (const [opening, closing] of [
+  ['\\section*{Acknowledgments}', ''],
+  ['\\section{Acknowledgements}', ''],
+  ['\\subsection*{Acknowledgments}', ''],
+  ['\\paragraph{Acknowledgments.}', ''],
+  ['\\section*{Acknowledgments and Disclosure of Funding}', ''],
+  ['\\begin{ack}', '\\end{ack}'],
+  ['\\begin{acks}', '\\end{acks}'],
+  ['\\begin{acknowledgments}', '\\end{acknowledgments}'],
+  ['\\begin{acknowledgements*}', '\\end{acknowledgements*}'],
+  ['\\acks', ''],
+  ['\\acknowledgments', ''],
+]) {
+  test(`RULE-12 profile: acknowledgment section is not prose: ${opening}`, () => {
+    const names = pfRepeat('Gadget Ribbon,', 45) + ' and Copper Meadow.';
+    const after = '\\section{Conclusion}\n' + pfSentence(100);
+    const text = pfWhole('The harbor moved quietly again.\n\n' + opening + '\n' + names + '\n' + closing + '\n\n' + after);
+    const found = rule12Profile(text, 'paper.tex');
+    assert.equal(found.length, 1);
+    assert.ok(found[0].detail.startsWith('a sentence of 100 words'), opening);
+  });
+}
+
+test('RULE-12 profile: acks command with body in braces is dropped', () => {
+  const names = pfRepeat('Gadget Ribbon,', 45) + ' and Copper Meadow.';
+  const text = pfWhole('The harbor moved quietly again.\n\n\\acks{' + names + '}\n\n\\section{Conclusion}\n' + pfSentence(10));
+  assert.deepEqual(pfLengths(text), [5, 10]);
+});
+
+for (const heading of ['## Acknowledgments', '### Acknowledgements', '## Acknowledgments and funding']) {
+  test(`RULE-12 profile: markdown acknowledgments end at next heading: ${heading}`, () => {
+    const names = pfRepeat('Gadget Ribbon,', 45) + ' and Copper Meadow.';
+    const text = '# Notes\n\n' + pfSentence(10) + '\n\n' + heading + '\n\n' + names + '\n\n## Next\n\n' + pfSentence(100) + '\n';
+    const found = rule12Profile(text, 'notes.md');
+    assert.equal(found.length, 1);
+    assert.ok(found[0].detail.startsWith('a sentence of 100 words'), heading);
+  });
+}
+
+test('RULE-12 profile: prose before and after acknowledgment section is read', () => {
+  const text = pfWhole(
+    '\\section{Intro}\n' + pfSentence(90) + '\n\n\\section*{Acknowledgments}\nWe thank the harbor crew today.\n\n' +
+    '\\section{Conclusion}\n' + pfSentence(110)
+  );
+  const found = rule12Profile(text, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.startsWith('2 sentences over 80 words'));
+});
+
+// ---------- leading YAML front-matter ----------
+
+test('RULE-12 profile: leading yaml block is not prose', () => {
+  const front =
+    '---\nname: demo\ndescription: ' + pfRepeat('gadget', 80) + '\n' +
+    'allowed-tools: ' + pfRepeat('river', 15) + '\n---\n\n# Demo\n\n';
+  assert.deepEqual(rule12Profile(front + pfSentence(12) + '\n', 'SKILL.md'), []);
+  const found = rule12Profile(front + pfSentence(95) + '\n', 'SKILL.md');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('95 words'));
+  assert.equal(found[0].line, 9);
+  assert.deepEqual(pfLengths(front + pfSentence(12) + '\n', 'SKILL.md'), [12]);
+});
+
+test('RULE-12 profile: thematic break at top is not front matter', () => {
+  const text = '---\n\n' + pfSentence(100) + '\n\n---\n\nOther text follows here.\n';
+  const found = rule12Profile(text, 'notes.md');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('100 words'));
+  assert.equal(rule12Profile('---\nname: demo\n\n' + pfSentence(100) + '\n', 'notes.md').length, 1);
+});
+
+test('RULE-12 profile: yaml block with crlf and bom is dropped', () => {
+  const front = '\ufeff---\r\nname: demo\r\ndescription: ' + pfRepeat('gadget', 100) + '\r\n---\r\n\r\n';
+  assert.deepEqual(rule12Profile(front + pfSentence(12) + '\r\n', 'SKILL.md'), []);
+});
+
+test('RULE-12 profile: yaml looking text in tex file is left alone', () => {
+  const text = pfWhole('---\nname: demo\n' + pfRepeat('gadget', 80) + '.\n---\n');
+  assert.equal(rule12Profile(text, 'paper.tex').length, 1);
+});
+
+// ---------- Markdown footnote definitions ----------
+
+for (const name of ['notes.md', 'notes.markdown', 'notes.txt', '']) {
+  test(`RULE-12 profile: footnote definition is not prose: ${name}`, () => {
+    const host = 'The harbor moved quietly across the meadow.[^a]';
+    const text = host + '\n\n[^a]: ' + pfWordsOf(84) + '.\n\nThe lantern rose over the orchard today.\n';
+    assert.deepEqual(pfLengths(text, name || 'notes.md'), [7, 7], name);
+    assert.deepEqual(rule12Profile(text, name), [], name);
+  });
+}
+
+for (const name of ['notes.md', 'notes.txt', '']) {
+  test(`RULE-12 profile: footnote definition keeps continuation paragraphs: ${name}`, () => {
+    const text =
+      'The harbor moved quietly across the meadow.[^a]\n\n' +
+      '[^a]: ' + pfWordsOf(30) + '.\n' +
+      pfWordsOf(30, 'river') + '.\n' +
+      '\n' +
+      '    ' + pfWordsOf(90, 'lantern') + '.\n' +
+      '\n' +
+      '    ' + pfWordsOf(40, 'copper') + '.\n' +
+      '\n' +
+      'The lantern rose over the orchard today.\n';
+    assert.deepEqual(pfLengths(text, name || 'notes.md'), [7, 7], name);
+    assert.deepEqual(rule12Profile(text, name), [], name);
+  });
+}
+
+test('RULE-12 profile: prose after footnote definition is read again', () => {
+  const text =
+    '[^a]: ' + pfWordsOf(20) + '.\n\n' +
+    'Plain text follows, and ' + pfWordsOf(95, 'river') + '.\n';
+  const found = rule12Profile(text, 'notes.md');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('a sentence of 99 words'));
+  assert.equal(found[0].line, 3);
+});
+
+test('RULE-12 profile: footnote definition ends at next definition or blank line', () => {
+  const text =
+    '[^a]: ' + pfWordsOf(30) + '.\n' +
+    '[^b]: ' + pfWordsOf(30) + '.\n' +
+    '[^c]: ' + pfWordsOf(30) + '.\n' +
+    '\n' +
+    'Body text after the notes is short.\n';
+  assert.deepEqual(pfLengths(text, 'notes.md'), [7]);
+});
+
+test('RULE-12 profile: footnote marker counts as no word and does not join sentences', () => {
+  const text = 'The gadget moved the river.[^1] The lantern rose over the orchard today.[^2]\n\n[^1]: A note here.\n[^2]: Another note.\n';
+  assert.deepEqual(pfLengths(text, 'notes.md'), [5, 7]);
+  assert.deepEqual(pfLengths('The gadget[^note] moved the river today.\n', 'notes.md'), [6]);
+});
+
+test('RULE-12 profile: text that only looks like footnote is prose', () => {
+  for (const line of [
+    'See [^a]: ' + pfWordsOf(90) + '.',
+    '[^a b]: ' + pfWordsOf(90) + '.',
+    '[^]: ' + pfWordsOf(90) + '.',
+    '    [^a]: ' + pfWordsOf(90) + '.',
+  ]) {
+    const found = rule12Profile('Intro text first.\n\n' + line + '\n', 'notes.md');
+    assert.equal(found.length, line.startsWith('    ') ? 0 : 1, line);
+  }
+  const fenced = '```\n[^a]: ' + pfWordsOf(90) + '.\n```\n\nShort text follows here.\n';
+  assert.deepEqual(rule12Profile(fenced, 'notes.md'), []);
+});
+
+test('RULE-12 profile: latex file is not read for markdown footnotes', () => {
+  const text = pfWhole('The harbor moved quietly across the meadow.\n\n[^a]: ' + pfWordsOf(90) + '.\n');
+  const found = rule12Profile(text, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('a sentence of 91 words'));
+});
+
+// ---------- share of long sentences ----------
+
+test('RULE-12 profile: too many long sentences is reported once', () => {
+  const text = pfPaper(pfWithShare(50, 25));
+  const found = rule12Profile(text, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.equal(found[0].rule, 'RULE-12');
+  assert.ok(found[0].detail.startsWith(pfDocumentPrefix + 'about 50% of the 50 sentences run past 30 words'));
+  assert.ok(found[0].detail.includes('above the 10% to 35% range of human-written papers'));
+});
+
+test('RULE-12 profile: too few long sentences is reported once', () => {
+  const found = rule12Profile(pfPaper(pfWithShare(50, 0)), 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('none of the 50 sentences run past 30 words'));
+  assert.ok(found[0].detail.includes('below the 10% to 35% range of human-written papers'));
+  assert.ok(found[0].detail.includes('clipped'));
+});
+
+test('RULE-12 profile: a few long sentences read as fewer than five percent', () => {
+  const found = rule12Profile(pfPaper(pfWithShare(100, 2)), 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('fewer than 5% of the 100 sentences'));
+});
+
+test('RULE-12 profile: a share inside human range stays quiet', () => {
+  for (const longCount of [6, 8, 15, 20]) {
+    assert.deepEqual(rule12Profile(pfPaper(pfWithShare(50, longCount)), 'paper.tex'), [], String(longCount));
+  }
+});
+
+test('RULE-12 profile: share bounds are strict', () => {
+  assert.equal(r12Tuning.shareHigh, 0.45);
+  assert.equal(r12Tuning.shareLow, 0.06);
+  assert.deepEqual(rule12Profile(pfPaper(pfWithShare(40, 18)), 'paper.tex'), []);
+  assert.equal(rule12Profile(pfPaper(pfWithShare(40, 19)), 'paper.tex').length, 1);
+  assert.deepEqual(rule12Profile(pfPaper(pfWithShare(50, 3)), 'paper.tex'), []);
+  assert.equal(rule12Profile(pfPaper(pfWithShare(50, 2)), 'paper.tex').length, 1);
+});
+
+test('RULE-12 profile: short document is never read as profile', () => {
+  assert.equal(r12Tuning.shareMinSentences, 40);
+  assert.deepEqual(rule12Profile(pfPaper(pfWithShare(39, 0)), 'paper.tex'), []);
+  assert.deepEqual(rule12Profile(pfPaper(pfWithShare(39, 39, 35)), 'paper.tex'), []);
+  assert.equal(rule12Profile(pfPaper(pfWithShare(40, 0)), 'paper.tex').length, 1);
+});
+
+test('RULE-12 profile: fragment without documentclass stays quiet for share', () => {
+  assert.deepEqual(rule12Profile(pfTex(pfWithShare(50, 0)), 'paper.tex'), []);
+  assert.deepEqual(rule12Profile(pfTex(pfWithShare(50, 25)), 'paper.tex'), []);
+});
+
+for (const cls of ['beamer', 'letter', 'moderncv', 'slides']) {
+  test(`RULE-12 profile: slide and letter classes stay quiet for share: ${cls}`, () => {
+    assert.deepEqual(rule12Profile(pfPaper(pfWithShare(50, 0), cls), 'paper.tex'), [], cls);
+    assert.deepEqual(rule12Profile(pfPaper(pfWithShare(50, 25), cls), 'paper.tex'), [], cls);
+  });
+}
+
+test('RULE-12 profile: markdown and plain text files are never read for a share', () => {
+  for (const [count, longCount] of [[50, 0], [50, 25], [200, 0], [200, 100]]) {
+    const sentences = pfWithShare(count, longCount);
+    const abstract = pfMdPaper(sentences, '# Abstract');
+    const design =
+      '# Design\n\n## Introduction\n\n' + pfParagraphs(sentences.slice(0, Math.floor(count / 2))) +
+      '\n## Conclusion\n\n' + pfParagraphs(sentences.slice(Math.floor(count / 2))) + '\n## References\n\nOne source.\n';
+    const cases = [
+      [abstract, 'draft.md'],
+      [abstract, 'notes.md'],
+      [pfParagraphs(sentences), 'intro.md'],
+      [pfParagraphs(sentences), 'abstract.txt'],
+      [pfMdPaper(sentences, '## 1. Introduction'), 'paper.md'],
+      [design, 'design.md'],
+      [design, 'design.txt'],
+      [design, ''],
+      ['# Introduction\n\n' + pfParagraphs(sentences) + '\n# Conclusion\n\nDone for now.\n', 'rfc.md'],
+    ];
+    for (const [text, name] of cases) {
+      assert.deepEqual(rule12Profile(text, name), [], `${name}, ${count}, ${longCount}`);
+    }
+    assert.deepEqual(rule12Profile(abstract), []);
+  }
+});
+
+test('RULE-12 profile: markdown file is never a whole document', () => {
+  for (const [text, name] of [[pfMdPaper(pfWithShare(200, 0)), 'draft.md'], [pfParagraphs(pfWithShare(200, 0)), 'intro.md']]) {
+    assert.equal(pfWholeDocument(pfDocument(text, name)), false, name);
+  }
+  assert.equal(pfWholeDocument(pfDocument(pfPaper(pfWithShare(50, 10)), 'paper.tex')), true);
+  assert.equal(r12Tuning.shareMinSentencesText, undefined);
+});
+
+test('RULE-12 profile: markdown tables headings and code are not counted', () => {
+  const sentences = pfWithShare(150, 30);
+  const noise = '| a | b |\n|---|---|\n| ' + pfRepeat('gadget', 100) + ' | x |\n\n```\n' + pfRepeat('river', 100) + '.\n```\n';
+  const text = '# Abstract\n\n' + pfParagraphs(sentences) + '\n' + noise;
+  assert.deepEqual(rule12Profile(text, 'draft.md'), []);
+  assert.deepEqual(pfLengths(text, 'draft.md'), sentences.map((s) => s.split(' ').length));
+});
+
+// ---------- complete LaTeX document, and nothing less ----------
+
+test('RULE-12 profile: main file that pulls its sections in is not a whole document', () => {
+  const intro = '\\section{Introduction}\n' + pfParagraphs(pfWithShare(40, 0));
+  const flat = pfLatexDoc(intro);
+  assert.equal(rule12Profile(flat, 'main.tex').length, 1);
+  for (const command of [
+    '\\input{methods}', '\\input{sections/results.tex}', '\\include{results}',
+    '\\subfile{sections/results}', '\\subfileinclude{results}', '\\input {methods}',
+  ]) {
+    const main = pfLatexDoc(intro + '\n' + command + '\n\\input{conclusion}\n');
+    assert.deepEqual(rule12Profile(main, 'main.tex'), [], command);
+    assert.equal(pfWholeDocument(pfDocument(main, 'main.tex')), false, command);
+  }
+  for (const body of ['\\input{head}\n' + intro, intro + '\\input{tail}\n', intro.replace('\n\n', '\n\\input{mid}\n\n')]) {
+    assert.deepEqual(rule12Profile(pfLatexDoc(body), 'main.tex'), [], body.slice(0, 20));
+  }
+});
+
+test('RULE-12 profile: input of generated table or figure keeps document whole', () => {
+  const body = '\\section{Results}\n' + pfParagraphs(pfWithShare(40, 0));
+  for (const wrapped of [
+    '\\begin{table}\n\\input{tables/main.tex}\n\\end{table}\n',
+    '\\begin{figure}\n\\input{figs/plot.tex}\n\\end{figure}\n',
+    '\\begin{table*}\\centering\\input{tables/main}\\end{table*}\n',
+  ]) {
+    const found = rule12Profile(pfLatexDoc(body + wrapped), 'paper.tex');
+    assert.equal(found.length, 1, wrapped);
+    assert.ok(found[0].detail.includes('none of the 40 sentences'), wrapped);
+  }
+});
+
+test('RULE-12 profile: input in preamble or comment or longer command is not body include', () => {
+  const body = '\\section{Results}\n' + pfParagraphs(pfWithShare(40, 0));
+  for (const text of [
+    pfLatexDoc(body, '\\input{macros}\n\\include{more}\n'),
+    pfLatexDoc(body + '% \\input{methods}\n'),
+    pfLatexDoc(body + '\\includegraphics[width=3cm]{plot}\n\\inputminted{python}{x.py}\n'),
+    pfLatexDoc(body + '\\includepdf{poster}\n\\inputenc\n'),
+  ]) {
+    assert.equal(rule12Profile(text, 'paper.tex').length, 1, text.slice(-60));
+  }
+});
+
+test('RULE-12 profile: fragment with only one end of document is not whole', () => {
+  const body = '\\section{Results}\n' + pfParagraphs(pfWithShare(60, 0));
+  const beginOnly = pfLatexDoc(body, '', false);
+  const endOnly = '\\documentclass{article}\n' + body + '\\end{document}\n';
+  const backwards = '\\end{document}\n\\documentclass{article}\n\\begin{document}\n' + body;
+  for (const text of [beginOnly, endOnly, backwards, '\\begin{document}\n' + body, body + '\\end{document}\n']) {
+    assert.deepEqual(rule12Profile(text, 'edit.tex'), [], text.slice(0, 40));
+  }
+  assert.equal(rule12Profile(pfLatexDoc(body), 'edit.tex').length, 1);
+});
+
+test('RULE-12 profile: commented end of document does not complete it', () => {
+  const body = '\\section{Results}\n' + pfParagraphs(pfWithShare(60, 0));
+  const text = pfLatexDoc(body, '', false) + '% \\end{document}\n';
+  assert.deepEqual(rule12Profile(text, 'paper.tex'), []);
+});
+
+test('RULE-12 profile: hard wrapped lines join into one sentence', () => {
+  const words = Array(84).fill('gadget');
+  const chunks = [];
+  for (let i = 0; i < words.length; i += 6) chunks.push(words.slice(i, i + 6).join(' '));
+  const wrapped = chunks.join('\n') + '.\n';
+  const found = rule12Profile('\\section{Method}\n' + wrapped, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('a sentence of 84 words'));
+  const shorterChunks = [];
+  for (let i = 0; i < 44; i += 6) shorterChunks.push(words.slice(i, i + 6).join(' '));
+  const shorter = shorterChunks.join('\n') + '.\n';
+  assert.deepEqual(rule12Profile('\\section{Method}\n' + shorter + '\n' + pfParagraphs(pfWithShare(50, 12)), 'paper.tex'), []);
+});
+
+test('RULE-12 profile: preamble and title page are not prose', () => {
+  const front =
+    '\\documentclass{article}\n\\title{' + pfRepeat('gadget', 90) + '}\n' +
+    '\\author{' + pfRepeat('River Lantern.', 60) + '}\n\\begin{document}\n\\maketitle\n';
+  const text = front + '\\section{Results}\n' + pfParagraphs(pfWithShare(50, 10)) + '\\end{document}\n';
+  assert.deepEqual(rule12Profile(text, 'paper.tex'), []);
+});
+
+// ---------- ", so" clause joins ----------
+
+function pfSoText(joins, wordsTarget, phrase = 'so the') {
+  const sentences = [];
+  const count = Math.max(1, Math.floor(wordsTarget / 14));
+  for (let i = 0; i < count; i++) {
+    if (i < joins) {
+      const first = [];
+      for (let j = 0; j < 6; j++) first.push(PF_WORDS[(i + j) % 8]);
+      const second = [];
+      for (let j = 0; j < 5; j++) second.push(PF_WORDS[(i + j) % 8]);
+      sentences.push('The ' + first.join(' ') + ', ' + phrase + ' ' + second.join(' ') + '.');
+    } else {
+      sentences.push(pfSentence(14, i));
+    }
+  }
+  return pfParagraphs(sentences, 6);
+}
+
+function pfSoSentencesText(joins, wordsTarget) {
+  return pfSoText(joins, wordsTarget).trim().split(/(?<=\.)\s+/).filter(Boolean);
+}
+
+test('RULE-12 profile: many so joins are reported once', () => {
+  const found = pfOnlySo(rule12Profile(pfSoText(10, 2000), 'paper.tex'));
+  assert.equal(found.length, 1);
+  assert.equal(found[0].rule, 'RULE-12');
+  assert.ok(found[0].detail.startsWith(pfDocumentPrefix + '10 sentences join clauses with ", so"'));
+  assert.ok(found[0].detail.includes('human-written papers rarely pass 1'));
+  assert.equal(found[0].line, 1);
+});
+
+test('RULE-12 profile: so joins need density and count and words', () => {
+  assert.equal(r12Tuning.soDensity, 1.5);
+  assert.equal(r12Tuning.soMinCount, 6);
+  assert.equal(r12Tuning.soMinWords, 1000);
+  assert.deepEqual(pfOnlySo(rule12Profile(pfSoText(6, 5000), 'paper.tex')), []);
+  assert.equal(pfOnlySo(rule12Profile(pfSoText(8, 5000), 'paper.tex')).length, 1);
+  assert.deepEqual(pfOnlySo(rule12Profile(pfSoText(5, 1400), 'paper.tex')), []);
+  assert.equal(pfOnlySo(rule12Profile(pfSoText(6, 1400), 'paper.tex')).length, 1);
+});
+
+test('RULE-12 profile: a fragment under a thousand words never reports so joins', () => {
+  assert.deepEqual(pfOnlySo(rule12Profile(pfSoText(10, 700), 'paper.tex')), []);
+  assert.deepEqual(pfOnlySo(rule12Profile('The gadget moved, so the river rose.', 'notes.md')), []);
+});
+
+test('RULE-12 profile: so joins are read in any latex file but not in slides or letters', () => {
+  assert.equal(pfOnlySo(rule12Profile(pfSoText(10, 2000), '03-method.tex')).length, 1);
+  assert.equal(pfOnlySo(rule12Profile(pfWhole(pfSoText(10, 2000)), 'paper.tex')).length, 1);
+  for (const cls of ['beamer', 'letter', 'moderncv']) {
+    const text = `\\documentclass{${cls}}\n\\begin{document}\n` + pfSoText(10, 2000) + '\\end{document}\n';
+    assert.deepEqual(pfOnlySo(rule12Profile(text, 'talk.tex')), [], cls);
+  }
+});
+
+test('RULE-12 profile: so joins are read only in latex', () => {
+  // Notes, changelogs and design documents carry the join by design, and an Abstract
+  // or Introduction heading opens design notes too: Markdown and text are never read.
+  const body = pfSoText(30, 2000);
+  for (const name of ['CHANGELOG.md', 'notes.md', 'guard-hook.md', 'design.txt', 'draft.md', 'intro.md']) {
+    assert.deepEqual(pfOnlySo(rule12Profile(body, name)), [], name);
+    for (const head of ['# Notes\n\n', '# Abstract\n\n', '## 1. Introduction\n\n']) {
+      assert.deepEqual(pfOnlySo(rule12Profile(head + body, name)), [], `${head}, ${name}`);
+    }
+  }
+  // A LaTeX section file is read: the density and the word count decide.
+  assert.equal(pfOnlySo(rule12Profile('\\section{Results}\n' + body, 'results.tex')).length, 1);
+  assert.equal(pfOnlySo(rule12Profile('\\section{Results}\n' + pfSoText(10, 1500), 'results.tex')).length, 1);
+});
+
+test('RULE-12 profile: a file name does not make a text file a paper', () => {
+  const body = pfSoText(10, 2000);
+  for (const name of [
+    'abstract.md', 'intro.md', 'introduction.md', '01-introduction.md', 'paper_abstract.txt', 'my intro.md',
+    'introspection.md', 'notes.md',
+  ]) {
+    assert.deepEqual(pfOnlySo(rule12Profile(body, name)), [], name);
+  }
+});
+
+for (const heading of ['# Abstract', '## Introduction', '## 1. Introduction', '# **Abstract**', '### introduction']) {
+  test(`RULE-12 profile: abstract or introduction heading does not make markdown a paper: ${heading}`, () => {
+    assert.deepEqual(pfOnlySo(rule12Profile(pfMdPaper(pfSoSentencesText(10, 2000), heading), 'draft.md')), [], heading);
+  });
+}
+
+for (const heading of ['## Introduction to the harbor', '## Abstractions', '## Introductions', '## Intro']) {
+  test(`RULE-12 profile: heading must be titled abstract or introduction: ${heading}`, () => {
+    assert.deepEqual(pfOnlySo(rule12Profile(pfMdPaper(pfSoSentencesText(10, 2000), heading), 'notes.md')), [], heading);
+  });
+}
+
+for (const phrase of [
+  'so that the', 'so far the', 'so on the', 'so forth the', 'so as to the', 'so much the',
+  'so many the', 'so long the', 'so few the', 'so little the', 'so often the', 'so well the',
+]) {
+  test(`RULE-12 profile: so phrases are not clause joins: ${phrase}`, () => {
+    assert.deepEqual(pfOnlySo(rule12Profile(pfSoText(40, 2000, phrase), 'paper.tex')), []);
+  });
+}
+
+test('RULE-12 profile: so-called is not a clause join', () => {
+  const text = pfSoText(0, 2000).replace('The gadget', 'The so-called gadget');
+  const sentences = Array(12).fill('The gadget works, so-called by many, and the rest follows.');
+  assert.deepEqual(pfOnlySo(rule12Profile(text + pfParagraphs(sentences), 'paper.tex')), []);
+});
+
+test('RULE-12 profile: so before math or a quote is a clause join in latex', () => {
+  const sentences = Array.from({ length: 10 }, (_, i) => `The gadget ${i} moved the river, so $x_{${i}}$ grew across the harbor and the meadow.`);
+  const text = pfParagraphs(sentences) + pfSoText(0, 1500);
+  assert.equal(pfOnlySo(rule12Profile(text, 'paper.tex')).length, 1);
+});
+
+test('RULE-12 profile: so joins in comments and code do not count', () => {
+  const sentenceSo = 'The gadget moved the river, so the lantern rose over the orchard and the meadow.';
+  const commented = Array(20).fill('% ' + sentenceSo + '\n').join('');
+  assert.deepEqual(pfOnlySo(rule12Profile(commented + pfSoText(0, 2000), 'paper.tex')), []);
+  const fenced = '```\n' + Array(20).fill(sentenceSo).join('\n') + '\n```\n\n';
+  assert.deepEqual(pfOnlySo(rule12Profile('# Abstract\n\n' + fenced + pfSoText(0, 2000), 'draft.md')), []);
+});
+
+// ---------- order and combinations ----------
+
+test('RULE-12 profile: all three checks can report in one document in a fixed order', () => {
+  const soSentences = Array(12).fill('The gadget moved the river, so the lantern rose over the orchard today.');
+  const text = pfPaper(soSentences.concat(pfWithShare(50, 30)).concat([pfSentence(90)]));
+  const found = rule12Profile(text, 'paper.tex');
+  assert.deepEqual(pfKindsOf(found), ['share', 'so', 'extreme']);
+});
+
+test('RULE-12 profile: extreme finding comes last even when it sits before others in file', () => {
+  const soSentences = Array(12).fill('The gadget moved the river, so the lantern rose over the orchard today.');
+  const text = pfPaper([pfSentence(90)].concat(soSentences).concat(pfWithShare(50, 30)));
+  const found = rule12Profile(text, 'paper.tex');
+  assert.deepEqual(pfKindsOf(found), ['share', 'so', 'extreme']);
+});
+
+test('RULE-12 profile: a hook that shows only first two findings sees document level ones', () => {
+  const soSentences = Array(12).fill('The gadget moved the river, so the lantern rose over the orchard today.');
+  const text = pfPaper([pfSentence(90)].concat(soSentences).concat(pfWithShare(50, 30)));
+  const firstTwo = rule12Profile(text, 'paper.tex').slice(0, 2);
+  assert.deepEqual(pfKindsOf(firstTwo), ['share', 'so']);
+});
+
+test('RULE-12 profile: document level findings start with marker and extreme finding does not', () => {
+  const text = pfPaper(pfWithShare(50, 30).concat([pfSentence(90)]));
+  const found = rule12Profile(text, 'paper.tex');
+  assert.equal(found.length, 2);
+  assert.ok(found[0].detail.startsWith(pfDocumentPrefix));
+  assert.ok(!found[1].detail.startsWith(pfDocumentPrefix));
+});
+
+test('RULE-12 profile: the message describes a departure and never a violation', () => {
+  const found = rule12Profile(pfPaper(pfWithShare(50, 0)), 'paper.tex');
+  for (const bad of ['violation', 'error', 'must', 'forbidden', 'illegal', 'failed']) {
+    assert.ok(!found[0].detail.toLowerCase().includes(bad), bad);
+  }
+  for (const v of rule12Profile(pfPaper(pfWithShare(50, 30)), 'paper.tex')) {
+    assert.ok(v.column >= 1 && v.line >= 1 && v.excerpt);
+  }
+});
+
+test('RULE-12 profile: signature and defaults match rule 03', () => {
+  assert.deepEqual(rule12Profile(pfPaper(pfWithShare(50, 30))), rule12Profile(pfPaper(pfWithShare(50, 30)), null));
+});
+
+for (const bad of ['', null, undefined, 12, '\x00\x00', '\\begin{document}', '\\author{', '---\nname:', '\\footnote{']) {
+  test(`RULE-12 profile: never raises on bad input: ${bad}`, () => {
+    assert.deepEqual(rule12Profile(bad, 'paper.tex'), []);
+    assert.deepEqual(rule12Profile(bad), []);
+  });
+}
+
+test('RULE-12 profile: crlf and bare cr keep line numbers', () => {
+  const source = '\\section{Results}\n' + pfSentence(12) + '\n\n' + pfSentence(100) + '\n';
+  const found = rule12Profile(source.replace(/\n/g, '\r\n'), 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.equal(found[0].line, 4);
+  assert.equal(rule12Profile(source.replace(/\n/g, '\r'), 'paper.tex')[0].line, 4);
+});
+
+test('RULE-12 profile: emphasis markers are removed only when non-word character flanks', () => {
+  const re = new RegExp(pfEmphasisSrc, 'gu');
+  for (const [raw, expected] of [
+    ['a **bold** b', 'a bold b'],
+    ['_emph_ x', 'emph x'],
+    ['snake_case_name here', 'snake_case_name here'],
+    ['__init__ call', 'init call'],
+    ['x * y * z', 'x  y  z'],
+    ['2*3=6', '2*3=6'],
+  ]) {
+    assert.equal(raw.replace(new RegExp(pfEmphasisSrc, 'gu'), ''), expected, raw);
+  }
+});
+
+// ==============================================================================
+// RULE-08 repeats tests
+// ==============================================================================
+
+const PF_FILLER = [
+  'The harbor survey covered forty orchards over two seasons.',
+  'Copper ribbons raised the measured yield in most plots.',
+  'Lantern spacing followed the layout shown in the figure.',
+  'Pruning dates were set by the local extension office.',
+];
+
+const PF_CAVEATS = [
+  'The orchard survey does not establish that pruning raises the fruit yield for every tree variety.',
+  'Again, our orchard data do not establish that pruning raises fruit yield across tree varieties.',
+  'This analysis does not establish that fruit yield rises with pruning for any tree variety.',
+];
+
+function pfLatex(...sections) {
+  const out = [];
+  for (const [title, paras] of sections) {
+    out.push('\\section{' + title + '}');
+    out.push(...paras);
+    out.push('');
+  }
+  return out.join('\n');
+}
+
+function pfMarkdown(...sections) {
+  const out = [];
+  for (const [title, paras] of sections) {
+    out.push('## ' + title);
+    out.push('');
+    for (const para of paras) {
+      out.push(para);
+      out.push('');
+    }
+  }
+  return out.join('\n');
+}
+
+function pfThreeSections(caveats = PF_CAVEATS, build = pfLatex) {
+  return build(
+    ['Introduction', [PF_FILLER[0] + ' ' + caveats[0]]],
+    ['Results', [PF_FILLER[1], PF_FILLER[2] + ' ' + caveats[1]]],
+    ['Discussion', [PF_FILLER[3] + ' ' + caveats[2]]]
+  );
+}
+
+test('RULE-08 repeats: a caveat stated three times is reported once', () => {
+  const text = pfThreeSections();
+  const found = rule08Repeats(text, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.equal(found[0].rule, 'RULE-08');
+  assert.ok(found[0].detail.startsWith(pfDocumentPrefix + 'the same caveat framing is stated 3 times outside a limitations section'));
+  assert.ok(found[0].detail.includes('also on lines'));
+  assert.ok(found[0].detail.includes('consider cutting the copies that add nothing, and keep the scope with every claim and summary it bounds'));
+  assert.equal(found[0].line, 2);
+  assert.ok(found[0].column >= 1);
+  assert.ok(found[0].excerpt);
+});
+
+test('RULE-08 repeats: the message quotes at most ten words of the first instance', () => {
+  const found = rule08Repeats(pfThreeSections(), 'paper.tex');
+  const quote = found[0].detail.match(/\("(.*?)"; also/)[1];
+  assert.equal(quote, 'The orchard survey does not establish that pruning raises the ...');
+  assert.equal(quote.replace(' ...', '').split(' ').length, 10);
+  const short = rule08Repeats(
+    pfThreeSections(['Pruning does not establish yield gains.', PF_CAVEATS[1], PF_CAVEATS[2]]),
+    'paper.tex'
+  );
+  assert.ok(!short.length || !short[0].detail.includes('..."'));
+});
+
+test('RULE-08 repeats: a paraphrase joins the group', () => {
+  const paraphrases = [
+    'The orchard survey does not establish that pruning raises the fruit yield for every tree variety.',
+    'We cannot say that pruning raised fruit yield, because the orchard survey covers only a few tree varieties.',
+    'Our orchard survey does not show that pruning increases the fruit yield for every tree variety.',
+  ];
+  const found = rule08Repeats(pfThreeSections(paraphrases), 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('stated 3 times'));
+});
+
+test('RULE-08 repeats: two groups are reported separately in order', () => {
+  const other = [
+    'Winter survival of copper ribbons in the north meadow remains untested.',
+    'Survival of copper ribbons through winter in the north meadow remains untested here.',
+    'The north meadow winter survival of copper ribbons remains untested.',
+  ];
+  const text = pfLatex(
+    ['Introduction', [PF_CAVEATS[0], other[0]]],
+    ['Results', [PF_CAVEATS[1], other[1]]],
+    ['Discussion', [PF_CAVEATS[2], other[2]]]
+  );
+  const found = rule08Repeats(text, 'paper.tex');
+  const lines = found.map((v) => v.line);
+  assert.deepEqual(lines, [...lines].sort((a, b) => a - b));
+  assert.equal(found.length, 2);
+  assert.ok(found[0].detail.includes('orchard') && found[1].detail.includes('copper ribbons'));
+});
+
+test('RULE-08 repeats: a fragment needs three instances of its own', () => {
+  const two = PF_CAVEATS[0] + ' ' + PF_FILLER[0] + ' ' + PF_CAVEATS[1] + '\n';
+  assert.deepEqual(rule08Repeats(two, 'notes.md'), []);
+  const three = PF_CAVEATS.join(' ') + '\n';
+  const found = rule08Repeats(three, 'notes.md');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('also on line 1'));
+});
+
+test('RULE-08 repeats: a limitation stated once in text and once under limitations is quiet', () => {
+  const text = pfLatex(
+    ['Results', [PF_FILLER[0], PF_CAVEATS[0]]],
+    ['Limitations', [PF_CAVEATS[1]]]
+  );
+  assert.deepEqual(rule08Repeats(text, 'paper.tex'), []);
+});
+
+test('RULE-08 repeats: instances under limitations are not counted', () => {
+  const text = pfLatex(
+    ['Results', [PF_CAVEATS[0]]],
+    ['Discussion', [PF_CAVEATS[1]]],
+    ['Limitations', [PF_CAVEATS[2], 'Once more, pruning does not establish yield gains for any orchard tree variety.']]
+  );
+  assert.deepEqual(rule08Repeats(text, 'paper.tex'), []);
+  const four = pfLatex(
+    ['Introduction', [PF_CAVEATS[0]]],
+    ['Results', [PF_CAVEATS[1]]],
+    ['Discussion', [PF_CAVEATS[2]]],
+    ['Limitations', [PF_CAVEATS[0]]]
+  );
+  const found = rule08Repeats(four, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('stated 3 times'));
+});
+
+for (const title of [
+  '\\section*{Limitations}', '\\section{Limitations and Future Work}', '\\section{Threats to Validity}',
+  '\\subsection{Limitations}', '\\paragraph{Limitations.}', '\\section{Caveats}',
+]) {
+  test(`RULE-08 repeats: every limitations style heading opens section in latex: ${title}`, () => {
+    const text = [
+      '\\section{Results}', PF_FILLER[0] + ' ' + PF_CAVEATS[0], '',
+      title, PF_CAVEATS[1], '', PF_CAVEATS[2], '',
+    ].join('\n');
+    assert.deepEqual(rule08Repeats(text, 'paper.tex'), [], title);
+  });
+}
+
+test('RULE-08 repeats: limitations section ends at next heading of its level', () => {
+  const text = pfLatex(
+    ['Results', [PF_CAVEATS[0]]],
+    ['Limitations', [PF_CAVEATS[1]]],
+    ['Conclusion', [PF_CAVEATS[2]]]
+  );
+  assert.deepEqual(rule08Repeats(text, 'paper.tex'), []);
+  const after = pfLatex(
+    ['Results', [PF_CAVEATS[0]]],
+    ['Limitations', [PF_FILLER[0]]],
+    ['Conclusion', [PF_CAVEATS[1]]],
+    ['Outlook', [PF_CAVEATS[2]]]
+  );
+  assert.equal(rule08Repeats(after, 'paper.tex').length, 1);
+});
+
+test('RULE-08 repeats: subsection limitations ends at next subsection', () => {
+  const text = [
+    '\\section{Discussion}', PF_CAVEATS[0], '',
+    '\\subsection{Limitations}', PF_CAVEATS[1], '',
+    '\\subsection{Outlook}', PF_CAVEATS[2], '',
+  ].join('\n');
+  assert.deepEqual(rule08Repeats(text, 'paper.tex'), []);
+  const more = text + '\n\\subsection{Closing}\n' + PF_CAVEATS[0] + '\n';
+  assert.equal(rule08Repeats(more, 'paper.tex').length, 1);
+});
+
+for (const heading of ['Limitations', 'Threats to validity', 'Limitations and future work']) {
+  test(`RULE-08 repeats: markdown limitations headings: ${heading}`, () => {
+    const text = pfMarkdown(
+      ['Results', [PF_CAVEATS[0]]],
+      [heading, [PF_CAVEATS[1], PF_CAVEATS[2]]]
+    );
+    assert.deepEqual(rule08Repeats(text, 'paper.md'), []);
+    const nested = '## Discussion\n\n' + PF_CAVEATS[0] + '\n\n### ' + heading + '\n\n' + PF_CAVEATS[1] + '\n\n## Conclusion\n\n' + PF_CAVEATS[2] + '\n';
+    assert.deepEqual(rule08Repeats(nested, 'paper.md'), []);
+  });
+}
+
+test('RULE-08 repeats: markdown repeats report like latex', () => {
+  const found = rule08Repeats(pfThreeSections(PF_CAVEATS, pfMarkdown), 'paper.md');
+  assert.equal(found.length, 1);
+  assert.equal(found[0].rule, 'RULE-08');
+});
+
+test('RULE-08 repeats: file named for limitations is all limitations', () => {
+  const text = PF_CAVEATS.join(' ') + '\n';
+  assert.deepEqual(rule08Repeats(text, '13-limitations.tex'), []);
+  assert.deepEqual(rule08Repeats(text, 'limitations.md'), []);
+  assert.equal(rule08Repeats(text, 'results.md').length, 1);
+});
+
+for (const lead of [
+  '\\textbf{Limitations.}', '\\noindent\\textbf{Limitations}', '\\noindent \\textbf{Limitations and caveats.}',
+  '\\textit{Threats to validity.}', '\\emph{Limitations}', '\\textsc{Caveats.}', '  \\textbf{Limitations:}',
+]) {
+  test(`RULE-08 repeats: bold run-in lead opens limitations paragraph in latex: ${lead}`, () => {
+    const text = [
+      '\\section{Results}', PF_FILLER[0] + ' ' + PF_CAVEATS[0], '',
+      '\\section{Discussion}',
+      lead + ' ' + PF_CAVEATS[1] + ' ' + PF_FILLER[1], PF_CAVEATS[2], '',
+    ].join('\n');
+    assert.deepEqual(rule08Repeats(text, 'paper.tex'), [], lead);
+  });
+}
+
+for (const lead of ['**Limitations.**', '**Limitations**', '__Limitations.__', '**Threats to validity.**']) {
+  test(`RULE-08 repeats: bold run-in lead opens limitations paragraph in markdown: ${lead}`, () => {
+    const text = [
+      '## Results', '', PF_FILLER[0] + ' ' + PF_CAVEATS[0], '',
+      '## Discussion', '',
+      lead + ' ' + PF_CAVEATS[1] + ' ' + PF_FILLER[1], PF_CAVEATS[2], '',
+    ].join('\n');
+    assert.deepEqual(rule08Repeats(text, 'paper.md'), [], lead);
+  });
+}
+
+test('RULE-08 repeats: run-in lead covers paragraph only', () => {
+  const lead = '\\textbf{Limitations.}';
+  const text = [
+    '\\section{Discussion}', lead + ' ' + PF_CAVEATS[0], '',
+    PF_CAVEATS[1], '', PF_CAVEATS[2], '', PF_CAVEATS[0].replace('orchard', 'Orchard'), '',
+  ].join('\n');
+  const found = rule08Repeats(text, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('stated 3 times'));
+});
+
+test('RULE-08 repeats: run-in lead without limitations word opens nothing', () => {
+  for (const lead of ['\\textbf{Results.}', '\\textbf{Our approach.}', '**Setup.**', '\\emph{Note}']) {
+    const build = lead.startsWith('*') ? pfMarkdown : pfLatex;
+    const text = build(
+      ['Introduction', [lead + ' ' + PF_FILLER[0] + ' ' + PF_CAVEATS[0]]],
+      ['Results', [PF_FILLER[1] + ' ' + PF_CAVEATS[1]]],
+      ['Discussion', [PF_FILLER[3] + ' ' + PF_CAVEATS[2]]]
+    );
+    assert.equal(rule08Repeats(text, lead.startsWith('*') ? 'paper.md' : 'paper.tex').length, 1, lead);
+  }
+});
+
+test('RULE-08 repeats: bold phrase inside line is not run-in lead', () => {
+  const text = pfLatex(
+    ['Introduction', ['See \\textbf{Limitations.} ' + PF_CAVEATS[0]]],
+    ['Results', [PF_CAVEATS[1]]],
+    ['Discussion', [PF_CAVEATS[2]]]
+  );
+  assert.equal(rule08Repeats(text, 'paper.tex').length, 1);
+});
+
+test('RULE-08 repeats: footnotes and acknowledgments are not prose for repeats', () => {
+  const note = PF_FILLER[0] + '\\footnote{' + PF_CAVEATS[0] + '}';
+  const text = pfLatex(['Introduction', [note]], ['Results', [PF_CAVEATS[1]]], ['Discussion', [PF_CAVEATS[2]]]);
+  assert.deepEqual(rule08Repeats(text, 'paper.tex'), []);
+  const ack = pfLatex(
+    ['Results', [PF_CAVEATS[0]]], ['Discussion', [PF_CAVEATS[1]]], ['Conclusion', [PF_CAVEATS[2]]]
+  ) + '\\section*{Acknowledgments}\n' + PF_CAVEATS[0] + '\n\n' + PF_CAVEATS[1] + '\n';
+  const found = rule08Repeats(ack, 'paper.tex');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('stated 3 times'));
+});
+
+for (const name of ['paper.md', 'notes.txt', '']) {
+  test(`RULE-08 repeats: markdown footnote definitions are not prose: ${name}`, () => {
+    const notes = [1, 2, 3].map((i) => `[^${i}]: ${PF_CAVEATS[i - 1]}`).join('\n');
+    const text = [PF_FILLER[0] + '[^1]', PF_FILLER[1] + '[^2]', PF_FILLER[2] + '[^3]', notes].join('\n\n') + '\n';
+    assert.deepEqual(rule08Repeats(text, name), []);
+    assert.equal(rule08Repeats(text.replace(/\[\^1\]: /g, '').replace(/\[\^2\]: /g, '').replace(/\[\^3\]: /g, ''), name).length, 1);
+  });
+}
+
+test('RULE-08 repeats: continuation paragraph of footnote is not prose', () => {
+  const text =
+    PF_FILLER[0] + ' ' + PF_CAVEATS[0] + '[^a]\n\n' + PF_FILLER[1] + ' ' + PF_CAVEATS[1] + '\n\n' +
+    '[^a]: A first note.\n\n    ' + PF_CAVEATS[2] + '\n';
+  assert.deepEqual(rule08Repeats(text, 'notes.txt'), []);
+  assert.deepEqual(rule08Repeats(text, 'notes.md'), []);
+  const body = text.replace('[^a]: A first note.\n\n    ', '\n').replace(/\[\^a\]/g, '');
+  assert.equal(rule08Repeats(body, 'notes.txt').length, 1);
+});
+
+test('RULE-08 repeats: caveat after footnote definition still counts', () => {
+  const text =
+    PF_FILLER[0] + ' ' + PF_CAVEATS[0] + '\n\n' + PF_FILLER[1] + ' ' + PF_CAVEATS[1] + '[^a]\n\n' +
+    '[^a]: A short note.\n\n' + PF_FILLER[2] + ' ' + PF_CAVEATS[2] + '\n';
+  const found = rule08Repeats(text, 'paper.md');
+  assert.equal(found.length, 1);
+  assert.ok(found[0].detail.includes('stated 3 times'));
+});
+
+test('RULE-08 repeats: latex file is not read for markdown footnotes in repeats', () => {
+  const text = pfLatex(['Results', [PF_FILLER[0] + ' ' + PF_CAVEATS[0]]]) + '\n[^1]: ' + PF_CAVEATS[1] + '\n\n[^2]: ' + PF_CAVEATS[2] + '\n';
+  assert.equal(rule08Repeats(text, 'paper.tex').length, 1);
+});
+
+test('RULE-08 repeats: appendix text is not counted', () => {
+  const after = '\\appendix\n\\section{Details}\n' + PF_CAVEATS.join('\n\n') + '\n';
+  const text = pfLatex(['Results', [PF_FILLER[0]]]) + after;
+  assert.deepEqual(rule08Repeats(text, 'paper.tex'), []);
+  assert.deepEqual(rule08Repeats(PF_CAVEATS.join('\n\n') + '\n', 'appendix-b.tex'), []);
+  const md = '## Results\n\n' + PF_FILLER[0] + '\n\n## Appendix A\n\n' + PF_CAVEATS.join('\n\n') + '\n';
+  assert.deepEqual(rule08Repeats(md, 'paper.md'), []);
+});
+
+test('RULE-08 repeats: different caveats stay quiet', () => {
+  const different = [
+    'The orchard survey does not establish that pruning raises the fruit yield for every tree variety.',
+    'Winter survival of copper ribbons in the north meadow remains untested.',
+    'We leave the effect of lantern spacing on harbor traffic to future work.',
+  ];
+  assert.deepEqual(rule08Repeats(pfThreeSections(different), 'paper.tex'), []);
+});
+
+test('RULE-08 repeats: three sentences that are not caveats stay quiet', () => {
+  const plain = Array(3).fill('The orchard survey raised fruit yield with pruning for every tree variety.');
+  assert.deepEqual(rule08Repeats(pfThreeSections(plain), 'paper.tex'), []);
+});
+
+const PF_CUE_FAMILIES = {
+  'does not establish': '{lead}The orchard survey does not establish that pruning raises fruit yield in other trees.',
+  'does not directly show': '{lead}The orchard survey does not directly show that pruning raises fruit yield in other trees.',
+  'we do not claim': '{lead}We do not claim that pruning raises fruit yield in other orchard trees.',
+  'we have not tested': '{lead}We have not tested whether pruning raises fruit yield in other orchard trees.',
+  'cannot rule out': '{lead}The orchard data cannot rule out that pruning raises fruit yield in other trees.',
+  'cannot distinguish': '{lead}The orchard survey cannot distinguish pruning effects on fruit yield in other trees.',
+  'is limited to': '{lead}The pruning result is limited to orchard trees of one variety grown in loam.',
+  'remains untested': '{lead}Whether pruning raises fruit yield in other orchard trees remains untested.',
+  'remains open': '{lead}Whether pruning raises fruit yield in other orchard trees remains an open question.',
+  'beyond the scope': '{lead}Pruning effects on fruit yield in other orchard trees are beyond the scope of this survey.',
+  'leave to future work': '{lead}We leave pruning effects on fruit yield in other orchard trees to future work.',
+  'unclear whether': '{lead}It is unclear whether pruning raises fruit yield in other orchard trees.',
+  'should not be read as': '{lead}This should not be read as a claim that pruning raises fruit yield in other orchard trees.',
+  'one limitation': '{lead}One limitation is that pruning was studied only in one orchard of one tree variety.',
+  'may not generalize': '{lead}The pruning effect on fruit yield may not generalize to other orchard trees.',
+};
+
+for (const cue of Object.keys(PF_CUE_FAMILIES).sort()) {
+  test(`RULE-08 repeats: cue family is recognized: ${cue}`, () => {
+    const template = PF_CUE_FAMILIES[cue];
+    const sentences = ['', 'Again, ', 'Also, '].map((lead) => {
+      const s = template.replace('{lead}', lead);
+      return s ? s[0].toUpperCase() + s.slice(1) : s;
+    });
+    const found = rule08Repeats(pfThreeSections(sentences), 'paper.tex');
+    assert.equal(found.length, 1, cue);
+  });
+}
+
+test('RULE-08 repeats: markup inside cue does not hide it', () => {
+  const emph = PF_CAVEATS.map((s) => s.replace('does not establish', 'does \\emph{not} establish'));
+  assert.equal(rule08Repeats(pfThreeSections(emph), 'paper.tex').length, 1);
+  const bold = PF_CAVEATS.map((s) =>
+    s.replace('does not establish', 'does **not** establish').replace('do not establish', 'do **not** establish')
+  );
+  assert.equal(rule08Repeats(pfThreeSections(bold, pfMarkdown), 'paper.md').length, 1);
+  const math = PF_CAVEATS.map((s) => s.replace('fruit yield', 'fruit yield $y$'));
+  assert.equal(rule08Repeats(pfThreeSections(math), 'paper.tex').length, 1);
+});
+
+test('RULE-08 repeats: caveat in comment or code block is not counted', () => {
+  const commented = pfLatex(['Results', ['% ' + PF_CAVEATS[0], '% ' + PF_CAVEATS[1], PF_CAVEATS[2]]]);
+  assert.deepEqual(rule08Repeats(commented, 'paper.tex'), []);
+  const fenced = '## Results\n\n```\n' + PF_CAVEATS.join('\n') + '\n```\n';
+  assert.deepEqual(rule08Repeats(fenced, 'notes.md'), []);
+});
+
+test('RULE-08 repeats: signature drops function words cue words and inflection', () => {
+  const a = new Set(r08Signature('The orchard survey does not establish that pruning raises the fruit yield.'));
+  const b = new Set(r08Signature('Orchard surveys do not establish that pruned trees raise fruit yields.'));
+  assert.ok(a.has('orchard') && a.has('survey') && a.has('fruit'));
+  assert.ok(!a.has('establish') && !a.has('the') && !a.has('does'));
+  assert.ok(b.has('orchard') && b.has('survey') && b.has('fruit') && b.has('yield'));
+  assert.deepEqual(Array.from(r08Signature('walks walked walking')).sort(), ['walk']);
+  assert.deepEqual(Array.from(r08Signature('raise raises raised')).sort(), ['rais']);
+  assert.deepEqual(Array.from(r08Signature('variety varieties')).sort(), ['variety']);
+});
+
+test('RULE-08 repeats: similarity needs shared stems overlap and jaccard', () => {
+  const base = new Set(['orchard', 'survey', 'prun', 'fruit', 'yield', 'variety']);
+  assert.ok(r08Similar(base, base));
+  assert.ok(!r08Similar(base, new Set(['orchard', 'survey', 'harbor', 'ribbon', 'lantern', 'copper'])));
+  assert.ok(!r08Similar(base, new Set(['orchard', 'survey'])));
+  assert.equal(r08Tuning.repeats, 3);
+  assert.equal(r08Tuning.minShared, 3);
+});
+
+test('RULE-08 repeats: message is one or two sentences and never a violation', () => {
+  for (const text of [pfThreeSections(), pfThreeSections(PF_CAVEATS, pfMarkdown)]) {
+    for (const v of rule08Repeats(text, 'paper.tex')) {
+      assert.ok(!v.detail.toLowerCase().includes('violation'));
+      assert.ok(v.detail.startsWith(pfDocumentPrefix));
+      assert.ok(v.detail.includes('the same caveat framing is stated'));
+      assert.ok(v.detail.includes('consider cutting the copies that add nothing, and keep the scope with every claim and summary it bounds'));
+      assert.ok((v.detail.match(/\. /g) || []).length <= 1);
+      assert.ok(v.line >= 1 && v.column >= 1 && v.excerpt);
+    }
+  }
+});
+
+test('RULE-08 repeats: default path and keyword path agree', () => {
+  assert.deepEqual(rule08Repeats(pfThreeSections()), rule08Repeats(pfThreeSections(), null));
+});
+
+for (const bad of ['', null, undefined, 12, '\x00\x00', '\\section{', '## ', '\\appendix']) {
+  test(`RULE-08 repeats: never raises on bad input: ${bad}`, () => {
+    assert.deepEqual(rule08Repeats(bad, 'paper.tex'), []);
+    assert.deepEqual(rule08Repeats(bad), []);
+  });
+}
+
+test('RULE-08 repeats: crlf keeps line numbers', () => {
+  const text = pfThreeSections().replace(/\n/g, '\r\n');
+  const expected = rule08Repeats(pfThreeSections(), 'paper.tex');
+  const found = rule08Repeats(text, 'paper.tex');
+  assert.deepEqual(
+    found.map((v) => [v.line, v.detail]),
+    expected.map((v) => [v.line, v.detail])
+  );
+});
+
+// ---------- plumbing and run() dispatch ----------
+
+test('RULE-12 profile and RULE-08 repeats: run dispatch skips by default', () => {
+  const result12 = runMechProfile({ id: 'RULE-12', severity: 'low' }, pfSentence(35), 'paper.tex');
+  assert.equal(result12.count, 1);
+  assert.equal(result12.violations[0].detail, 'sentence length 35 words (>30)');
+
+  const result08 = runMechProfile({ id: 'RULE-08', severity: 'low' }, pfSentence(35), 'paper.tex');
+  assert.equal(result08.status, 'skipped');
+});
+
+test('RULE-12 profile: a large document is read quickly', () => {
+  const body = pfParagraphs(Array.from({ length: 4000 }, (_, i) => pfSentence(18 + (i % 30), i)));
+  const text = '\documentclass{article}\n\begin{document}\n\section{Results}\n' + body + '\end{document}\n';
+  assert.ok(text.length > 400000);
+  const started = Date.now();
+  rule12Profile(text, 'paper.tex');
+  assert.ok(Date.now() - started < 5000);
+});
+
+test('RULE-12 profile: hostile inputs are fast', () => {
+  const hostile = [
+    [', so '.repeat(50000), 'paper.tex'],
+    ['$'.repeat(100000), 'paper.tex'],
+    ['\author{'.repeat(20000), 'paper.tex'],
+    ['{'.repeat(100000), 'paper.tex'],
+    ['The gadget moved. '.repeat(30000), 'paper.tex'],
+    ['\begin{equation}\n'.repeat(20000), 'paper.tex'],
+    ['\footnote{'.repeat(20000), 'paper.tex'],
+    ['\footnote{a}'.repeat(20000), 'paper.tex'],
+    ['\acks '.repeat(20000), 'paper.tex'],
+    ['\section{Acknowledgments}\n'.repeat(20000), 'paper.tex'],
+    ['## Acknowledgments\n'.repeat(20000), 'notes.md'],
+    ['---\nname: x\n' + 'a: b\n'.repeat(50000), 'notes.md'],
+    ['foo' + '_'.repeat(40000) + 'bar. ' + 'The gadget moved. '.repeat(10), 'notes.md'],
+    ['foo' + '*'.repeat(40000) + 'bar. ' + 'The gadget moved. '.repeat(10), 'notes.md'],
+    ['# Abstract\n' + 'x_'.repeat(40000), 'notes.md'],
+    ['[^'.repeat(100000), 'notes.md'],
+    ['[^a'.repeat(100000) + ']', 'notes.md'],
+    ['[^1]: x\n'.repeat(30000), 'notes.md'],
+    ['[^1]: x\n\n    y\n\n'.repeat(20000), 'notes.txt'],
+    ['[^1]:\n' + '    z\n\n'.repeat(20000), 'notes.txt'],
+    ['A note.[^1] '.repeat(20000), 'notes.md'],
+    ['\documentclass{article}\begin{document}' + '\input{a} '.repeat(20000) + '\end{document}', 'paper.tex'],
+    ['\documentclass{article}\begin{document}' + '\begin{figure}\input{a}\end{figure}'.repeat(20000) + '\end{document}', 'paper.tex'],
+    ['\documentclass{article}\begin{document}' + '\begin{figure}\input{a} '.repeat(20000) + '\end{document}', 'paper.tex'],
+  ];
+  for (const [text, name] of hostile) {
+    const started = Date.now();
+    rule12Profile(text, name);
+    assert.ok(Date.now() - started < 5000, text.slice(0, 20));
+  }
+});
+
+test('RULE-12 profile: a long underscore run is linear', () => {
+  const text = 'foo' + '_'.repeat(40000) + 'bar. ' + 'The gadget moved over the harbor today. '.repeat(20);
+  let started = Date.now();
+  text.replace(new RegExp(pfEmphasisSrc, 'gu'), '');
+  assert.ok(Date.now() - started < 500);
+  started = Date.now();
+  rule12Profile(text, 'notes.md');
+  assert.ok(Date.now() - started < 1000);
+});
+
+test('RULE-08 repeats: a large document is read quickly', () => {
+  const body = Array.from(
+    { length: 3000 },
+    (_, i) => PF_FILLER[i % 4] + ' ' + PF_CAVEATS[i % 3].replace('orchard', 'orchard' + Math.floor(i / 3))
+  );
+  const text = pfLatex(['Results', body]);
+  const started = Date.now();
+  rule08Repeats(text, 'paper.tex');
+  assert.ok(Date.now() - started < 5000);
+});
+
+test('RULE-08 repeats: hostile inputs are fast', () => {
+  const hostile = [
+    'does not establish '.repeat(30000),
+    'We do not claim '.repeat(30000),
+    '\section{Limitations}\n'.repeat(20000),
+    '## Limitations\n'.repeat(20000),
+    'leaves ' + 'x '.repeat(50000) + 'to future work.',
+    '**Limitations.** x\n'.repeat(30000),
+    '\textbf{Limitations.} x\n'.repeat(30000),
+    '\textbf{Limitations.}\n\n'.repeat(30000),
+    '\footnote{'.repeat(20000),
+    '\acks '.repeat(20000),
+    '[^1]: does not establish x\n'.repeat(30000),
+    '[^'.repeat(100000),
+    '[^1]: x\n\n    y\n\n'.repeat(20000),
+  ];
+  for (const text of hostile) {
+    const started = Date.now();
+    rule08Repeats(text, 'paper.tex');
+    assert.ok(Date.now() - started < 5000, text.slice(0, 20));
+  }
+});

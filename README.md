@@ -69,7 +69,7 @@ Sourced from writing authorities; each rule cites its source by chapter, section
 | 09 | Express coordinate ideas in similar form (parallel structure) | S&W §II.19 |
 | 10 | Keep related words together | S&W §II.20; Gopen & Swan 1990 |
 | 11 | Place new or important information in the stress position at the end of the sentence | Gopen & Swan 1990 |
-| 12 | Break long sentences; vary length (split sentences over 30 words) | S&W §II.18; Pinker 2014 Ch. 4 |
+| 12 | Break long sentences; vary length (split when the reader must hold more than one open clause) | S&W §II.18; Pinker 2014 Ch. 4 |
 
 ### Field-Observed Rules (RULE-A through RULE-I)
 
@@ -80,14 +80,14 @@ Structural patterns logged from LLM output across research, proposal, documentat
 | A | Do not convert prose into bullet points unless the content is a genuine list (and do not over-bullet where 2 items or a sentence fit) |
 | B | Do not use em or en dashes as casual sentence punctuation |
 | C | Do not start consecutive sentences with the same word or phrase |
-| D | Do not overuse transition words ("Additionally", "Furthermore", "Moreover") |
+| D | Do not open sentences with additive-only transition words ("Additionally", "Furthermore", "Moreover"); keep the ones that mark a contrast, cause, or sequence the text establishes |
 | E | Do not close every paragraph with a summary sentence |
 | F | Use consistent terms; do not redefine abbreviations mid-document |
-| G | Use title case for section and subsection headings (articles, short prepositions, and coordinating conjunctions stay lowercase) |
+| G | Use title case for section and subsection headings (articles, short prepositions, and coordinating conjunctions stay lowercase); a full-sentence bold run-in lead takes sentence case |
 | H | **Support factual claims with citation or concrete evidence; do not be handwavy (critical)** |
 | I | Prefer full forms over contractions in formal technical prose ("it is" over "it's") |
 
-**Escape hatch** (Orwell 1946 Rule 6): *"Break any of these rules sooner than say anything outright barbarous."* Rules are guides to clarity, not ends in themselves.
+**Escape hatch** (Orwell 1946 Rule 6): *"Break any of these rules sooner than say anything outright barbarous."* Most rules are defaults to apply with judgment, and human writers depart from any single one now and then. Depart when the sentence reads better for it, not to vary the pattern. A few are firm: no invented citations, evidence, or numbers, and no placeholders in finished text. A draft that obeys every default in every sentence reads as machine-made.
 
 See [`RULES.md`](RULES.md) for the full per-rule blocks with BAD/GOOD examples, enforcement tier, and rationale.
 

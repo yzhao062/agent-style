@@ -24,8 +24,8 @@ Mode is inferred from argument count. No flags.
 3. **Merge.** Combine deterministic + semantic rule results into the full scorecard.
 4. **Report.** Print the scorecard: per rule, count + first 3 violations. If total is zero, report "no violations" and exit.
 5. **Ask.** "Produce a polished draft at FILE.reviewed.md?" Wait for the user's yes/no.
-6. **Polish (on yes).** Compose a revision prompt using `references/revision-prompt.md` + the violation list + `.agent-style/RULES.md`. Invoke the host model. Write the output to `FILE.reviewed.md`. Never touch `FILE`.
-7. **Verify.** Shell out to `agent-style review --audit-only FILE.reviewed.md`. Show before → after scorecard.
+6. **Polish (on yes).** Compose a revision prompt using `references/revision-prompt.md` + the findings list + `.agent-style/RULES.md`. The prompt treats each finding as a departure to consider: the reviser keeps one that reads well and judges the draft's overall pattern. A banned AI-tell word is always replaced, and a RULE-H unsupported claim stays flagged. Invoke the host model. Write the output to `FILE.reviewed.md`. Never touch `FILE`.
+7. **Verify.** Shell out to `agent-style review --audit-only FILE.reviewed.md`. Show before → after scorecard. A remaining finding is not necessarily a failure, since a departure that reads well may stay; the diff in step 8 lets the user judge it.
 8. **Diff.** Print `diff FILE FILE.reviewed.md` so the user can accept or discard hunks.
 
 ## Workflow (A/B compare)
@@ -40,9 +40,9 @@ No ask, no polish, no file writes. This is the benchmark / regression-check shap
 
 The revision prompt enforces these in its template (see `references/revision-prompt.md`):
 
-- **No new facts.** No metrics, numbers, citations, references, links, code behavior, or claims that are not already in the source. If a claim is flagged as unsupported (RULE-H), leave it flagged — do not invent support.
-- **Preserve Markdown structure.** Code fences, tables, frontmatter, link syntax, heading levels, list nesting, and inline code spans are preserved exactly unless the violation IS the structure.
-- **Preserve meaning.** Revisions only resolve flagged violations. Do not rewrite paragraphs the audit did not flag.
+- **No new facts.** Never add metrics, numbers, citations, references, links, code behavior, or claims that are not already in the source. Do not add a connective (however, thus, because, then) that asserts a cause, contrast, or sequence the source does not state. If a claim is flagged as unsupported (RULE-H), leave it flagged. Do not invent support.
+- **Preserve Markdown structure.** Code fences, tables, frontmatter, link syntax, heading levels, list nesting, and inline code spans are preserved exactly unless the finding IS the structure.
+- **Preserve meaning.** Revisions address only flagged findings, and a finding that reads well as written may stay. Do not rewrite paragraphs the audit did not flag.
 - **Write-beside only.** Output at `FILE.reviewed.md`. Never in-place.
 
 ## References
