@@ -10,7 +10,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Semantic Versi
 
 ## [Unreleased]
 
-*No unreleased changes queued.*
+### Changed
+
+- **The Markdown lint job runs on Node 24.** `DavidAnson/markdownlint-cli2-action` moves from v19, which targets the deprecated Node 20 runtime and bundles markdownlint-cli2 0.17.2, to v24, which targets Node 24 and bundles 0.23.2. The newer linter adds MD060 (table column style); 0.9.0 already disables it for the archived bench tables, and a clean clone lints with no findings under 0.23.2.
 
 ## [0.9.0] — 2026-10-18
 
