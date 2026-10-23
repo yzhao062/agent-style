@@ -10,7 +10,6 @@
   <img src="docs/assets/brand/logo.svg" alt="agent-style" width="350">
 </picture>
 
-
 # The Elements of Agent Style
 
 **Make your AI agent write like a tech pro.**

@@ -72,7 +72,7 @@ jobs:
   # so the claim in pyproject.toml is checked rather than asserted.
   python-floor:
     name: Import + tests on the oldest supported Python (${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.python-version == '3.9' && 'ubuntu-24.04' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
