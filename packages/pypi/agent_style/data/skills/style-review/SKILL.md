@@ -1,8 +1,8 @@
-# SPDX-License-Identifier: CC-BY-4.0
 ---
 name: style-review
 description: Review Markdown prose against agent-style's 21 rules. `/style-review FILE` audits the file and (on user confirm) writes a polished copy at `FILE.reviewed.md`. `/style-review A.md B.md` A/B-compares two drafts and emits a per-rule delta table. Complements the generation-time rules installed via `agent-style enable <tool>`.
 ---
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
 
 # style-review
 
